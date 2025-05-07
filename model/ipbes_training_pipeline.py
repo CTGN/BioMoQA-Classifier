@@ -45,7 +45,7 @@ def balance_dataset(dataset):
     # Ensure there are more negatives than positives before subsampling
     if len(neg) > num_pos:
         #TODO : Change the proportion value her for les or more imbalance -> compare different values, plot ? try less
-        neg_subset_train = neg.shuffle(seed=42).select(range(10*num_pos))
+        neg_subset_train = neg.shuffle(seed=42).select(range(num_pos))
     else:
         neg_subset_train = neg  # Fallback (unlikely in your case)
 
@@ -94,7 +94,7 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
     
     if ensemble==False:
         #For ensemble learning : make a function that execute the optimize_model_cross_val function for 5 different model names 
-        test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12)
+        avg_metrics,test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12)
         logger.info(f"Results: {results}")
         
         return test_metrics,None
@@ -107,7 +107,8 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
 
         for i,model_name in enumerate(model_names):
             logger.info(f"Training model {i+1}/{len(model_names)}: {model_name}")
-            test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12, model_name=model_name, data_type=classification_type)
+            avg_metrics,test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=3, model_name=model_name, data_type=classification_type)
+            torch.cuda.empty_cache()
             scores_by_model.append(scores_by_fold)
             logger.info(f"Metrics for {model_name}: {test_metrics}")
 
@@ -116,9 +117,9 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
         mean_scores=np.mean(all_scores,axis=1)
 
         #TODO : take a decision based on this
-        #TODO : Implement ensemble metrics
+        #TODO : Implement ensemble metrics -> use it in the whole_pipeline function
         #TODO : retrun ensemble metric or add it to the test metrics (which should be renamed in that case)
-        return test_metrics,mean_scores
+        return avg_metrics,test_metrics,mean_scores
 
     #Compare different training methods
     return None
@@ -128,9 +129,10 @@ def whole_pipeline():
     classification_types= ["SUA", "IAS", "VA"]
     for classification_type in classification_types:
         logger.info(f"Running pipeline for {classification_type}")
-        test_metrics,mean_scores=pipeline(classification_type, ensemble=True,n_fold=5)
-        output.append(test_metrics)
-        logger.info(f"Metrics for {classification_type}: {test_metrics}")
+        avg_metrics,test_metrics,mean_scores=pipeline(classification_type, ensemble=True,n_fold=5)
+        #! The use of avg_metrics is wrong here
+        output.append(avg_metrics)
+        logger.info(f"Metrics for {classification_type}: {avg_metrics}")
     return output
 
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Tuple[int, 
         "accuracy": evaluate.load("accuracy").compute(predictions=predictions, references=labels),
     }
     logger.info(f"Metrics: {metrics}")
-    return tn, fp, fn, tp,metrics
+    return metrics
 
 def set_random_seeds(seed: int) -> None:
     """Set random seeds for reproducibility across libraries."""
@@ -171,7 +171,7 @@ def plot_precision_recall_curve(y_true, y_scores,logger,plot_dir,data_type=None)
         logger.info(f"Precision-Recall curve saved to {plot_dir}/precision_recall_curve.png")
     return avg_precision
 
-def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/BioMoQA_Playground/plots', metric="avg_f1", mode="max"):
+def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/BioMoQA_Playground/plots', metric="eval_f1", mode="max"):
     """
     Create visualizations of Ray Tune hyperparameter search results.
     
@@ -305,7 +305,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
     except ImportError:
         logger.warning("Could not import ExperimentAnalysis for parallel coordinates plot")
 
-def plot_trial_performance(analysis,logger,plot_dir, metric="avg_f1"):
+def plot_trial_performance(analysis,logger,plot_dir, metric="eval_f1"):
     """
     Plot performance across different trials.
     

@@ -170,25 +170,32 @@ def optimize_model_cross_val(
         # Perform hyperparameter search
         logger.info(f"Starting hyperparameter search for {loss_type} loss")
 
-        checkpoint_config=tune.CheckpointConfig(checkpoint_frequency=0,checkpoint_at_end=False)
+        checkpoint_config = tune.CheckpointConfig(checkpoint_frequency=0, checkpoint_at_end=False)
 
         analysis = tune.run(
             train_bert,
             config=tune_config,
             scheduler=scheduler,
-            search_alg=HyperOptSearch(metric="eval_f1", mode="max",random_state_seed=CONFIG["seed"]),
+            search_alg=HyperOptSearch(metric="eval_f1", mode="max", random_state_seed=CONFIG["seed"]),
             checkpoint_config=checkpoint_config,
             num_samples=n_trials,  # Number of trials
             resources_per_trial={"cpu": 10, "gpu": 1},
             storage_path="/home/leandre/Projects/BioMoQA_Playground/model/ray_results/",
         )
         logger.info(f"Analysis results: {analysis}")
-        # Step 10: Train Final Model with Best Hyperparameters
-        best_config = analysis.get_best_config(metric="eval_f1", mode="max")
-        best_results=analysis.get_best_trial(metric="eval_f1",mode="max").last_result
+
+        # Handle case where no trials succeeded
+        best_trial = analysis.get_best_trial(metric="eval_f1", mode="max")
+        logger.info(f"Best trial : {best_trial}")
+        if best_trial is None:
+            logger.error("No successful trials found. Please check the training process and metric logging.")
+            return None, None
+
+        best_config = best_trial.config
+        best_results = best_trial.last_result
 
         logger.info(f"Best config : {best_config}")
-        logger.info(f"Best results after optimization: {best_results}")
+        logger.info(f"Best trial after optimization: {best_results}")
 
         visualize_ray_tune_results(analysis, logger, plot_dir=CONFIG['plot_dir'])
         plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'])
@@ -287,10 +294,14 @@ def optimize_model_cross_val(
         test_metrics.append(results)
         scores_by_fold.append(scores)
 
-    #TODO : Get the average metrics from the cross validation
+        torch.cuda.empty_cache()
     torch.cuda.empty_cache()
+    #TODO : Get the average metrics from the cross validation
+    all_metrics=np.array([[fold_metrics[0][key][key] for key in fold_metrics[0]] for fold_metrics in test_metrics])
+    avg_metrics=np.mean(all_metrics,axis=1)
+    logger.info(f"Average metrics :", avg_metrics)
     
-    return test_metrics, scores_by_fold
+    return avg_metrics, scores_by_fold
 
 if __name__ == "__main__":
     #! the following is obsolete
