@@ -12,6 +12,8 @@ final_model/
 data/corpus/
 data/__pycache__/
 model/__pycache__/
+nohup.out
+plots/
 
 
 # Virtual environments

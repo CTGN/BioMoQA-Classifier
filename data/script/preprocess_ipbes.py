@@ -122,27 +122,6 @@ def clean_ipbes(dataset):
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
     return dataset
 
-def stratified_split(dataset, target_column, train_size=0.8, test_size=0.2, seed=42):
-    """
-    Performs stratified splitting on an IterableDataset.
-    
-    Args:
-        iterable_dataset: The IterableDataset to split
-        label_key: The key for the label field used for stratification
-        train_size, val_size, test_size: Proportions for each split (should sum to 1)
-        seed: Random seed for reproducibility
-    
-    Returns:
-        Three IterableDatasets: train, validation, and test
-    """
-    # First split: 70% train, 30% temporary
-    train_temp = dataset.train_test_split(test_size=1-train_size, stratify_by_column=target_column, seed=seed)
-    train_dataset = train_temp['train']
-    test_dataset = train_temp['test']
-    
-    return train_dataset, test_dataset
-
-
 def prereprocess_ipbes(pos_ds,neg_ds):
     """
     Function to preprocess the IPBES dataset
@@ -167,9 +146,7 @@ def prereprocess_ipbes(pos_ds,neg_ds):
     print("Number of positives after cleaning:", len(pos_dataset))
     print(clean_ds)
 
-    train_ds, test_ds = stratified_split(clean_ds, target_column='labels')
-
-    return train_ds, test_ds, clean_ds
+    return clean_ds
 
 
 def data_pipeline():

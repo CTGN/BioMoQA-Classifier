@@ -41,14 +41,14 @@ CONFIG = {
         "save_strategy": "best",
         "save_total_limit": 1,
         "learning_rate": None,
-        "per_device_train_batch_size": 33,
-        "per_device_eval_batch_size": 33,
+        "per_device_train_batch_size": 30,
+        "per_device_eval_batch_size": 30,
         "gradient_accumulation_steps": 8,
         "num_train_epochs": 4,
         "fp16": False,
         "logging_strategy": "epoch",
         "load_best_model_at_end": True,
-        "report_to": "none",
+        "report_to": "tensorboard",
     },
 }
 
@@ -75,7 +75,7 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Tuple[int, 
         "accuracy": evaluate.load("accuracy").compute(predictions=predictions, references=labels),
     }
     logger.info(f"Metrics: {metrics}")
-    return tn, fp, fn, tp
+    return tn, fp, fn, tp,metrics
 
 def set_random_seeds(seed: int) -> None:
     """Set random seeds for reproducibility across libraries."""
@@ -96,17 +96,22 @@ def load_datasets(processed: bool = True) -> Tuple[Dataset, Dataset]:
     logger.info(f"Loaded datasets. Train size: {len(train_ds)}, Test size: {len(test_ds)}")
     return train_ds, test_ds
 
+#TODO : check python doc to see what are "*" and "**"
 def tokenize_datasets(
-    train_ds: Dataset,test_ds : Dataset, tokenizer: AutoTokenizer
-) -> Tuple[Dataset, Dataset]:
-    """Tokenize the training and validation datasets."""
+    *datasets: Dataset, tokenizer: AutoTokenizer, with_title: bool
+) -> Tuple[Dataset, ...]:
+    """Tokenize one, two, or three datasets."""
     def tokenization(batch: Dict) -> Dict:
-        return tokenizer(batch["text"], truncation=True)
+        if with_title:
+            return tokenizer(batch["title"], batch["text"], truncation=True, max_length=512)
+        else:
+            return tokenizer(batch["text"], truncation=True, max_length=512)
 
-    tokenized_train = train_ds.map(tokenization, batched=True,batch_size=1000, num_proc=os.cpu_count())
-    tokenized_test = test_ds.map(tokenization, batched=True,batch_size=1000, num_proc=os.cpu_count())
-    logger.info("Datasets tokenized successfully")
-    return tokenized_train,tokenized_test
+    tokenized_datasets = tuple(
+        ds.map(tokenization, batched=True, batch_size=1000, num_proc=os.cpu_count()) for ds in datasets
+    )
+    logger.info(f"{len(datasets)} datasets tokenized successfully")
+    return tokenized_datasets
 
 def plot_roc_curve(y_true, y_scores,logger,plot_dir,data_type=None):
     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
@@ -115,15 +120,25 @@ def plot_roc_curve(y_true, y_scores,logger,plot_dir,data_type=None):
     optimal_threshold = thresholds[optimal_idx]
     roc_auc = auc(fpr, tpr)
     
-    plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.3f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+
+    # Plot ROC curve
+    ax1.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.3f})')
+    ax1.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    ax1.set_xlim([0.0, 1.0])
+    ax1.set_ylim([0.0, 1.05])
+    ax1.set_xlabel('False Positive Rate')
+    ax1.set_ylabel('True Positive Rate')
+    ax1.set_title('Receiver Operating Characteristic')
+    ax1.legend(loc="lower right")
+
+    # Add secondary x-axis for thresholds
+    ax2 = ax1.twiny()
+    ax2.set_xlim(ax1.get_xlim())
+    ax2.set_xticks(fpr[::10])  # Use every 10th FPR value for clarity
+    ax2.set_xticklabels([f'{t:.2f}' for t in thresholds[::10]], rotation=45, fontsize=8)
+    ax2.set_xlabel('Thresholds')
+
     if data_type is not None:
         plt.savefig(os.path.join(plot_dir, "roc_curve_" + data_type +".png"))
         plt.close()
@@ -304,6 +319,7 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="avg_f1"):
     
     # Load experiment data
     df = analysis.dataframe()
+    logger.info(f"analysis dataframe : {df.head()}")
     
     if "trial_id" in df.columns and metric in df.columns:
         # Get final results for each trial
@@ -316,6 +332,6 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="avg_f1"):
         plt.ylabel(metric)
         plt.title(f"Final {metric} Score by Trial")
         plt.grid(True, axis='y')
-        plt.savefig(os.path.join(plot_dir, "hyperparams", "trial_comparison.png"))
+        plt.savefig(os.path.join(plot_dir, "hyperparams", "trials_comparison_.png"))
         plt.close()
         logger.info(f"Trial comparison plot saved")

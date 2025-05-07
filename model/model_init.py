@@ -27,15 +27,16 @@ from utils import *
 
 def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
     """Compute evaluation metrics from model predictions."""
+    #TODO : print the size of logits to be sure that we compute the metrics in the right way
     logits, labels = eval_pred
     scores = 1 / (1 + np.exp(-logits.squeeze()))  # Sigmoid
     predictions = (scores > 0.5).astype(int)
-    f1 = evaluate.load("f1").compute(predictions=predictions, references=labels)
-    accuracy = evaluate.load("accuracy").compute(predictions=predictions, references=labels)
-    precision = evaluate.load("precision").compute(predictions=predictions, references=labels)
+    f1 = evaluate.load("f1").compute(predictions=predictions, references=labels) or {}
+    accuracy = evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {}
+    precision = evaluate.load("precision").compute(predictions=predictions, references=labels) or {}
     optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val")
     
-    return f1 | accuracy | precision | {"optim_threshold": optimal_threshold}
+    return {**f1, **accuracy, **precision, "optim_threshold": optimal_threshold}
 
 
 

@@ -23,6 +23,7 @@ dependencies = [
     "lxml>=5.3.1",
     "matplotlib>=3.10.1",
     "mistralai>=1.6.0",
+    "mlflow>=2.22.0",
     "nlpaug>=1.1.11",
     "nltk>=3.9.1",
     "onnxruntime>=1.21.0",

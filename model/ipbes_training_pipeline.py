@@ -2,7 +2,14 @@ from optimization_cross_val import *
 from utils import *
 import sys
 import datasets
-#TODO :
+from time import perf_counter
+
+#? How do we implement ensemble learning with cross-validation
+# -> like i did i guess
+# look for other ways ? ask julien ?
+# TODO : change ensemble implementation so that it takes scores and returns scores (average ? ) -> see julien's covid paper
+# TODO : compare with and twithout title
+# TODO : Put longer number of epoch and implement early stopping, ask julien to explain again why tha adma opt implies that early stopping is better for bigger epochs
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust ".." based on your structure
 
@@ -12,15 +19,13 @@ if parent_dir not in sys.path:
 
 from data import data_pipeline
 
-def pipeline(classification_type,ensemble=False):
+def balance_dataset(dataset):
     """
-    This function runs the entire pipeline for training and evaluating a model using cross-validation.
-    It includes data loading, preprocessing, model training, and evaluation.
+    - Performs undersampling on the negatives
+    - Renames the abstract column -> we should not hqve to do that 
     """
-    data_dict=data_pipeline()
-    print(data_dict[classification_type])
-    train,test,_=data_dict[classification_type]
 
+     
     def is_label(batch,label):
         batch_bools=[]
         for ex_label in batch['labels']:
@@ -31,71 +36,109 @@ def pipeline(classification_type,ensemble=False):
         return batch_bools
 
     # Assuming your dataset has a 'label' column (adjust if needed)
-    pos_train = train.filter(lambda x : is_label(x,1), batched=True, batch_size=1000, num_proc=os.cpu_count())
-    neg_train = train.filter(lambda x : is_label(x,0), batched=True, batch_size=1000, num_proc=os.cpu_count())
-    pos_test = test.filter(lambda x : is_label(x,1), batched=True, batch_size=1000, num_proc=os.cpu_count())
-    neg_test = test.filter(lambda x : is_label(x,0), batched=True, batch_size=1000, num_proc=os.cpu_count())
-    print("Number of train positives",len(pos_train))
-    print("Number of train negatives",len(neg_train))
-    print("Number of test positives",len(pos_test))
-    print("Number of test negatives",len(neg_test))
-    num_pos = len(pos_train)
+    pos = dataset.filter(lambda x : is_label(x,1), batched=True, batch_size=1000, num_proc=os.cpu_count())
+    neg = dataset.filter(lambda x : is_label(x,0), batched=True, batch_size=1000, num_proc=os.cpu_count())
+    logger.info(f"Number of positives: {len(pos)}")
+    logger.info(f"Number of negatives: {len(neg)}")
+    num_pos = len(pos)
 
     # Ensure there are more negatives than positives before subsampling
-    if len(neg_train) > num_pos:
-        neg_subset_train = neg_train.shuffle(seed=42).select(range(10*num_pos))
+    if len(neg) > num_pos:
+        #TODO : Change the proportion value her for les or more imbalance -> compare different values, plot ?
+        neg_subset_train = neg.shuffle(seed=42).select(range(10*num_pos))
     else:
-        neg_subset_train = neg_train  # Fallback (unlikely in your case)
-    
-    if len(neg_test) > len(pos_test):
-        neg_subset_test = neg_test.shuffle(seed=42).select(range(10*len(pos_test)))
+        neg_subset_train = neg  # Fallback (unlikely in your case)
+
+    balanced_ds = datasets.concatenate_datasets([pos, neg_subset_train])
+    balanced_ds = balanced_ds.shuffle(seed=42)  # Final shuffle
+
+    balanced_ds = balanced_ds.rename_column("abstract", "text")
+    logger.info(f"Balanced columns: {balanced_ds.column_names}")
+    logger.info(f"Balanced dataset size: {len(balanced_ds)}")
+
+    return balanced_ds
+
+#TODO : compare the loss functions inside the pipeline function to have the same test set for each run
+def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False,n_fold=5):
+    """
+    This function runs the entire pipeline for training and evaluating a model using cross-validation.
+    It includes data loading, preprocessing, model training, and evaluation.
+    """
+    logger.info(f"Running pipeline for {classification_type} with loss type {loss_type} and ensemble={ensemble}")
+
+    set_random_seeds(CONFIG["seed"])
+
+    data_dict=data_pipeline()
+
+    logger.info(f"Data for {classification_type}: {data_dict[classification_type]}")
+    dataset=data_dict[classification_type]
+
+    # ? When and what should we balance ? 
+    # the when depends on what. If only training is balances then it should be done inside the optimization_cros_val function
+    #TODO : even if done on the whole dataset, we can move it into optimization_cros_val
+    logger.info(f"Balancing dataset...")
+    balanced_dataset = balance_dataset(dataset)
+
+    #First we do k-fold cross validation for testing
+    #TODO : ensure that this does not change when running this pipeline different times for comparisons purposes
+    skf = StratifiedKFold(n_splits=n_fold, shuffle=True, random_state=CONFIG["seed"])
+
+    if with_title:
+        folds = list(skf.split(balanced_dataset[['text','title']], balanced_dataset['labels']))
+
+    elif not with_title:
+        folds = list(skf.split(balanced_dataset['text'], balanced_dataset['labels']))
+
     else:
-        neg_subset_test = neg_test
-
-    balanced_train = datasets.concatenate_datasets([pos_train, neg_subset_train])
-    balanced_train = balanced_train.shuffle(seed=42)  # Final shuffle
-    balanced_test = datasets.concatenate_datasets([pos_test, neg_subset_test])
-    balanced_test = balanced_test.shuffle(seed=42)  # Final shuffle
-
-    balanced_train = balanced_train.rename_column("abstract", "text")
-    balanced_test = balanced_test.rename_column("abstract", "text")
-    
-    print(f"Balanced dataset size: {len(balanced_train)}")
-    print(f"Test dataset size: {len(balanced_test)}")
+        raise ValueError("Invalid value for with_title. It must be True or False.")
     
     if ensemble==False:
         #For ensemble learning : make a function that execute the optimize_model_cross_val function for 5 different model names 
-        analysis=optimize_model_cross_val(balanced_train,balanced_test,loss_type="BCE",n_trials=2,n_fold=5)
-        print(analysis)
-    elif ensemble==True:
-        #The following is enough for comaprison purposes, for proper ensemble learning, we should go through each prediction and take the majority vote (see the 2 methods ?)
-        model_names = ["model1", "model2", "model3", "model4", "model5"]
-        analyses = []
-        preds_list = []
+        test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=3)
+        logger.info(f"Results: {results}")
+        
+        return test_metrics,None
 
-        for model_name in model_names:
-            analysis,preds = optimize_model_cross_val(balanced_train, balanced_test, loss_type="focal", n_trials=2, n_fold=5, model_name=model_name)
-            analyses.append(analysis)
-            preds_list.append(preds)
-            print(f"Analysis for {model_name}: {analysis}")
+    elif ensemble==True:
+        logger.info(f"Ensemble learning pipeline")
+        
+        model_names = ["microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract", "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext","FacebookAI/roberta-base", "dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"]
+        scores_by_model = []
+
+        for i,model_name in enumerate(model_names):
+            logger.info(f"Training model {i+1}/{len(model_names)}: {model_name}")
+            test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=1, model_name=model_name, data_type=classification_type)
+            scores_by_model.append(scores_by_fold)
+            logger.info(f"Metrics for {model_name}: {test_metrics}")
 
         #Then we can take the majority vote
-        all_preds = np.vstack(preds_list).T  # shape = (N, 5)
+        all_scores = np.vstack(scores_by_model).T  # shape = (N, 5)
+        mean_scores=np.mean(all_scores,axis=1)
 
-        def majority_vote(arr):
-            # arr is of shape (n_models,)
-            values, counts = np.unique(arr, return_counts=True)
-            return values[np.argmax(counts)]
-
-        # apply to each row (i.e. each sample)
-        majority_preds = np.apply_along_axis(majority_vote, axis=1, arr=all_preds)
-        return analyses, majority_preds
+        #TODO : take a decision based on this
+        #TODO : Implement ensemble metrics
+        #TODO : retrun ensemble metric or add it to the test metrics (which should be renamed in that case)
+        return test_metrics,mean_scores
 
     #Compare different training methods
-    return analysis
+    return None
+
+def whole_pipeline():
+    output=[]
+    classification_types= ["SUA", "IAS", "VA"]
+    for classification_type in classification_types:
+        logger.info(f"Running pipeline for {classification_type}")
+        test_metrics,mean_scores=pipeline(classification_type, ensemble=True,n_fold=2)
+        output.append(test_metrics)
+        logger.info(f"Metrics for {classification_type}: {test_metrics}")
+    return output
 
 if __name__ == "__main__":
+    begin_pipeline=perf_counter()
     ray.init(num_gpus=torch.cuda.device_count())
-    # Run the pipeline for a specific classification type
-    classification_type = "SUA"  # Change this to "IAS" or "VA" as needed
-    results= pipeline(classification_type)
+    final_output=whole_pipeline()
+    end_pipeline=perf_counter()
+    logger.info(f"Final output: {final_output}")
+    pipeline_runtime=end_pipeline-begin_pipeline
+    logger.info(f"Total running time : {pipeline_runtime}")
+    #TODO : Add a statistical test function
