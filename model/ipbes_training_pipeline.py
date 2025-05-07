@@ -44,7 +44,7 @@ def balance_dataset(dataset):
 
     # Ensure there are more negatives than positives before subsampling
     if len(neg) > num_pos:
-        #TODO : Change the proportion value her for les or more imbalance -> compare different values, plot ?
+        #TODO : Change the proportion value her for les or more imbalance -> compare different values, plot ? try less
         neg_subset_train = neg.shuffle(seed=42).select(range(10*num_pos))
     else:
         neg_subset_train = neg  # Fallback (unlikely in your case)
@@ -94,7 +94,7 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
     
     if ensemble==False:
         #For ensemble learning : make a function that execute the optimize_model_cross_val function for 5 different model names 
-        test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=3)
+        test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12)
         logger.info(f"Results: {results}")
         
         return test_metrics,None
@@ -107,7 +107,7 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
 
         for i,model_name in enumerate(model_names):
             logger.info(f"Training model {i+1}/{len(model_names)}: {model_name}")
-            test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=1, model_name=model_name, data_type=classification_type)
+            test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12, model_name=model_name, data_type=classification_type)
             scores_by_model.append(scores_by_fold)
             logger.info(f"Metrics for {model_name}: {test_metrics}")
 
@@ -128,7 +128,7 @@ def whole_pipeline():
     classification_types= ["SUA", "IAS", "VA"]
     for classification_type in classification_types:
         logger.info(f"Running pipeline for {classification_type}")
-        test_metrics,mean_scores=pipeline(classification_type, ensemble=True,n_fold=2)
+        test_metrics,mean_scores=pipeline(classification_type, ensemble=True,n_fold=5)
         output.append(test_metrics)
         logger.info(f"Metrics for {classification_type}: {test_metrics}")
     return output

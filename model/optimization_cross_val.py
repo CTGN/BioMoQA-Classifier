@@ -179,7 +179,7 @@ def optimize_model_cross_val(
             search_alg=HyperOptSearch(metric="eval_f1", mode="max",random_state_seed=CONFIG["seed"]),
             checkpoint_config=checkpoint_config,
             num_samples=n_trials,  # Number of trials
-            resources_per_trial={"cpu": 30, "gpu": 3},
+            resources_per_trial={"cpu": 10, "gpu": 1},
             storage_path="/home/leandre/Projects/BioMoQA_Playground/model/ray_results/",
         )
         logger.info(f"Analysis results: {analysis}")
@@ -239,14 +239,16 @@ def optimize_model_cross_val(
 
         metrics = trainer.train().metrics
 
+        eval_results_dev=trainer.evaluate()
+
         end_time_train=perf_counter()
         logger.info(f"Training time : {end_time_train-start_time}")
 
-        eval_results = trainer.evaluate(tokenized_test)
+        eval_results_test = trainer.evaluate(tokenized_test)
 
         end_time_val=perf_counter()
         logger.info(f"Evaluation time : {end_time_val-end_time_train}")
-        logger.info(f"Evaluation results on test set: {eval_results}")
+        logger.info(f"Evaluation results on test set: {eval_results_test}")
         # Number of optimizer updates performed:
 
         n_updates = trainer.state.global_step
@@ -256,7 +258,7 @@ def optimize_model_cross_val(
         logger.info(f"Avg time / step: {avg_step_time:.3f}s")
         
 
-        final_model_path = os.path.join(CONFIG["final_model_dir"], "best_model_cross_val_"+str(loss_type)+str(model_name)+str(n_trials)+"trials_fold-"+str(fold_idx))
+        final_model_path = os.path.join(CONFIG["final_model_dir"], "best_model_cross_val_"+str(loss_type)+str(model_name)+str(n_trials)+"trials_fold-"+str(fold_idx+1))
         
         trainer.save_model(final_model_path)
         logger.info(f"Best model saved to {final_model_path}")
@@ -268,18 +270,18 @@ def optimize_model_cross_val(
         
         scores = 1 / (1 + np.exp(-predictions.predictions.squeeze()))
         preds = (scores > 0.5).astype(int)
-        res1=detailed_metrics(preds, test_ds["labels"])
+        res1=detailed_metrics(preds, test_split["labels"])
         results.append(res1)
-        plot_roc_curve(test_ds["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
-        plot_precision_recall_curve(test_ds["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
+        plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
+        plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
 
         #! The following seems weird. we are talking about decision here. View it like a ranking problem. take a perspective for usage
-        threshold = best_results["optim_threshold"]
+        threshold = eval_results_dev["eval_optim_threshold"]
         logger.info(f"\nOn test Set (optimal threshold of {threshold} according to cross validation on the training set): ")
         preds = (scores > threshold).astype(int)
-        res2=detailed_metrics(preds, test_ds["labels"])
+        res2=detailed_metrics(preds, test_split["labels"])
         results.append(res2)
-        plot_precision_recall_curve(test_ds["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
+        plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
 
         logger.info(f"Results for fold {fold_idx+1} : {results}")
         test_metrics.append(results)
