@@ -335,3 +335,9 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="eval_f1"):
         plt.savefig(os.path.join(plot_dir, "hyperparams", "trials_comparison_.png"))
         plt.close()
         logger.info(f"Trial comparison plot saved")
+
+def clear_cuda_cache():
+    """Clear CUDA cache and log memory usage."""
+    torch.cuda.empty_cache()
+    logger.info(f"Cleared CUDA cache. Memory allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB, "
+                f"Memory reserved: {torch.cuda.memory_reserved() / 1e9:.2f} GB")

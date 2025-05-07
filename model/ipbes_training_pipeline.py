@@ -94,10 +94,11 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
     
     if ensemble==False:
         #For ensemble learning : make a function that execute the optimize_model_cross_val function for 5 different model names 
-        avg_metrics,test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=12)
+        avg_metrics,test_metrics, scores_by_fold =optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=9)
+        clear_cuda_cache()  # Clear CUDA cache after cross-validation
         logger.info(f"Results: {results}")
         
-        return test_metrics,None
+        return avg_metrics,None
 
     elif ensemble==True:
         logger.info(f"Ensemble learning pipeline")
@@ -107,8 +108,9 @@ def pipeline(classification_type,loss_type="BCE",ensemble=False,with_title=False
 
         for i,model_name in enumerate(model_names):
             logger.info(f"Training model {i+1}/{len(model_names)}: {model_name}")
-            avg_metrics,test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=3, model_name=model_name, data_type=classification_type)
+            avg_metrics,test_metrics, scores_by_fold = optimize_model_cross_val(balanced_dataset, folds, loss_type=loss_type, n_trials=9, model_name=model_name, data_type=classification_type)
             torch.cuda.empty_cache()
+            clear_cuda_cache()  # Log memory usage
             scores_by_model.append(scores_by_fold)
             logger.info(f"Metrics for {model_name}: {test_metrics}")
 
@@ -139,6 +141,8 @@ if __name__ == "__main__":
     begin_pipeline=perf_counter()
     ray.init(num_gpus=torch.cuda.device_count())
     final_output=whole_pipeline()
+    torch.cuda.empty_cache()  # Clear CUDA cache after pipeline
+    clear_cuda_cache()  # Log memory usage
     end_pipeline=perf_counter()
     logger.info(f"Final output: {final_output}")
     pipeline_runtime=end_pipeline-begin_pipeline

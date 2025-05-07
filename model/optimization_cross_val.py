@@ -88,7 +88,8 @@ def optimize_model_cross_val(
         def train_bert(config):
 
             model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
-
+            model.gradient_checkpointing_enable()
+            
             # Set up training arguments
             training_args = CustomTrainingArguments(
                 output_dir=f'.', #! Is that alright ?
@@ -206,11 +207,12 @@ def optimize_model_cross_val(
         logger.info(f"Final training...")
         start_time=perf_counter()
         model=AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
-        
+        model.gradient_checkpointing_enable()
+
         if data_type is not None:
-            output_dir=os.path.join(CONFIG["output_dir"], data_type + "_"  + loss_type + "_" + model_name)
+            output_dir=os.path.join(CONFIG["output_dir"], data_type + "_"  + loss_type + "_" + model_name + "_" + str((fold_idx+1)))
         else:
-            output_dir=os.path.join(CONFIG["output_dir"], loss_type + "_" + model_name)
+            output_dir=os.path.join(CONFIG["output_dir"], loss_type + "_" + model_name + "_" + str((fold_idx+1)))
 
         # Set up training arguments
         training_args = CustomTrainingArguments(
@@ -299,9 +301,9 @@ def optimize_model_cross_val(
     #TODO : Get the average metrics from the cross validation
     all_metrics=np.array([[fold_metrics[0][key][key] for key in fold_metrics[0]] for fold_metrics in test_metrics])
     avg_metrics=np.mean(all_metrics,axis=1)
-    logger.info(f"Average metrics :", avg_metrics)
+    logger.info(f"Average metrics : {avg_metrics}")
     
-    return avg_metrics, scores_by_fold
+    return avg_metrics,test_metrics, scores_by_fold
 
 if __name__ == "__main__":
     #! the following is obsolete
