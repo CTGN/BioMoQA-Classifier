@@ -137,7 +137,8 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
 def create_ipbes_negatives(pos_raw, corpus_ds):
     "Deletes all instances from the corpus dataset that are in the positives dataset with respect to the the abstract,title and doi or that are None"
 
-    # Create a set of positive DOIs for faster lookup
+    # Create a set of positive attributes for faster lookup
+
     neg_ds=corpus_ds.remove_columns(['author','topics', 'author_abbr',"id"])
 
     abs_set=set(e.strip() for e in pos_raw['Abstract Note'] if e is not None)
@@ -147,7 +148,7 @@ def create_ipbes_negatives(pos_raw, corpus_ds):
     if None in titles_set : titles_set.remove(None) 
     if None in abs_set : abs_set.remove(None) 
 
-    def find(batch):
+    def is_not_in_pos(batch):
         batch_bools=[]
         for j in range(len(batch['display_name'])):
             title=batch['display_name'][j]
@@ -166,7 +167,8 @@ def create_ipbes_negatives(pos_raw, corpus_ds):
             else:
                 batch_bools.append(True)
         return batch_bools
-    neg_ds=neg_ds.filter(find, batched=True, batch_size=1000,num_proc=32)
+    
+    neg_ds=neg_ds.filter(is_not_in_pos, batched=True, batch_size=1000,num_proc=32)
     neg_ds=neg_ds.rename_column("display_name", "title")
     neg_ds=neg_ds.rename_column("ab", "abstract")
 
@@ -205,13 +207,13 @@ def loading_pipeline_from_raw(multi_label=False):
 
         #Merge positives to create the unified negative dataset
         print("Concatenating positive datasets...")
-        unify_pos_ds=concatenate_datasets([ds for ds in pos_ds_list])
+        unify_pos_ds=concatenate_datasets(pos_ds_list)
         unify_pos_dataframe=unify_pos_ds.to_pandas()
-        unify_pos_dataframe=unify_pos_dataframe.drop_duplicates()
+        unify_pos_dataframe=unify_pos_dataframe.drop_duplicates(ignore_index=True)
         unify_pos_ds=Dataset.from_pandas(unify_pos_dataframe)
 
         print("creating raw negative dataset")
-        # Create a unified negative dataset that deducts instances from all positives type from the corpus
+        # Create a unified negative dataset that deducts instances from all positives types from the corpus
         neg_ds = create_ipbes_negatives(unify_pos_ds, corpus_ds)
 
         print("creating raw positive dataset")

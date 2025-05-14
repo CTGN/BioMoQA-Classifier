@@ -61,32 +61,33 @@ def merge_pos_neg(pos_ds, neg_ds, store=False):
     print("Number of Positives before cleaning :",len(pos_ds))
     return merged_ds
 
-def clean_ipbes(dataset):
+def clean_ipbes(dataset,label_cols=["labels"]):
     """
     Clean dataset using streaming operations
     """
     print("Filtering out rows with no abstracts or DOI...")
 
-    # Process conflicts and duplicates using map
-    seen_texts = set()
-    # Initialize empty sets
-    pos_abstracts = set()
-    neg_abstracts = set()
-    
-    # Process in batches using map
-    def collect_abstracts(examples):
-        for i, label in enumerate(examples['labels']):
-            if label == 1:
-                pos_abstracts.add(examples['abstract'][i])
-            else:
-                neg_abstracts.add(examples['abstract'][i])
-        return examples
-    
-    # Process in parallel with batching
-    dataset.map(collect_abstracts, 
-                batched=True, 
-                batch_size=1000, 
-                num_proc=min(4, os.cpu_count() or 1))
+
+    for label_name in label_cols:
+        # Process conflicts and duplicates using map
+        seen_texts = set()
+        # Initialize empty sets
+        pos_abstracts = set()
+        neg_abstracts = set()
+        # Process in batches using map
+        def collect_abstracts(examples):
+            for i, label_val in enumerate(examples[label_name]):
+                if label_val == 1:
+                    pos_abstracts.add(examples['abstract'][i])
+                else:
+                    neg_abstracts.add(examples['abstract'][i])
+            return examples
+        
+        # Process in parallel with batching
+        dataset=dataset.map(collect_abstracts, 
+                    batched=True, 
+                    batch_size=1000, 
+                    num_proc=min(4, os.cpu_count() or 1))
     
     conflicting_texts = set()
     print("Size of the dataset before cleaning:", len(dataset))
@@ -136,7 +137,7 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols):
     pos_combined = concatenate_datasets(pos_ds_list)
 
     pos_combined_df=pos_combined.to_pandas()
-    pos_combined_df=pos_combined_df.drop_duplicates()
+    pos_combined_df=pos_combined_df.drop_duplicates(ignore_index=True)
     pos_combined=Dataset.from_pandas(pos_combined_df)
 
     print("pos_combined",pos_combined)
@@ -146,25 +147,23 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols):
 
     def assign_membership(batch):
         abstracts = batch['abstract']
-        out = {col: [] for col in label_cols}
         # for each example in the batch, check membership in each set
-        for a in abstracts:
-            for i, s in enumerate(abstract_sets):
-                out[label_cols[i]].append(int(a in s))
+        for i, s in enumerate(abstract_sets):
+            batch[label_cols[i]]=[int(a in s) for a in abstracts]
         # return new columns; existing columns are kept by default
-        return out
+        return batch
 
     # Use a reasonable batch size for efficiency
-    generated = gcombined.map(
+    unified_dataset = gcombined.map(
         assign_membership,
         batched=True,
         batch_size=1000,
         num_proc=os.cpu_count()
     )
 
-    unified_dataset = generated
+    clean_unified_dataset=clean_ipbes(unified_dataset,label_cols=label_cols)
     
-    return unified_dataset
+    return clean_unified_dataset
 
 
 
@@ -200,9 +199,9 @@ def data_pipeline(multi_label=False):
     """
     if multi_label:
         data_type_list=["IAS","SUA","VA"]
-        pos_ds, neg_ds, _ = loading_pipeline_from_raw(multi_label=multi_label)
+        pos_ds_list, neg_ds, _ = loading_pipeline_from_raw(multi_label=multi_label)
 
-        clean_ds = unify_multi_label(pos_ds,neg_ds,data_type_list)
+        clean_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list)
         return clean_ds
     else:
         
