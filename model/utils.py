@@ -20,7 +20,14 @@ from datasets import Dataset, load_dataset
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import evaluate
 import logging
-
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import seaborn as sns
+import smtplib
+from email.mime.text import MIMEText
+from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import make_scorer,f1_score,accuracy_score,recall_score,precision_score
 
 # Configuration
 CONFIG = {
@@ -39,15 +46,16 @@ CONFIG = {
     "default_training_args": {
         "eval_strategy": "epoch",
         "save_strategy": "best",
+        "load_best_model_at_end": True,
+        "metric_for_best_model": "eval_f1", #? Default to loss, don't we want this (loss) ?
         "save_total_limit": 1,
         "learning_rate": None,
         "per_device_train_batch_size": 27,
         "per_device_eval_batch_size": 27,
-        "gradient_accumulation_steps": 8,
+        "gradient_accumulation_steps": 4,
         "num_train_epochs": 4,
         "fp16": False,
         "logging_strategy": "epoch",
-        "load_best_model_at_end": True,
         "report_to": "tensorboard",
     },
 }
@@ -69,11 +77,34 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Tuple[int, 
     plt.close()
 
     metrics = {
-        "f1": evaluate.load("f1").compute(predictions=predictions, references=labels),
-        "recall": evaluate.load("recall").compute(predictions=predictions, references=labels),
-        "precision": evaluate.load("precision").compute(predictions=predictions, references=labels),
-        "accuracy": evaluate.load("accuracy").compute(predictions=predictions, references=labels),
+        **evaluate.load("f1").compute(predictions=predictions, references=labels),
+        **evaluate.load("recall").compute(predictions=predictions, references=labels),
+        **evaluate.load("precision").compute(predictions=predictions, references=labels),
+        **evaluate.load("accuracy").compute(predictions=predictions, references=labels)
     }
+    
+    logger.info(f"Metrics: {metrics}")
+    return metrics
+
+def multi_label_detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Tuple[int, int, int, int]:
+    """Compute and display detailed metrics including confusion matrix."""
+    cm = confusion_matrix(labels, predictions, labels=["IAS","SUA","VA"])
+
+    disp = ConfusionMatrixDisplay(cm, display_labels=["IAS","SUA","VA"])
+    disp.plot()
+    plt.savefig(os.path.join(CONFIG["plot_dir"], "confusion_matrix.png"))
+    plt.close()
+
+    f1_per_label=f1_score(labels,predictions,average=None)
+    recall_per_label=recall_score(labels,predictions,average=None)
+    precision_per_label=precision_score(labels,predictions,average=None)
+
+    metrics = {"f1_IAS":f1_per_label[0],"f1_SUA":f1_per_label[1],"f1_VA":f1_per_label[2],"f1_weighted":f1_score(labels,predictions,average="weighted"),"f1_macro":f1_score(labels,predictions,average="macro"),"f1_micro":f1_score(labels,predictions,average="micro"),
+        "recall_IAS":recall_per_label[0],"recall_SUA":recall_per_label[1],"recall_VA":recall_per_label[2],"recall_weighted":recall_score(labels,predictions,average="weighted"),"recall_macro":recall_score(labels,predictions,average="macro"),"recall_micro":recall_score(labels,predictions,average="micro"),
+        "precision_IAS":precision_per_label[0],"precision_SUA":precision_per_label[1],"precision_VA":precision_per_label[2],"precision_weighted":precision_score(labels,predictions,average="weighted"),"precision_macro":precision_score(labels,predictions,average="macro"),"precision_micro":precision_score(labels,predictions,average="micro"),
+        "accuracy":accuracy_score(labels,predictions)
+    }
+    
     logger.info(f"Metrics: {metrics}")
     return metrics
 
@@ -180,9 +211,6 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
         metric: Metric to optimize (default: "eval_f1")
         mode: Optimization mode ("max" or "min")
     """
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import os
     
     # Load experiment data
     df = analysis.dataframe()
@@ -291,6 +319,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
     # Plot parallel coordinates for all parameters
     try:
         from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
+
         if isinstance(analysis, ExperimentAnalysis):
             ax = None
             try:
@@ -313,9 +342,6 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="eval_f1"):
         experiment_path: Path to the Ray Tune experiment directory
         metric: Metric to visualize
     """
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import os
     
     # Load experiment data
     df = analysis.dataframe()
@@ -327,7 +353,7 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="eval_f1"):
         trial_final = trial_final.sort_values("trial_id")
         
         plt.figure(figsize=(12, 6))
-        plt.plot(range(len(trial_final)), trial_final[metric], alpha=0.7)
+        plt.plot(range(len(trial_final)), trial_final[metric],"o", alpha=0.7)
         plt.xlabel("Trial Number")
         plt.ylabel(metric)
         plt.title(f"Final {metric} Score by Trial")
@@ -341,3 +367,34 @@ def clear_cuda_cache():
     torch.cuda.empty_cache()
     logger.info(f"Cleared CUDA cache. Memory allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB, "
                 f"Memory reserved: {torch.cuda.memory_reserved() / 1e9:.2f} GB")
+    
+"""
+def mail_report(message,subject='Classifier report'):
+
+
+
+    msg = MIMEText(message)
+
+    # me == the sender's email address
+    # you == the recipient's email address
+    msg['Subject'] = subject
+    msg['From'] = me
+    msg['To'] = you
+
+    # Send the message via our own SMTP server, but don't include the
+    # envelope header.
+    s = smtplib.SMTP('localhost')
+    s.sendmail(me, [you], msg.as_string())
+    s.quit()
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+    # start TLS for security
+    s.starttls()
+    # Authentication
+    s.login("leandrecatogni", "noztox-Xazris-tuwhi9")
+    # sending the mail
+    s.sendmail("leandrecatogni", "leandrecatogni", message)
+    # terminating the session
+    s.quit()
+    return None
+
+"""

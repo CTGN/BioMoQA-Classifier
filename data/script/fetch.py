@@ -124,7 +124,7 @@ async def extract_fulltext(document):
 
 async def fetch_and_store_publications(sem, session, url, pmids, publication_dir, log_file, overwrite):
     """
-    Fetch publications using PMIDs, store those with or without full text, and log failures or missing full text.
+    Fetch publications using PMIDs, store them without full text, and log failures or missing full text.
     """
     try:
         async with sem:
@@ -154,23 +154,12 @@ async def fetch_and_store_publications(sem, session, url, pmids, publication_dir
                     pmcids.append(pmcid)
                 publications.append(publication)
 
-            # Fetch full-text data from PMC if available
-            if pmcids:
-                pmc_publications = await fetch_publications_from_sibils(session, url, pmcids, "pmc")
-                for publication in publications:
-                    if publication["PMCID"] in pmc_publications:
-                        publication_data = pmc_publications[publication["PMCID"]]["document"]
-                        publication["FULLTEXT"] = await extract_fulltext(publication_data)
-
             # Store publications (with or without full-text) and log any that are missing full-text
             stored_count = 0
             for publication in publications:
                 try:
                     pub_lib.save_pub(publication, publication_dir, overwrite=overwrite)
                     stored_count += 1
-                    if not publication["FULLTEXT"]:
-                        with open(log_file, 'a') as lf:
-                            lf.write(f"PMID: {publication['PMID']} - Only abstract available, no full-text.\n")
                 except FileExistsError:
                     log.info(f"Publication for PMID {publication['PMID']} already exists, skipping save.")
 
@@ -237,4 +226,4 @@ def main(cfg: DictConfig):
     asyncio.run(run(cfg))
 
 if __name__ == "__main__":
-    main()
+    main()  # Hydra will automatically inject the config

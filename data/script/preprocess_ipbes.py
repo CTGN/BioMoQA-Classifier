@@ -11,6 +11,7 @@ import os
 import gc
 from collections import defaultdict
 import random
+import argparse
 
 def merge_pos_neg(pos_ds, neg_ds, store=False):
     """
@@ -122,6 +123,51 @@ def clean_ipbes(dataset):
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
     return dataset
 
+def unify_multi_label(pos_ds_list,neg_ds,label_cols):
+    """
+    Unify all positives with the negative data and add a label for each positive type (3 in our case)
+    """
+
+    
+    # 1. Create sets of abstracts for each positive dataset
+    abstract_sets = [set(ds["abstract"]) for ds in pos_ds_list]
+
+    # 2. Unify all positives into one Dataset
+    pos_combined = concatenate_datasets(pos_ds_list)
+
+    pos_combined_df=pos_combined.to_pandas()
+    pos_combined_df=pos_combined_df.drop_duplicates()
+    pos_combined=Dataset.from_pandas(pos_combined_df)
+
+    print("pos_combined",pos_combined)
+
+    # 3. Concatenate positives with the negative dataset
+    gcombined = concatenate_datasets([pos_combined, neg_ds])
+
+    def assign_membership(batch):
+        abstracts = batch['abstract']
+        out = {col: [] for col in label_cols}
+        # for each example in the batch, check membership in each set
+        for a in abstracts:
+            for i, s in enumerate(abstract_sets):
+                out[label_cols[i]].append(int(a in s))
+        # return new columns; existing columns are kept by default
+        return out
+
+    # Use a reasonable batch size for efficiency
+    generated = gcombined.map(
+        assign_membership,
+        batched=True,
+        batch_size=1000,
+        num_proc=os.cpu_count()
+    )
+
+    unified_dataset = generated
+    
+    return unified_dataset
+
+
+
 def prereprocess_ipbes(pos_ds,neg_ds):
     """
     Function to preprocess the IPBES dataset
@@ -141,30 +187,37 @@ def prereprocess_ipbes(pos_ds,neg_ds):
                 batch_bools.append(False)
         return batch_bools
 
-    # Assuming your dataset has a 'label' column (adjust if needed)
     pos_dataset = clean_ds.filter(lambda x : is_label(x,1), batched=True, batch_size=1000, num_proc=os.cpu_count())
     print("Number of positives after cleaning:", len(pos_dataset))
     print(clean_ds)
-
+    
     return clean_ds
 
 
-def data_pipeline():
+def data_pipeline(multi_label=False):
     """
     Load the data and preprocess it
     """
+    if multi_label:
+        data_type_list=["IAS","SUA","VA"]
+        pos_ds, neg_ds, _ = loading_pipeline_from_raw(multi_label=multi_label)
 
-    pos_ds_list, neg_ds_list, corpus_ds=loading_pipeline_from_raw()
-    dataset_dict = {}
-    data_type_list=["IAS","SUA","VA"]
-    for i in range(len(pos_ds_list)):
-        print("Processing dataset for type:", data_type_list[i])
-        print("Positive dataset size:", len(pos_ds_list[i]))
-        print("Negative dataset size:", len(neg_ds_list[i]))
-        dataset_dict[data_type_list[i]]= prereprocess_ipbes(pos_ds_list[i],neg_ds_list[i])
-    
-    print("Completed processing all datasets.")
-    return dataset_dict
+        clean_ds = unify_multi_label(pos_ds,neg_ds,data_type_list)
+        return clean_ds
+    else:
+        
+        pos_ds_list, neg_ds_list, _ = loading_pipeline_from_raw()
+        dataset_dict = {}
+        data_type_list=["IAS","SUA","VA"]
+        for i in range(len(pos_ds_list)):
+            print("Processing dataset for type:", data_type_list[i])
+            print("Positive dataset size:", len(pos_ds_list[i]))
+            print("Negative dataset size:", len(neg_ds_list[i]))
+            dataset_dict[data_type_list[i]]= prereprocess_ipbes(pos_ds_list[i],neg_ds_list[i])
+        
+        print("Completed processing all datasets.")
+
+        return dataset_dict
 
 
 #TODO : Double check that we indeed delete cases where you have a positive into negatives -> I think we did it with conflicts

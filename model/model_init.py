@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from datasets import Dataset, load_dataset
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from ray import tune
 from ray.tune import ExperimentAnalysis
 from ray.tune.search.hyperopt import HyperOptSearch
@@ -38,6 +37,21 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     
     return {**f1, **accuracy, **precision, "optim_threshold": optimal_threshold}
 
+def multi_label_compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
+    """Compute evaluation metrics from model predictions."""
+    #TODO : print the size of logits to be sure that we compute the metrics in the right way
+    logits, labels = eval_pred
+    scores = 1 / (1 + np.exp(-logits.squeeze())) 
+
+    predictions = (scores > 0.5).astype(int)
+    f1={"f1":f1_score(labels,predictions,average="weighted")}
+    recall={"recall":recall_score(labels,predictions,average="weighted")}
+    accuracy = {"accuracy":accuracy_score(labels,predictions)} or {}
+    precision = {"precision":precision_score(labels,predictions,average="weighted")} or {}
+
+    optimal_thresholds = (plot_roc_curve(labels[:][i], scores[:][i], logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val") for i in range(scores.shape[-1]) )
+    
+    return {**f1, **recall, **precision, **accuracy, "optim_threshold": optimal_thresholds}
 
 
 class LossPlottingCallback(TrainerCallback):
