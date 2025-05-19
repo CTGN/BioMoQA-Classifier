@@ -9,6 +9,8 @@ import torch
 from datasets import Dataset, load_dataset
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.svm import SVC
+from sklearn.inspection import DecisionBoundaryDisplay
 from ray import tune
 from ray.tune import ExperimentAnalysis
 from ray.tune.search.hyperopt import HyperOptSearch
@@ -16,9 +18,11 @@ import ray
 from ray.tune.schedulers import ASHAScheduler
 from transformers import (
     AutoTokenizer,
+    AutoConfig,
     AutoModelForSequenceClassification,
     DataCollatorWithPadding,
     Trainer,
+    EarlyStoppingCallback,
     TrainerCallback,
     TrainingArguments,
     set_seed,
@@ -30,6 +34,8 @@ import datasets
 from time import perf_counter
 from model_init import *
 from time import perf_counter
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
+from HPO_callbacks import CleanupCallback
 
 #? How do we implement ensemble learning with cross-validation
 # -> like i did i guess
@@ -53,8 +59,9 @@ from time import perf_counter
 # TODO : add earlystoppingcallback
 # TODO : ask julien about gradient checkpointing 
 # Maybe make pandas df for results where you would have the following attributes : model_name, f1, accuracy,tp, fp, tn, fn 
-
+#TODO : Ask julien about multlabelstratifiedsplit
 #TODO : Consider Merging this file into the original binary pipeline
+#TODO : Check if it is relevant to use the weight attribute for BCEwithlogitloss in CustomTraier -> see model_init
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust ".." based on your structure
 
 # Add it to sys.path
@@ -63,7 +70,7 @@ if parent_dir not in sys.path:
 
 from data import data_pipeline
 
-def balance_dataset(dataset):
+def balance_dataset(dataset,coeff=1):
     """
     - Performs undersampling on the negatives
     - Renames the abstract column -> we should not hqve to do that 
@@ -72,22 +79,21 @@ def balance_dataset(dataset):
 
      
     def is_pos(batch):
-        batch_bools=[False for _ in range(len(batch))]
+        batch_bools=[False for _ in range(len(batch[labels[0]]))]
         for label in labels:
             for idx in range(len(batch[label])):
                 if batch[label][idx] == 1:
-                    batch_bool=True
+                    batch_bools[idx]=True
         return batch_bools
     
     def is_neg(batch):
-        batch_bools=[True for _ in range(len(batch))]
+        batch_bools=[True for _ in range(len(batch[labels[0]]))]
         for label in labels:
             for idx in range(len(batch[label])):
                 if batch[label][idx] == 1:
-                    batch_bool=False
+                    batch_bools[idx]=False
         return batch_bools
 
-    # Assuming your dataset has a 'label' column (adjust if needed)
     pos = dataset.filter(lambda x : is_pos(x), batched=True, batch_size=1000, num_proc=os.cpu_count())
     neg = dataset.filter(lambda x : is_neg(x), batched=True, batch_size=1000, num_proc=os.cpu_count())
     logger.info(f"Number of positives: {len(pos)}")
@@ -96,8 +102,7 @@ def balance_dataset(dataset):
 
     # Ensure there are more negatives than positives before subsampling
     if len(neg) > num_pos:
-        #TODO : Change the proportion value here for les or more imbalance -> compare different values, plot ? try less
-        neg_subset_train = neg.shuffle(seed=42).select(range(num_pos))
+        neg_subset_train = neg.shuffle(seed=42).select(range(coeff*num_pos))
     else:
         neg_subset_train = neg  # Fallback (unlikely in your case)
 
@@ -113,7 +118,6 @@ def balance_dataset(dataset):
 class TrainMultiLabelPipeline:
 
     def __init__(self,classification_type,loss_type="BCE",ensemble=False,n_trials=10,num_runs=5,with_title=False,n_fold=5,model_names = ["microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract", "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext","FacebookAI/roberta-base", "dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"]):
-        self.classification_type=classification_type
         self.loss_type=loss_type
         self.ensemble=ensemble
         self.with_title=with_title
@@ -126,33 +130,33 @@ class TrainMultiLabelPipeline:
         self.run_idx=None
         self.num_runs=num_runs
         self.labels=["IAS","SUA","VA"]
+        self.balance_coeff=1
 
-        logger.info(f"Pipeline for {self.classification_type} with loss type {self.loss_type} and ensemble={self.ensemble}")
+        logger.info(f"Multi Label pipeline for loss type {self.loss_type} and ensemble={self.ensemble}")
     
     def data_loading(self):
         set_random_seeds(CONFIG["seed"])
 
-        data_dict=data_pipeline()
-
-        logger.info(f"Data for {self.classification_type}: {data_dict[self.classification_type]}")
-        unbalanced_dataset=data_dict[self.classification_type]
+        unbalanced_dataset=data_pipeline(multi_label=True)
 
         # ? When and what should we balance ? 
         # the when depends on what. If only training is balances then it should be done inside the optimization_cros_val function
         #TODO : even if done on the whole dataset, we can move it into optimization_cros_val
         logger.info(f"Balancing dataset...")
-        self.dataset = balance_dataset(unbalanced_dataset)
+        self.dataset = balance_dataset(unbalanced_dataset,coeff=self.balance_coeff)
+
+        logger.info(f"Balanced dataset : {self.dataset}")
 
         #First we do k-fold cross validation for testing
         #TODO : ensure that this does not change when running this pipeline different times for comparisons purposes
-        skf = StratifiedKFold(n_splits=self.n_fold, shuffle=True, random_state=CONFIG["seed"])
-
+        mskf = MultilabelStratifiedKFold(n_splits=self.n_fold, shuffle=True, random_state=CONFIG["seed"])
+        logger.info(f"dataset's labels : {self.dataset.select_columns(self.labels)}")
         if self.with_title:
-            self.folds = list(skf.split(self.dataset[['text','title']], self.dataset.select_columns(self.labels)))
+            self.folds = list(mskf.split(self.dataset.select_columns(['text','title']).to_pandas(), self.dataset.select_columns(self.labels).to_pandas()))
             logging.info(f"fold 1 : {self.folds[0]}")
 
         else:
-            self.folds = list(skf.split(self.dataset['text'], self.dataset.select_columns(self.labels)))
+            self.folds = list(mskf.split(self.dataset['text'], self.dataset.select_columns(self.labels).to_pandas()))
             logging.info(f"fold 1 : {self.folds[0]}")
 
     
@@ -168,7 +172,7 @@ class TrainMultiLabelPipeline:
             model_name: Name of the pre-trained model to use.
 
         Returns:
-            Dictionary with evaluation results of the best model.
+            Classification score of the model by fold
         """
 
         #? When should we tokenize ? 
@@ -190,32 +194,45 @@ class TrainMultiLabelPipeline:
             logger.info(f"test split size : {len(test_split)}")
 
             # Train/dev multi-label stratified split :
-
-            labels = list(zip(train_dev_split["IAS"], train_dev_split["SUA"], train_dev_split["VA"]))
-
-            # get train/dev indices, stratified on the tuple-labels
-            train_idx, dev_idx = train_test_split(
-                range(len(train_dev_split)),
-                test_size=0.3,
-                stratify=labels,
+            msss = MultilabelStratifiedShuffleSplit(
+                n_splits=1,
+                test_size=0.3,    # 30% → dev set
+                train_size=0.7,   # 70% → train set
                 random_state=CONFIG["seed"]
             )
+
+            # get train/dev indices, stratified on the labels
+            train_idx, dev_idx = next(msss.split(np.arange(len(train_dev_split)),train_dev_split.select_columns(self.labels).to_pandas()))
 
             train_split = train_dev_split.select(train_idx)
             dev_split  = train_dev_split.select(dev_idx)
 
             logger.info(f"train split size : {len(train_split)}")
             logger.info(f"dev split size : {len(dev_split)}")
-            
-            tokenized_train,tokenized_dev, tokenized_test = tokenize_datasets(train_split,dev_split,test_split, tokenizer=tokenizer,with_title=self.with_title)
+
+            def preprocess(batch):
+                # join title & text, tokenize
+                if self.with_title:
+                    enc = tokenizer(batch["title"], batch["text"], truncation=True, max_length=512)
+                else:
+                    enc = tokenizer(batch["text"], truncation=True, max_length=512)
+                # stack the 3 label columns into a single multi-hot vector
+                enc["labels"] = [
+                    [i, s, v] for i, s, v in zip(batch["IAS"], batch["SUA"], batch["VA"]) #TODO: use self.labels
+                ]
+                return enc
+
+            tokenized_train = train_split.map(preprocess, batched=True, remove_columns=train_split.column_names)
+            tokenized_dev = dev_split.map(preprocess, batched=True, remove_columns=dev_split.column_names)
+            tokenized_test = test_split.map(preprocess, batched=True, remove_columns=test_split.column_names)
 
             #We whould maybe perform cross val inside the model names loops ?
             #1. We run all models for each fold and we take the average of all of them at the end -> I think it is not good this way
             #2. (Inside loops) We go through all folds for each run and compare the means
 
             def train_hpo(config):
-
-                model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(self.labels))
+                
+                model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(self.labels),problem_type="multi_label_classification")
 
                 # Set up training arguments
                 training_args = CustomTrainingArguments(
@@ -230,6 +247,7 @@ class TrainMultiLabelPipeline:
                     weight_decay=config["weight_decay"],
                     disable_tqdm=True,
                     logging_dir=f'./logs_fold_{fold_idx}',
+                    multi_label=True,
                 )
                 training_args.learning_rate=config["learning_rate"]
                 training_args.num_train_epochs=config["num_train_epochs"]
@@ -277,25 +295,9 @@ class TrainMultiLabelPipeline:
 
             # Set up scheduler for early stopping
             scheduler = ASHAScheduler(
-                metric="eval_f1", #When set to objective, it takes the sum of the compute-metric output. if compute-metric isnt defined, it takes the loss.
+                metric="eval_f1_weighted", #When set to objective, it takes the sum of the compute-metric output. if compute-metric isnt defined, it takes the loss.
                 mode="max"
             )
-
-            #TODO : check and remove the following
-            """ 
-            class MyCallback(tune.Callback):
-                def on_trial_start(self, iteration, trials, trial, **info):
-                    logger.info(f"Trial successfully started with config : {trial.config}")
-                    return super().on_trial_start(iteration, trials, trial, **info)
-                
-                def on_trial_complete(self, iteration, trials, trial, **info):
-                    logger.info(f"Trial ended with config : {trial.config}")
-                    return super().on_trial_complete(iteration, trials, trial, **info)
-                
-                def on_checkpoint(self, iteration, trials, trial, checkpoint, **info):
-                    logger.info("Created checkpoint successfully")
-                    return super().on_checkpoint(iteration, trials, trial, checkpoint, **info)
-            """
             
             # Perform hyperparameter search
             logger.info(f"Starting hyperparameter search for {self.loss_type} loss")
@@ -306,16 +308,17 @@ class TrainMultiLabelPipeline:
                 train_hpo,
                 config=tune_config,
                 scheduler=scheduler,
-                search_alg=HyperOptSearch(metric="eval_f1", mode="max", random_state_seed=CONFIG["seed"]),
+                search_alg=HyperOptSearch(metric="eval_f1_weighted", mode="max", random_state_seed=CONFIG["seed"]),
                 checkpoint_config=checkpoint_config,
                 num_samples=self.n_trials,
-                resources_per_trial={"cpu": 15, "gpu": 1},
+                resources_per_trial={"cpu": 30, "gpu": 3},
                 storage_path="/home/leandre/Projects/BioMoQA_Playground/model/ray_results/",
+                callbacks=[CleanupCallback()],
             )
             logger.info(f"Analysis results: {analysis}")
 
             # Handle case where no trials succeeded
-            best_trial = analysis.get_best_trial(metric="eval_f1", mode="max")
+            best_trial = analysis.get_best_trial(metric="eval_f1_weighted", mode="max")
             logger.info(f"Best trial : {best_trial}")
             if best_trial is None:
                 logger.error("No successful trials found. Please check the training process and metric logging.")
@@ -335,14 +338,10 @@ class TrainMultiLabelPipeline:
             #TODO : Check Julien's article about how to implement that (ask him about the threholding optimization)
             logger.info(f"Final training...")
             start_time=perf_counter()
-            model=AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(self.labels))
+            model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(self.labels),problem_type="multi_label_classification")
             #model.gradient_checkpointing_enable()
 
-            if self.classification_type is not None:
-                output_dir=os.path.join(CONFIG["output_dir"], self.classification_type + "_"  + self.loss_type + "_" + model_name + str((fold_idx+1)))
-            else :
-                #TODO : change this
-                output_dir=os.path.join(CONFIG["output_dir"], self.loss_type  + "_" + str((fold_idx+1)))
+            output_dir=os.path.join(CONFIG["output_dir"], self.loss_type  + "_" + str((fold_idx+1)))
 
             # Set up training arguments
             training_args = CustomTrainingArguments(
@@ -351,6 +350,7 @@ class TrainMultiLabelPipeline:
                     data_seed=CONFIG["seed"],
                     **CONFIG["default_training_args"],
                     loss_type=self.loss_type,
+                    multi_label=True,
                 )
             
             training_args.pos_weight = best_config["pos_weight"] if self.loss_type == "BCE" else None
@@ -362,6 +362,11 @@ class TrainMultiLabelPipeline:
 
             training_args.gradient_accumulation_steps = best_config.get("gradient_accumulation_steps", 1)
 
+            early_stopping_callback = EarlyStoppingCallback(
+                early_stopping_patience=3,
+                early_stopping_threshold=0.01,
+            )
+
             #TODO : Impelement early stopping !!
             trainer = CustomTrainer(
                 model=model,
@@ -371,6 +376,7 @@ class TrainMultiLabelPipeline:
                 data_collator=data_collator,
                 compute_metrics=multi_label_compute_metrics,
                 tokenizer=tokenizer,
+                callbacks=[early_stopping_callback],
             )
 
             logger.info(f"training size : {len(tokenized_train)}")
@@ -378,6 +384,7 @@ class TrainMultiLabelPipeline:
 
             metrics = trainer.train().metrics
 
+            #TODO : Early stopping here ?
             eval_results_dev=trainer.evaluate()
 
             end_time_train=perf_counter()
@@ -409,14 +416,14 @@ class TrainMultiLabelPipeline:
             
             scores = 1 / (1 + np.exp(-predictions.predictions.squeeze()))
             preds = (scores > 0.5).astype(int)
-            res1=multi_label_detailed_metrics(preds, test_split.select_columns(self.labels))
-
+            res1=multi_label_detailed_metrics(preds, test_split.select_columns(self.labels).to_pandas().to_numpy())
+            results.append(res1)
             #We update the results dataframe
             self.result_metrics = pd.concat([
                 self.result_metrics,
                 pd.DataFrame([{
                     "model_name": model_name,
-                    "data_type": self.classification_type,
+                    "data_type": None,
                     "loss_type": self.loss_type,
                     "fold": fold_idx,
                     "run": self.run_idx, 
@@ -426,14 +433,6 @@ class TrainMultiLabelPipeline:
 
             #TODO: Implement the follwing for multi-label (like the covid paper)
             #plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
-            #plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
-
-            #! The following seems weird. we are talking about decision here. View it like a ranking problem. take a perspective for usage
-            thresholds = eval_results_dev["eval_optim_threshold"]
-            logger.info(f"\nOn test Set (optimal threshold of {thresholds} according to cross validation on the training set): ")
-            preds = (scores > thresholds).astype(int)
-            res2=multi_label_detailed_metrics(preds, test_split["labels"])
-            results.append(res2)
             #plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
 
             logger.info(f"Results for fold {fold_idx+1} : {results}")
@@ -474,7 +473,7 @@ class TrainMultiLabelPipeline:
                 clear_cuda_cache() 
 
                 scores_by_model.append(scores_by_fold)
-                logger.info(f"Metrics for {model_name}: {self.result_metrics[(self.result_metrics['data_type'] == self.classification_type) & (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == model_name)]}")
+                logger.info(f"Metrics for {model_name}: {self.result_metrics[ (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == model_name)]}")
 
 
             avg_ensemble_metrics=self.ensemble_pred(scores_by_model)
@@ -491,8 +490,9 @@ class TrainMultiLabelPipeline:
         #Then we can take the majority vote
         logger.info(f"score by model shape (before ensembling): {np.array(scores_by_model).shape}")
         scores_by_model=np.array(scores_by_model)
-        scores_by_fold= scores_by_model.transpose(1, 0, 2)
+        scores_by_fold= scores_by_model.transpose(1, 0, 2, 3)
 
+        metrics_by_fold=[]
         for fold_idx in range(len(self.folds)):
             avg_models_scores=np.mean(scores_by_fold[fold_idx],axis=0)
             logger.info(f"\nfold number {fold_idx+1} / {len(self.folds)}")
@@ -501,14 +501,14 @@ class TrainMultiLabelPipeline:
             test_split = self.dataset.select(test_indices)
 
             preds = (avg_models_scores > 0.5).astype(int)
-            result=multi_label_detailed_metrics(preds, test_split.select_columns(self.labels))
-
+            result=multi_label_detailed_metrics(preds, test_split.select_columns(self.labels).to_pandas().to_numpy())
+            metrics_by_fold.append(result)
             #We update the results dataframe
             self.result_metrics = pd.concat([
                 self.result_metrics,
                 pd.DataFrame([{
                     "model_name": "Ensemble",
-                    "data_type": self.classification_type,
+                    "data_type": None,
                     "loss_type": self.loss_type,
                     "fold": fold_idx,
                     "run": self.run_idx,
@@ -519,12 +519,12 @@ class TrainMultiLabelPipeline:
          # Group by relevant columns and calculate mean metrics
         avg_metrics = self.result_metrics.groupby(
             ["data_type", "loss_type", "model_name", "run"]
-        )[["f1", "recall", "precision", "accuracy"]].mean().reset_index()
+        )[[key for key in metrics_by_fold[0]]].mean().reset_index()
 
         # Filter metrics for the current data_type and loss_type
         filtered_metrics = avg_metrics[
             (avg_metrics["model_name"]=="Ensemble") &
-            (avg_metrics["data_type"] == self.classification_type) &
+            (avg_metrics["data_type"] == None) &
             (avg_metrics["loss_type"] == self.loss_type)
         ]
 
@@ -532,100 +532,99 @@ class TrainMultiLabelPipeline:
 
     def whole_pipeline(self):
 
-        classification_types= ["SUA", "IAS", "VA"]
         loss_type_list=["BCE","focal"]
 
-        for classification_type in classification_types:
-            self.classification_type=classification_type
-            self.data_loading()
-            self.result_metrics["data_type"] = classification_type
-            for loss_type in loss_type_list:
-                self.loss_type=loss_type
-                for i in range(self.num_runs):
-                    self.run_idx=i+1
-                    logger.info(f"Run no {i+1}/{self.num_runs}")
-                    logger.info(f"Running pipeline for {classification_type}")
-                    logger.info(f"Loss Type : {loss_type}")
-                    avg_ens_metrics=self.run_pipeline()
-                    logger.info(f"Ensemble metrics for {classification_type} run no. {i+1}: {avg_ens_metrics}")
-                    logger.info(f"Metrics dataframe at {classification_type} run no. {i+1}: {self.dataset}")
-                self.store_metrics()
+        self.data_loading()
+        for loss_type in loss_type_list:
+            self.loss_type=loss_type
+            for i in range(self.num_runs):
+                self.run_idx=i+1
+                logger.info(f"Run no {i+1}/{self.num_runs}")
+                logger.info(f"Loss Type : {loss_type}")
+                avg_ens_metrics=self.run_pipeline()
+                logger.info(f"Ensemble metrics for run no. {i+1}: {avg_ens_metrics}")
+                logger.info(f"Metrics dataframe for run no. {i+1}: {self.dataset}")
+            self.store_metrics()
         return self.result_metrics
 
-    def store_metrics(self,path="/home/leandre/Projects/BioMoQA_Playground/metrics"):
+    def store_metrics(self,path="/home/leandre/Projects/BioMoQA_Playground/multi_labels_metrics.csv"):
         if self.result_metrics is not None:
             self.result_metrics.to_csv(path)
         else:
             raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
     
-    def baselines(self):
-        pass
+    def svm_baseline(self):
+
+        svm = SVC(kernel="rbf", gamma=0.5, C=1.0)
+        svm.fit(X, y)
 
     def plot_models_actual_perfs(self,comp_loss=False, plot_name="models_metrics_comp"):
         #TODO : Compare perfs with a baseline pre-trained model and an SVM (add functions for this)
         """
         Plots metrics distribution across runs for the last configuration/training.
         """
-        # Group by relevant columns and calculate mean metrics
-        avg_metrics = self.result_metrics.groupby(
-            ["data_type", "loss_type", "model_name", "run"]
-        )[["f1", "recall", "precision", "accuracy"]].mean().reset_index()
-
-        # Filter metrics for the current data_type and loss_type
-        if comp_loss:
-            filtered_metrics = avg_metrics[
-                (avg_metrics["data_type"] == self.classification_type)
+        for data_type in self.labels:
+            # Group by relevant columns and calculate mean metrics
+            avg_metrics = self.result_metrics.groupby(
+                ["data_type", "loss_type", "model_name", "run"]
+            )[[
+                'f1_SUA', 'f1_VA', 'f1_weighted', 'f1_macro', 'f1_micro', 'recall_IAS', 'recall_SUA', 'recall_VA', 'recall_weighted', 'recall_macro', 'recall_micro', 'precision_IAS', 'precision_SUA', 'precision_VA', 'precision_weighted', 'precision_macro','precision_micro'
+               ]].mean().reset_index()
+            # Filter metrics for the current data_type and loss_type
+            if comp_loss:
+                filtered_metrics = avg_metrics[
+                    (avg_metrics["data_type"] == data_type)
+                ]
+            else:
+                filtered_metrics = avg_metrics[
+                (avg_metrics["data_type"] == data_type) &
+                (avg_metrics["loss_type"] == self.loss_type)
             ]
-        else:
-            filtered_metrics = avg_metrics[
-            (avg_metrics["data_type"] == self.classification_type) &
-            (avg_metrics["loss_type"] == self.loss_type)
-        ]
 
-        # Create a boxplot for each metric
-        melted_metrics = filtered_metrics.melt(
-            id_vars=["loss_type","model_name"], 
-            value_vars=["f1", "recall", "precision", "accuracy"],
-            var_name="Metric", 
-            value_name="Value"
-        )
-        
-        if comp_loss:
-            sns.catplot(
-                data=melted_metrics, 
-                x="model_name", 
-                y="Value",
-                row="Metric",
-                hue="loss_type", 
-                kind="box", 
-                height=6, 
-                aspect=2,
-                sharey=False
-            )
-        else :
-            sns.catplot(
-                data=melted_metrics, 
-                x="model_name", 
-                y="Value",
-                row="Metric",
-                kind="box", 
-                height=6, 
-                aspect=2,
-                sharey=False
+            # Create a boxplot for each metric
+            melted_metrics = filtered_metrics.melt(
+                id_vars=["loss_type","model_name"], 
+                value_vars=["f1", "recall", "precision", "accuracy"],
+                var_name="Metric", 
+                value_name="Value"
             )
             
-        plt.tight_layout()
-        plt.show()
-        if comp_loss:
-            plt.savefig(os.path.join(CONFIG["plot_dir"],"results",self.classification_type + "_" + "all_loss" + "_" + plot_name))
-        else:
-            plt.savefig(os.path.join(CONFIG["plot_dir"],"results",self.classification_type + "_" +self.loss_type + "_" + plot_name))
+            if comp_loss:
+                sns.catplot(
+                    data=melted_metrics, 
+                    x="model_name", 
+                    y="Value",
+                    row="Metric",
+                    hue="loss_type", 
+                    kind="box", 
+                    height=6, 
+                    aspect=2,
+                    sharey=False
+                )
+            else :
+                sns.catplot(
+                    data=melted_metrics, 
+                    x="model_name", 
+                    y="Value",
+                    row="Metric",
+                    kind="box", 
+                    height=6, 
+                    aspect=2,
+                    sharey=False
+                )
+                
+            plt.tight_layout()
+            plt.show()
+            if comp_loss:
+                plt.savefig(os.path.join(CONFIG["plot_dir"],"results",data_type + "_" + "all_loss" + "_" + plot_name))
+            else:
+                plt.savefig(os.path.join(CONFIG["plot_dir"],"results",data_type + "_" +self.loss_type + "_" + plot_name))
 
 
 if __name__ == "__main__":
     begin_pipeline=perf_counter()
     ray.init(num_gpus=torch.cuda.device_count())
-    pipeline=TrainMultiLabelPipeline(None,ensemble=True,n_fold=2,n_trials=2,num_runs=2,model_names=["dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"])
+    pipeline=TrainMultiLabelPipeline(None,ensemble=True,n_fold=2,n_trials=1,num_runs=2)
     pipeline.whole_pipeline()
     torch.cuda.empty_cache()  # Clear CUDA cache after pipeline
     clear_cuda_cache()  # Log memory usage

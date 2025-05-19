@@ -1,4 +1,4 @@
-from optimization_cross_val import *
+from model.multi_label_pipeline import *
 from utils import *
 import sys
 import datasets
@@ -43,7 +43,6 @@ def balance_dataset(dataset):
     - Renames the abstract column -> we should not hqve to do that 
     """
 
-     
     def is_label(batch,label):
         batch_bools=[]
         for ex_label in batch['labels']:
@@ -521,7 +520,7 @@ class TrainPipeline:
             self.plot_models_actual_perfs(comp_loss=True)
         return self.result_metrics
 
-    def store_metrics(self,path="/home/leandre/Projects/BioMoQA_Playground/metrics.csv"):
+    def store_metrics(self,path="/home/leandre/Projects/BioMoQA_Playground/binary_metrics.csv"):
         if self.result_metrics is not None:
             self.result_metrics.to_csv(path)
         else:

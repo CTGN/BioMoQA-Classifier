@@ -42,16 +42,15 @@ def multi_label_compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dic
     #TODO : print the size of logits to be sure that we compute the metrics in the right way
     logits, labels = eval_pred
     scores = 1 / (1 + np.exp(-logits.squeeze())) 
+    logger.info(f"Logits shape : {logits.shape} and logits squeeze shape : {logits.squeeze().shape}")
 
     predictions = (scores > 0.5).astype(int)
-    f1={"f1":f1_score(labels,predictions,average="weighted")}
-    recall={"recall":recall_score(labels,predictions,average="weighted")}
-    accuracy = {"accuracy":accuracy_score(labels,predictions)} or {}
-    precision = {"precision":precision_score(labels,predictions,average="weighted")} or {}
-
-    optimal_thresholds = (plot_roc_curve(labels[:][i], scores[:][i], logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val") for i in range(scores.shape[-1]) )
+    f1={"f1_weighted":f1_score(labels,predictions,average="weighted")}
+    recall={"recall_weighted":recall_score(labels,predictions,average="weighted")}
+    accuracy = {"accuracy":accuracy_score(labels,predictions)}
+    precision = {"precision_weighted":precision_score(labels,predictions,average="weighted")}
     
-    return {**f1, **recall, **precision, **accuracy, "optim_threshold": optimal_thresholds}
+    return {**f1, **recall, **precision, **accuracy}
 
 
 class LossPlottingCallback(TrainerCallback):
@@ -83,9 +82,11 @@ class LossPlottingCallback(TrainerCallback):
 
 
 class CustomTrainingArguments(TrainingArguments):
-    def __init__(self,loss_type: str,pos_weight: Optional[float] = None,alpha: Optional[float] = None,gamma: Optional[float] = None,*args,**kwargs):
+    #TODO : make multi label a mandatory arg
+    def __init__(self,loss_type: str,multi_label: Optional[bool] = False,pos_weight: Optional[float] = None,alpha: Optional[float] = None,gamma: Optional[float] = None,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.loss_type = loss_type
+        self.multi_label=multi_label
 
         if loss_type == "BCE":
             if pos_weight is None:
@@ -115,11 +116,13 @@ class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs: bool = False,num_items_in_batch=None):
         labels = inputs.pop("labels")
         outputs = model(**inputs)
-        logits = outputs.logits.view(-1)
+        if self.args.multi_label:
+            logits = outputs.logits
+        else:
+            logits = outputs.logits.view(-1)
         
         if self.args.loss_type == "BCE":
-            pos_weight=self.args.pos_weight
-            pos_weight=torch.tensor(pos_weight,device=self.model.device)
+            pos_weight=torch.tensor(self.args.pos_weight,device=self.model.device)
             loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
             loss = loss_fn(logits, labels.float())
         elif self.args.loss_type == "focal":

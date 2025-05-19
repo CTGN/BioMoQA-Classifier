@@ -128,7 +128,6 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols):
     """
     Unify all positives with the negative data and add a label for each positive type (3 in our case)
     """
-
     
     # 1. Create sets of abstracts for each positive dataset
     abstract_sets = [set(ds["abstract"]) for ds in pos_ds_list]
