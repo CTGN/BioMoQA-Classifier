@@ -5,15 +5,28 @@ build/
 dist/
 wheels/
 *.egg-info
-results/
-model/ray_results/
-model/saved_checkpoint/
-final_model/
-data/corpus/
-data/__pycache__/
-model/__pycache__/
-nohup.out
+
+data/
+src/__pycache__
+src/data_pipeline/__pycache__
+src/data_pipeline/biomoqa/__pycache__
+src/data_pipeline/ipbes/__pycache__
+src/models/__pycache__
+src/models/biomoqa/__pycache__
+src/models/ipbes/__pycache__
+src/utils/__pycache__
+
+results/biomoqa/models
+results/biomoqa/ray_results
+results/biomoqa/final_model
+
+results/ipbes/models
+results/ipbes/ray_results
+results/ipbes/final_model
+
 plots/
+
+nohup.out
 
 
 # Virtual environments
