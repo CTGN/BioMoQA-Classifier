@@ -1,0 +1,13 @@
+,model_name,fold,loss_type,run,with_title,with_keywords,f1,recall,precision,accuracy
+0,dmis-lab/biobert-v1.1,1,BCE,1,True,True,0.9968454258675079,0.9937106918238994,1.0,0.9996239187664535
+1,dmis-lab/biobert-v1.1,2,BCE,1,True,True,0.9968454258675079,0.9937106918238994,1.0,0.9996239187664535
+2,google-bert/bert-base-uncased,1,BCE,1,True,True,0.9937106918238994,0.9937106918238994,0.9937106918238994,0.9992478375329071
+3,google-bert/bert-base-uncased,2,BCE,1,True,True,1.0,1.0,1.0,1.0
+4,Ensemble,1,BCE,1,True,True,0.9968454258675079,0.9937106918238994,1.0,0.9996239187664535
+5,Ensemble,2,BCE,1,True,True,1.0,1.0,1.0,1.0
+6,dmis-lab/biobert-v1.1,1,focal,1,True,True,1.0,1.0,1.0,1.0
+7,dmis-lab/biobert-v1.1,2,focal,1,True,True,1.0,1.0,1.0,1.0
+8,google-bert/bert-base-uncased,1,focal,1,True,True,1.0,1.0,1.0,1.0
+9,google-bert/bert-base-uncased,2,focal,1,True,True,1.0,1.0,1.0,1.0
+10,Ensemble,1,focal,1,True,True,1.0,1.0,1.0,1.0
+11,Ensemble,2,focal,1,True,True,1.0,1.0,1.0,1.0
