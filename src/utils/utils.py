@@ -26,13 +26,13 @@ import os
 import seaborn as sns
 import smtplib
 from email.mime.text import MIMEText
-from sklearn.metrics import make_scorer,f1_score,accuracy_score,recall_score,precision_score
+from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score,cohen_kappa_score
 from src.config import CONFIG
 
 
 logger = logging.getLogger(__name__)
 
-def detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Dict[str, float]:
+def detailed_metrics(predictions: np.ndarray, labels: np.ndarray,scores =None) -> Dict[str, float]:
     """Compute and display detailed metrics including confusion matrix."""
     cm = confusion_matrix(labels, predictions, labels=[0, 1])
     tn, fp, fn, tp = cm.ravel()
@@ -47,7 +47,12 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray) -> Dict[str, f
         **(evaluate.load("f1").compute(predictions=predictions, references=labels) or {}),
         **(evaluate.load("recall").compute(predictions=predictions, references=labels) or {}),
         **(evaluate.load("precision").compute(predictions=predictions, references=labels) or {}),
-        **(evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {})
+        **(evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {}),
+        "AP":average_precision_score(labels,scores,average="weighted") if scores is not None else {},
+        "MCC":matthews_corrcoef(labels,predictions),
+        "NDCG":ndcg_score(np.asarray(labels).reshape(1, -1),scores.reshape(1, -1)) if scores is not None else {},
+        "kappa":cohen_kappa_score(labels,predictions),
+        'TN':tn, 'FP':fp, 'FN':fn, "TP":tp
     }
     
     logger.info(f"Metrics: {metrics}")

@@ -147,6 +147,7 @@ def loading_pipeline(fetch=False):
     logger.info(f"Loading original negatives...")
     negatives_df = pd.read_csv("/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/negatives.csv")
     negatives_df["labels"] = 0
+    negatives_df["Keywords"]=""
     logger.info(f"Negatives column names: {negatives_df.columns.tolist()}")
 
     logger.info(f"Loading original positives...")
@@ -158,7 +159,7 @@ def loading_pipeline(fetch=False):
     # Combine datasets
     og_dataset = pd.concat([positive_df, negatives_df], axis=0)
     og_dataset = og_dataset.sample(frac=1, random_state=42).reset_index(drop=True)
-
+    
     logger.info(f"Class balance:\n{og_dataset['labels'].value_counts()}")
     logger.info(og_dataset.head())
     logger.info(f"Original dataset size: {len(og_dataset)}")

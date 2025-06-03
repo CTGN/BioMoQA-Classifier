@@ -19,10 +19,12 @@ src/utils/__pycache__
 results/biomoqa/models
 results/biomoqa/ray_results
 results/biomoqa/final_model
+results/biomoqa/test preds
 
 results/ipbes/models
 results/ipbes/ray_results
 results/ipbes/final_model
+results/ipbes/test preds
 
 plots/
 

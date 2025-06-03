@@ -1,26 +1,26 @@
-2025-06-02 11:02:01,161	INFO worker.py:1843 -- Started a local Ray instance. View the dashboard at [1m[32mhttp://127.0.0.1:8265 [39m[22m
-2025-06-02 11:02:01,936 - INFO - Random seeds set to 42
-2025-06-02 11:02:02,043 - INFO - Optional negatives loaded from CSV with 5000 entries.
-2025-06-02 11:02:02,043 - INFO - Loading original negatives...
-2025-06-02 11:02:02,053 - INFO - Negatives column names: ['Article ID', 'Title', 'Author', 'Publication year', 'Title secondary', 'URL', 'DOI', 'Abstract', 'Criteria for exclusion', 'labels']
-2025-06-02 11:02:02,053 - INFO - Loading original positives...
-2025-06-02 11:02:02,071 - INFO - Positives column names: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'labels']
-2025-06-02 11:02:02,077 - INFO - Class balance:
+2025-06-03 16:58:49,007	INFO worker.py:1843 -- Started a local Ray instance. View the dashboard at [1m[32mhttp://127.0.0.1:8265 [39m[22m
+2025-06-03 16:58:49,741 - INFO - Random seeds set to 42
+2025-06-03 16:58:49,851 - INFO - Optional negatives loaded from CSV with 5000 entries.
+2025-06-03 16:58:49,851 - INFO - Loading original negatives...
+2025-06-03 16:58:49,861 - INFO - Negatives column names: ['Article ID', 'Title', 'Author', 'Publication year', 'Title secondary', 'URL', 'DOI', 'Abstract', 'Criteria for exclusion A', ' Criteria for exclusion B', ' Criteria for exclusion C', 'labels', 'Keywords']
+2025-06-03 16:58:49,861 - INFO - Loading original positives...
+2025-06-03 16:58:49,881 - INFO - Positives column names: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'labels']
+2025-06-03 16:58:49,887 - INFO - Class balance:
 labels
 1    326
 0    123
 Name: count, dtype: int64
-2025-06-02 11:02:02,078 - INFO -     Article ID  ... Criteria for exclusion
-0        12959  ...                    NaN
-1        13470  ...                    NaN
-2         4686  ...                    NaN
-3  Diver, K.C.  ...                    NaN
-4         2951  ...                    NaN
+2025-06-03 16:58:49,887 - INFO -    Article ID  ...  Criteria for exclusion C
+0       12959  ...                       NaN
+1       13470  ...                       NaN
+2        4686  ...                       NaN
+3        2503  ...                       NaN
+4        2951  ...                       NaN
 
-[5 rows x 42 columns]
-2025-06-02 11:02:02,105 - INFO - Original dataset size: 449
-2025-06-02 11:02:02,105 - INFO - Optional negatives size: 5000
-2025-06-02 11:02:02,110 - INFO - Optional negatives:                                                title  ... labels
+[5 rows x 44 columns]
+2025-06-03 16:58:49,914 - INFO - Original dataset size: 449
+2025-06-03 16:58:49,914 - INFO - Optional negatives size: 5000
+2025-06-03 16:58:49,920 - INFO - Optional negatives:                                                title  ... labels
 0  Towards evidence-based conservation of subterr...  ...     -1
 1                  Marine biodiversity conservation.  ...     -1
 2  Climate teleconnections modulate global burned...  ...     -1
@@ -28,136 +28,1051 @@ Name: count, dtype: int64
 4  Principle, technique and application of grassl...  ...     -1
 
 [5 rows x 7 columns]
-2025-06-02 11:02:02,113 - INFO - Combined dataset size: 5449
-2025-06-02 11:02:02,117 - INFO -                                                title  ... labels
+2025-06-03 16:58:49,923 - INFO - Combined dataset size: 449
+2025-06-03 16:58:49,928 - INFO -                                                title  ... labels
 0  Feral pig (Sus scrofa) disturbance facilitates...  ...      1
 1  Effects of woody plant diversity on abovegroun...  ...      1
 2  Scaling species richness and endemism of tropi...  ...      1
-3                                               2008  ...      0
+3  Not as the crow flies: Assessing effective iso...  ...      0
 4  Species-group concepts and biogeography of the...  ...      1
 
 [5 rows x 5 columns]
-2025-06-02 11:02:02,119 - INFO - title         0
-abstract     49
-Keywords    131
-doi         112
-labels        0
+2025-06-03 16:58:49,929 - INFO - title        0
+abstract     0
+Keywords     8
+doi         36
+labels       0
 dtype: int64
-2025-06-02 11:02:02,153 - INFO - Total duplicate abstracts: 0
-2025-06-02 11:02:02,155 - INFO - Empty DataFrame
+2025-06-03 16:58:49,931 - INFO - Total duplicate abstracts: 0
+2025-06-03 16:58:49,933 - INFO - Empty DataFrame
 Columns: [abstract, labels, Keywords]
 Index: []
-2025-06-02 11:02:02,188 - INFO - Abstracts appearing in both classes: 0
-2025-06-02 11:02:02,188 - INFO - Empty DataFrame
+2025-06-03 16:58:49,935 - INFO - Abstracts appearing in both classes: 0
+2025-06-03 16:58:49,935 - INFO - Empty DataFrame
+Columns: [title, labels]
+Index: []
+2025-06-03 16:58:49,937 - INFO - Total duplicate abstracts: 0
+2025-06-03 16:58:49,938 - INFO - Empty DataFrame
+Columns: [abstract, labels, Keywords]
+Index: []
+2025-06-03 16:58:49,944 - INFO - Abstracts appearing in both classes: 0
+2025-06-03 16:58:49,944 - INFO - Empty DataFrame
+Columns: [abstract, labels]
+Index: []
+2025-06-03 16:58:49,945 - INFO - Total duplicate abstracts: 18
+2025-06-03 16:58:49,950 - INFO -                                               abstract  ...                                           Keywords
+147  1. How could identical species appear in widel...  ...                                                   
+253  Aims\r\n Developing plant conservation strateg...  ...  AFLP; genetic diversity; Indian Ocean; limited...
+206  Aims Developing plant conservation strategies ...  ...  AFLP; Genetic diversity; Indian Ocean; Limited...
+217  Coastal lagoons are considered one of the most...  ...                                                   
+213  Coastal lagoons are considered one of the most...  ...                                                   
+21   Distribution patterns of indigenous non-volant...  ...  Australian islands; Extreme-value function; Is...
+300  Distribution patterns of indigenous non-volant...  ...  island mammals; Australian islands; species-ar...
+197  Invasive plant species pose serious threats to...  ...                                                   
+35   Island bat species are disproportionately at r...  ...  Hawaiian hoary bat; Hawai?i; Population geneti...
+157  Island bat species are disproportionately at r...  ...  Bats; Endangered species; Hawai<sup>‘</sup>i; ...
+126  Islands are hotspots of biodiversity and extin...  ...  Deforestation; Endemicity; Extinction; Island ...
+276  Islands are hotspots of biodiversity and extin...  ...  Deforestation; Endemicity; Extinction; Island ...
+364  KELLY, A. B. (Department of Environmental Scie...  ...                                                   
+329  Summary o 1. How could identical species appea...  ...                                                   
+278  The Galapagos Islands are recognized for their...  ...                                                   
+149  The Galápagos Islands are recognized for their...  ...                                                   
+313  Working in the Galapagos Islands and surroundi...  ...                                                   
+280  Working in the Galápagos Islands and surroundi...  ...                                                   
+
+[18 rows x 3 columns]
+2025-06-03 16:58:49,952 - INFO - Abstracts appearing in both classes: 0
+2025-06-03 16:58:49,952 - INFO - Empty DataFrame
 Columns: [doi, labels]
 Index: []
-2025-06-02 11:02:02,458 - INFO - Cleaned dataset size: 5318
-2025-06-02 11:02:02,462 - INFO - Fold 1:
-2025-06-02 11:02:02,463 - INFO -   Train label distribution: {-1: 0.9402030838661151, 1: 0.05979691613388492}
-2025-06-02 11:02:02,463 - INFO -   Test label distribution: {-1: 0.9402030838661151, 1: 0.05979691613388492}
-2025-06-02 11:02:02,464 - INFO - Fold 2:
-2025-06-02 11:02:02,464 - INFO -   Train label distribution: {-1: 0.9402030838661151, 1: 0.05979691613388492}
-2025-06-02 11:02:02,464 - INFO -   Test label distribution: {-1: 0.9402030838661151, 1: 0.05979691613388492}
-Stringifying the column:   0%|          | 0/5318 [00:00<?, ? examples/s]Stringifying the column: 100%|██████████| 5318/5318 [00:00<00:00, 192627.56 examples/s]
-Casting to class labels:   0%|          | 0/5318 [00:00<?, ? examples/s]Casting to class labels: 100%|██████████| 5318/5318 [00:00<00:00, 198285.27 examples/s]
-2025-06-02 11:02:02,598 - INFO - Pipeline for loss type None and ensemble=True
-2025-06-02 11:02:02,598 - INFO - with_title : True
-2025-06-02 11:02:02,598 - INFO - with_keywords : True
-2025-06-02 11:02:02,598 - INFO - Run no 1/1
-2025-06-02 11:02:02,598 - INFO - Kernel : linear
-2025-06-02 11:02:02,599 - INFO - 
-fold number 1 / 2
-2025-06-02 11:02:02,603 - INFO - train+dev split size : 2659
-2025-06-02 11:02:02,603 - INFO - test split size : 2659
-2025-06-02 11:02:04,559 - INFO - X shape : (2127, 10000)
-2025-06-02 11:02:04,559 - INFO - y shape : (2127,)
-2025-06-02 11:02:12,870 - INFO - Confusion matrix: TN=2499, FP=1, FN=30, TP=129
-2025-06-02 11:02:15,735 - INFO - Metrics: {'f1': 0.8927335640138409, 'recall': 0.8113207547169812, 'precision': 0.9923076923076923, 'accuracy': 0.9883414817600602}
-2025-06-02 11:02:15,735 - INFO - Concatenating...
-2025-06-02 11:02:15,738 - INFO - 
-fold number 2 / 2
-2025-06-02 11:02:15,743 - INFO - train+dev split size : 2659
-2025-06-02 11:02:15,743 - INFO - test split size : 2659
-2025-06-02 11:02:17,678 - INFO - X shape : (2127, 10000)
-2025-06-02 11:02:17,678 - INFO - y shape : (2127,)
-2025-06-02 11:02:25,831 - INFO - Confusion matrix: TN=2500, FP=0, FN=20, TP=139
-2025-06-02 11:02:28,702 - INFO - Metrics: {'f1': 0.9328859060402684, 'recall': 0.8742138364779874, 'precision': 1.0, 'accuracy': 0.9924783753290711}
-2025-06-02 11:02:28,702 - INFO - Concatenating...
-2025-06-02 11:02:28,710 - INFO - Run no 1/1
-2025-06-02 11:02:28,710 - INFO - Kernel : rbf
-2025-06-02 11:02:28,710 - INFO - 
-fold number 1 / 2
-2025-06-02 11:02:28,715 - INFO - train+dev split size : 2659
-2025-06-02 11:02:28,715 - INFO - test split size : 2659
-2025-06-02 11:02:30,697 - INFO - X shape : (2127, 10000)
-2025-06-02 11:02:30,697 - INFO - y shape : (2127,)
-2025-06-02 11:02:49,155 - INFO - Confusion matrix: TN=2500, FP=0, FN=46, TP=113
-2025-06-02 11:02:52,094 - INFO - Metrics: {'f1': 0.8308823529411765, 'recall': 0.710691823899371, 'precision': 1.0, 'accuracy': 0.9827002632568634}
-2025-06-02 11:02:52,094 - INFO - Concatenating...
-2025-06-02 11:02:52,097 - INFO - 
-fold number 2 / 2
-2025-06-02 11:02:52,102 - INFO - train+dev split size : 2659
-2025-06-02 11:02:52,102 - INFO - test split size : 2659
-2025-06-02 11:02:54,061 - INFO - X shape : (2127, 10000)
-2025-06-02 11:02:54,061 - INFO - y shape : (2127,)
-2025-06-02 11:03:10,730 - INFO - Confusion matrix: TN=2500, FP=0, FN=40, TP=119
-2025-06-02 11:03:13,815 - INFO - Metrics: {'f1': 0.8561151079136691, 'recall': 0.7484276729559748, 'precision': 1.0, 'accuracy': 0.9849567506581421}
-2025-06-02 11:03:13,816 - INFO - Concatenating...
-2025-06-02 11:03:13,823 - INFO - Run no 1/1
-2025-06-02 11:03:13,824 - INFO - Kernel : poly
-2025-06-02 11:03:13,824 - INFO - 
-fold number 1 / 2
-2025-06-02 11:03:13,828 - INFO - train+dev split size : 2659
-2025-06-02 11:03:13,829 - INFO - test split size : 2659
-2025-06-02 11:03:15,796 - INFO - X shape : (2127, 10000)
-2025-06-02 11:03:15,796 - INFO - y shape : (2127,)
-2025-06-02 11:03:53,770 - INFO - Confusion matrix: TN=2500, FP=0, FN=140, TP=19
-2025-06-02 11:03:56,629 - INFO - Metrics: {'f1': 0.21348314606741572, 'recall': 0.11949685534591195, 'precision': 1.0, 'accuracy': 0.9473486273034976}
-2025-06-02 11:03:56,629 - INFO - Concatenating...
-2025-06-02 11:03:56,632 - INFO - 
-fold number 2 / 2
-2025-06-02 11:03:56,637 - INFO - train+dev split size : 2659
-2025-06-02 11:03:56,637 - INFO - test split size : 2659
-2025-06-02 11:03:58,643 - INFO - X shape : (2127, 10000)
-2025-06-02 11:03:58,643 - INFO - y shape : (2127,)
-2025-06-02 11:04:36,335 - INFO - Confusion matrix: TN=2500, FP=0, FN=145, TP=14
-2025-06-02 11:04:39,154 - INFO - Metrics: {'f1': 0.16184971098265896, 'recall': 0.0880503144654088, 'precision': 1.0, 'accuracy': 0.9454682211357653}
-2025-06-02 11:04:39,154 - INFO - Concatenating...
-2025-06-02 11:04:39,162 - INFO - Run no 1/1
-2025-06-02 11:04:39,162 - INFO - Kernel : sigmoid
-2025-06-02 11:04:39,162 - INFO - 
-fold number 1 / 2
-2025-06-02 11:04:39,167 - INFO - train+dev split size : 2659
-2025-06-02 11:04:39,167 - INFO - test split size : 2659
-2025-06-02 11:04:41,177 - INFO - X shape : (2127, 10000)
-2025-06-02 11:04:41,177 - INFO - y shape : (2127,)
-2025-06-02 11:04:47,992 - INFO - Confusion matrix: TN=2499, FP=1, FN=32, TP=127
-2025-06-02 11:04:50,843 - INFO - Metrics: {'f1': 0.8850174216027874, 'recall': 0.7987421383647799, 'precision': 0.9921875, 'accuracy': 0.9875893192929672}
-2025-06-02 11:04:50,843 - INFO - Concatenating...
-2025-06-02 11:04:50,845 - INFO - 
-fold number 2 / 2
-2025-06-02 11:04:50,850 - INFO - train+dev split size : 2659
-2025-06-02 11:04:50,850 - INFO - test split size : 2659
-2025-06-02 11:04:52,787 - INFO - X shape : (2127, 10000)
-2025-06-02 11:04:52,787 - INFO - y shape : (2127,)
-2025-06-02 11:04:59,562 - INFO - Confusion matrix: TN=2500, FP=0, FN=21, TP=138
-2025-06-02 11:05:02,792 - INFO - Metrics: {'f1': 0.9292929292929293, 'recall': 0.8679245283018868, 'precision': 1.0, 'accuracy': 0.9921022940955246}
-2025-06-02 11:05:02,792 - INFO - Concatenating...
-2025-06-02 11:05:02,803 - INFO - 
-fold number 1 / 2
-2025-06-02 11:05:02,808 - INFO - train+dev split size : 2659
-2025-06-02 11:05:02,808 - INFO - test split size : 2659
+2025-06-03 16:58:50,258 - INFO - Cleaned dataset size: 397
+2025-06-03 16:58:50,259 - INFO - Numnber of positives : 293
+2025-06-03 16:58:50,259 - INFO - Numnber of negatives : 104
+2025-06-03 16:58:50,260 - INFO - clean_og_df indices : RangeIndex(start=0, stop=397, step=1)
+2025-06-03 16:58:50,260 - INFO - opt_neg_df indices : Index([], dtype='int64')
+2025-06-03 16:58:50,265 - INFO - Fold 1:
+2025-06-03 16:58:50,265 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,265 - INFO -   Test label distribution: {1: 0.7368421052631579, 0: 0.2631578947368421}
+2025-06-03 16:58:50,268 - INFO - Fold 2:
+2025-06-03 16:58:50,268 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,269 - INFO -   Test label distribution: {1: 0.7424242424242424, 0: 0.25757575757575757}
+2025-06-03 16:58:50,271 - INFO - Fold 3:
+2025-06-03 16:58:50,271 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,272 - INFO -   Test label distribution: {1: 0.7348484848484849, 0: 0.26515151515151514}
+2025-06-03 16:58:50,275 - INFO - Fold 1:
+2025-06-03 16:58:50,275 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,275 - INFO -   Test label distribution: {1: 0.7368421052631579, 0: 0.2631578947368421}
+2025-06-03 16:58:50,278 - INFO - Fold 2:
+2025-06-03 16:58:50,278 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,278 - INFO -   Test label distribution: {1: 0.7424242424242424, 0: 0.25757575757575757}
+2025-06-03 16:58:50,281 - INFO - Fold 3:
+2025-06-03 16:58:50,281 - INFO -   Train label distribution: {1: 0.7373737373737373, 0: 0.26262626262626265}
+2025-06-03 16:58:50,281 - INFO -   Test label distribution: {1: 0.7348484848484849, 0: 0.26515151515151514}
+Stringifying the column:   0%|          | 0/397 [00:00<?, ? examples/s]Stringifying the column: 100%|██████████| 397/397 [00:00<00:00, 67499.24 examples/s]
+Casting to class labels:   0%|          | 0/397 [00:00<?, ? examples/s]Casting to class labels: 100%|██████████| 397/397 [00:00<00:00, 72205.83 examples/s]
+2025-06-03 16:58:50,314 - INFO - Number of positives : 293
+2025-06-03 16:58:50,315 - INFO - Number of negatives : 104
+2025-06-03 16:58:50,320 - INFO - Confusion matrix: TN=0, FP=35, FN=0, TP=98
+2025-06-03 16:58:53,491 - INFO - Metrics: {'f1': 0.8484848484848485, 'recall': 1.0, 'precision': 0.7368421052631579, 'accuracy': 0.7368421052631579, 'AP': 0.7368421052631579, 'MCC': 0.0, 'NDCG': 0.9189307109272616, 'kappa': 0.0, 'TN': 0, 'FP': 35, 'FN': 0, 'TP': 98}
+2025-06-03 16:58:53,496 - INFO - Confusion matrix: TN=35, FP=0, FN=98, TP=0
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+2025-06-03 16:58:56,415 - INFO - Metrics: {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.2631578947368421, 'AP': 0.7368421052631579, 'MCC': 0.0, 'NDCG': 0.9189307109272616, 'kappa': 0.0, 'TN': 35, 'FP': 0, 'FN': 98, 'TP': 0}
+2025-06-03 16:58:56,419 - INFO - Confusion matrix: TN=0, FP=34, FN=0, TP=98
+2025-06-03 16:58:59,590 - INFO - Metrics: {'f1': 0.8521739130434782, 'recall': 1.0, 'precision': 0.7424242424242424, 'accuracy': 0.7424242424242424, 'AP': 0.7424242424242424, 'MCC': 0.0, 'NDCG': 0.9208012714375936, 'kappa': 0.0, 'TN': 0, 'FP': 34, 'FN': 0, 'TP': 98}
+2025-06-03 16:58:59,594 - INFO - Confusion matrix: TN=34, FP=0, FN=98, TP=0
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+2025-06-03 16:59:03,527 - INFO - Metrics: {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.25757575757575757, 'AP': 0.7424242424242424, 'MCC': 0.0, 'NDCG': 0.9208012714375936, 'kappa': 0.0, 'TN': 34, 'FP': 0, 'FN': 98, 'TP': 0}
+2025-06-03 16:59:03,532 - INFO - Confusion matrix: TN=0, FP=35, FN=0, TP=97
+2025-06-03 16:59:06,448 - INFO - Metrics: {'f1': 0.8471615720524017, 'recall': 1.0, 'precision': 0.7348484848484849, 'accuracy': 0.7348484848484849, 'AP': 0.7348484848484849, 'MCC': 0.0, 'NDCG': 0.9181159076123374, 'kappa': 0.0, 'TN': 0, 'FP': 35, 'FN': 0, 'TP': 97}
+2025-06-03 16:59:06,451 - INFO - Confusion matrix: TN=35, FP=0, FN=97, TP=0
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+2025-06-03 16:59:09,229 - INFO - Metrics: {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.26515151515151514, 'AP': 0.7348484848484849, 'MCC': 0.0, 'NDCG': 0.9181159076123374, 'kappa': 0.0, 'TN': 35, 'FP': 0, 'FN': 97, 'TP': 0}
+2025-06-03 16:59:09,232 - INFO - Pipeline for loss type None and ensemble=True
+2025-06-03 16:59:09,232 - INFO - with_title : True
+2025-06-03 16:59:09,232 - INFO - with_keywords : True
+2025-06-03 16:59:09,233 - INFO - fold indexes for run no.1: [[159, 206, 117, 82, 317, 330, 131, 380, 183, 158, 213, 260, 155, 332, 303, 269, 40, 232, 314, 244, 168, 218, 254, 100, 3, 235, 105, 243, 352, 394, 196, 223, 230, 307, 342, 289, 135, 7, 189, 134, 78, 133, 12, 375, 109, 46, 62, 393, 167, 151, 387, 374, 276, 323, 132, 319, 114, 176, 322, 263, 258, 266, 250, 329, 309, 367, 24, 229, 370, 211, 228, 346, 115, 392, 87, 88, 81, 343, 253, 278, 43, 333, 28, 80, 191, 10, 378, 388, 225, 363, 136, 104, 356, 8, 57, 162, 220, 391, 139, 386, 282, 70, 61, 170, 102, 296, 64, 35, 4, 251, 279, 44, 373, 129, 236, 327, 187, 68, 245, 215, 18, 42, 116, 212, 376, 148, 126, 27, 252, 173, 103, 336, 209, 199, 169, 283, 32, 246, 292, 210, 247, 141, 73, 194, 59, 385, 354, 51, 305, 200, 344, 179, 178, 355, 313, 112, 291, 23, 328, 130, 315, 181, 138, 94, 95, 121, 207, 175, 295, 321, 34, 300, 262, 33, 341, 54, 299, 48, 30, 204, 123, 331, 301, 150, 157, 265, 14, 53, 396, 242, 377, 366, 93, 214, 83, 52, 6, 188], [177, 268, 97, 248, 298, 320, 224, 137, 161, 145, 339, 98, 39, 66, 17, 325, 226, 91, 348, 67, 55, 237, 273, 353, 381, 261, 31, 2, 290, 107, 38, 113, 120, 1, 222, 84, 358, 202, 63, 337, 92, 99, 144, 256, 19, 171, 219, 285, 274, 174, 118, 233, 156, 324, 284, 190, 255, 357, 205, 111, 72, 384, 294, 71, 163, 217], array([  0,   5,   9,  11,  13,  15,  16,  20,  21,  22,  25,  26,  29,
+        36,  37,  41,  45,  47,  49,  50,  56,  58,  60,  65,  69,  74,
+        75,  76,  77,  79,  85,  86,  89,  90,  96, 101, 106, 108, 110,
+       119, 122, 124, 125, 127, 128, 140, 142, 143, 146, 147, 149, 152,
+       153, 154, 160, 164, 165, 166, 172, 180, 182, 184, 185, 186, 192,
+       193, 195, 197, 198, 201, 203, 208, 216, 221, 227, 231, 234, 238,
+       239, 240, 241, 249, 257, 259, 264, 267, 270, 271, 272, 275, 277,
+       280, 281, 286, 287, 288, 293, 297, 302, 304, 306, 308, 310, 311,
+       312, 316, 318, 326, 334, 335, 338, 340, 345, 347, 349, 350, 351,
+       359, 360, 361, 362, 364, 365, 368, 369, 371, 372, 379, 382, 383,
+       389, 390, 395])]
+2025-06-03 16:59:09,233 - INFO - Run no 1/2
+2025-06-03 16:59:09,233 - INFO - Loss Type : BCE
+2025-06-03 16:59:09,233 - INFO - Ensemble learning pipeline
+2025-06-03 16:59:09,233 - INFO - Training model 1/2: dmis-lab/biobert-v1.1
+2025-06-03 16:59:09,494 - INFO - 
+fold number 1 / 3
+2025-06-03 16:59:09,499 - INFO - train split size : 198
+2025-06-03 16:59:09,500 - INFO - dev split size : 66
+2025-06-03 16:59:09,500 - INFO - test split size : 133
+Map (num_proc=32):   0%|          | 0/198 [00:00<?, ? examples/s]Map (num_proc=32):   4%|▎         | 7/198 [00:00<00:03, 57.16 examples/s]Map (num_proc=32):  24%|██▍       | 48/198 [00:00<00:00, 241.39 examples/s]Map (num_proc=32):  39%|███▉      | 78/198 [00:00<00:00, 257.09 examples/s]Map (num_proc=32):  58%|█████▊    | 114/198 [00:00<00:00, 270.39 examples/s]Map (num_proc=32):  76%|███████▌  | 150/198 [00:00<00:00, 286.15 examples/s]Map (num_proc=32):  94%|█████████▍| 186/198 [00:00<00:00, 298.22 examples/s]Map (num_proc=32): 100%|██████████| 198/198 [00:00<00:00, 246.16 examples/s]
+Map (num_proc=32):   0%|          | 0/66 [00:00<?, ? examples/s]Map (num_proc=32):   5%|▍         | 3/66 [00:00<00:02, 24.28 examples/s]Map (num_proc=32):  21%|██        | 14/66 [00:00<00:00, 64.00 examples/s]Map (num_proc=32):  33%|███▎      | 22/66 [00:00<00:00, 69.52 examples/s]Map (num_proc=32):  45%|████▌     | 30/66 [00:00<00:00, 72.13 examples/s]Map (num_proc=32):  61%|██████    | 40/66 [00:00<00:00, 76.51 examples/s]Map (num_proc=32):  76%|███████▌  | 50/66 [00:00<00:00, 76.93 examples/s]Map (num_proc=32):  94%|█████████▍| 62/66 [00:00<00:00, 89.16 examples/s]Map (num_proc=32): 100%|██████████| 66/66 [00:00<00:00, 70.61 examples/s]
+Map (num_proc=32):   0%|          | 0/133 [00:00<?, ? examples/s]Map (num_proc=32):   4%|▍         | 5/133 [00:00<00:02, 45.00 examples/s]Map (num_proc=32):  22%|██▏       | 29/133 [00:00<00:00, 141.55 examples/s]Map (num_proc=32):  43%|████▎     | 57/133 [00:00<00:00, 187.57 examples/s]Map (num_proc=32):  58%|█████▊    | 77/133 [00:00<00:00, 189.54 examples/s]Map (num_proc=32):  76%|███████▌  | 101/133 [00:00<00:00, 192.98 examples/s]Map (num_proc=32):  91%|█████████ | 121/133 [00:00<00:00, 186.13 examples/s]Map (num_proc=32): 100%|██████████| 133/133 [00:00<00:00, 156.33 examples/s]
+2025-06-03 16:59:14,285 - INFO - 3 datasets tokenized successfully
+2025-06-03 16:59:14,287 - INFO - Starting hyperparameter search for BCE loss
+[36m(train_hpo pid=3187778)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3187778)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3187778)[0m 2025-06-03 16:59:24,084 - INFO - pos_weight value in TrainingArguments : 8.493688290834637
+[36m(train_hpo pid=3187778)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3187778)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3187778)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3187778)[0m   warnings.warn(
+[36m(train_hpo pid=3187942)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3187942)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3187942)[0m 2025-06-03 16:59:31,396 - INFO - pos_weight value in TrainingArguments : 7.549531688595925
+[36m(train_hpo pid=3187942)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3187942)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3187942)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3187942)[0m   warnings.warn(
+[36m(train_hpo pid=3188307)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3188307)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3188307)[0m 2025-06-03 16:59:38,693 - INFO - pos_weight value in TrainingArguments : 8.949837496427758
+[36m(train_hpo pid=3188307)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3188307)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3188307)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3188307)[0m   warnings.warn(
+╭──────────────────────────────────────────────────────────────────╮
+│ Configuration for experiment     train_hpo_2025-06-03_16-59-14   │
+├──────────────────────────────────────────────────────────────────┤
+│ Search algorithm                 SearchGenerator                 │
+│ Scheduler                        AsyncHyperBandScheduler         │
+│ Number of trials                 12                              │
+╰──────────────────────────────────────────────────────────────────╯
+
+View detailed results here: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14
+To visualize your results with TensorBoard, run: `tensorboard --logdir /tmp/ray/session_2025-06-03_16-58-47_680579_3184318/artifacts/2025-06-03_16-59-14/train_hpo_2025-06-03_16-59-14/driver_artifacts`
+
+Trial status: 1 PENDING
+Current time: 2025-06-03 16:59:15. Total running time: 0s
+Logical resource usage: 0/32 CPUs, 0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status       pos_weight     learning_rate     weight_decay     num_train_epochs │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_e551318b   PENDING         8.49369       1.49561e-06          0.13641                    6 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Trial train_hpo_e551318b started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_e551318b config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                             0 │
+│ num_train_epochs                          6 │
+│ pos_weight                          8.49369 │
+│ weight_decay                        0.13641 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3187778)[0m [2025-06-03 16:59:24,336] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3187778)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial train_hpo_df686b80 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_df686b80 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                             0 │
+│ num_train_epochs                          5 │
+│ pos_weight                          7.54953 │
+│ weight_decay                        0.12303 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3187942)[0m [2025-06-03 16:59:31,804] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3187778)[0m {'loss': 9.075, 'grad_norm': 84.71575927734375, 'learning_rate': 1.246338876535363e-06, 'epoch': 0.7272727272727273}
+[36m(train_hpo pid=3187942)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=10, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=5, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3187778)[0m {'loss': 8.855, 'grad_norm': 81.62535858154297, 'learning_rate': 9.970711012282902e-07, 'epoch': 1.7272727272727273}
+
+Trial train_hpo_6b75e693 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_6b75e693 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         8e-05 │
+│ num_train_epochs                          3 │
+│ pos_weight                          8.94984 │
+│ weight_decay                        0.25122 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3188307)[0m [2025-06-03 16:59:38,957] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3188307)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=6, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=3, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3187942)[0m {'loss': 5.1661, 'grad_norm': 55.27841567993164, 'learning_rate': 3.6443132246884782e-06, 'epoch': 0.7272727272727273}
+
+Trial status: 3 RUNNING | 1 PENDING
+Current time: 2025-06-03 16:59:45. Total running time: 30s
+Logical resource usage: 30.0/32 CPUs, 3.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status       pos_weight     learning_rate     weight_decay     num_train_epochs │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_e551318b   RUNNING         8.49369       1.49561e-06         0.13641                     6 │
+│ train_hpo_df686b80   RUNNING         7.54953       4.55539e-06         0.123031                    5 │
+│ train_hpo_6b75e693   RUNNING         8.94984       7.98818e-05         0.251217                    3 │
+│ train_hpo_398ab4df   PENDING         9.2685        1.10121e-06         0.13345                     4 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯[36m(train_hpo pid=3188307)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3188307)[0m   warnings.warn(
+2025-06-03 16:59:58,626 - INFO - Cleaning up trial 6b75e693
+2025-06-03 16:59:58,626 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_6b75e693_3_learning_rate=0.0001,num_train_epochs=3,pos_weight=8.9498,weight_decay=0.2512_2025-06-03_16-59-30
+[36m(train_hpo pid=3188307)[0m 2025-06-03 16:59:58,555 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3188307)[0m 2025-06-03 16:59:58,558 - INFO - eval_result: {'eval_loss': 1.2682873010635376, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8993293642997742, 'eval_runtime': 3.3467, 'eval_samples_per_second': 19.721, 'eval_steps_per_second': 1.195, 'epoch': 2.7272727272727275}
+[36m(train_hpo pid=3188307)[0m 2025-06-03 16:59:58,599 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3189031)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3189031)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3189031)[0m 2025-06-03 17:00:07,157 - INFO - pos_weight value in TrainingArguments : 9.268502695024392
+[36m(train_hpo pid=3189031)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3189031)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3187778)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3187778)[0m   warnings.warn(
+[36m(train_hpo pid=3187778)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+[36m(train_hpo pid=3187778)[0m   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+
+[36m(train_hpo pid=3188307)[0m {'loss': 2.1904, 'grad_norm': 19.05434226989746, 'learning_rate': 2.6627264875937445e-05, 'epoch': 1.7272727272727273}[32m [repeated 3x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#log-deduplication for more options.)[0m
+[36m(train_hpo pid=3188307)[0m {'train_runtime': 12.7765, 'train_samples_per_second': 46.492, 'train_steps_per_second': 0.47, 'train_loss': 2.548025210698446, 'epoch': 2.7272727272727275}
+[36m(train_hpo pid=3188307)[0m STATE at ending of training  :  TrainerState(epoch=2.7272727272727275, global_step=6, max_steps=6, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=3, num_input_tokens_seen=0, total_flos=139973824671744.0, log_history=[{'loss': 4.0158, 'grad_norm': 40.93490219116211, 'learning_rate': 5.325452975187489e-05, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 2.1904, 'grad_norm': 19.05434226989746, 'learning_rate': 2.6627264875937445e-05, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 1.4378, 'grad_norm': 7.1604084968566895, 'learning_rate': 0.0, 'epoch': 2.7272727272727275, 'step': 6}, {'train_runtime': 12.7765, 'train_samples_per_second': 46.492, 'train_steps_per_second': 0.47, 'total_flos': 139973824671744.0, 'train_loss': 2.548025210698446, 'epoch': 2.7272727272727275, 'step': 6}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial train_hpo_6b75e693 finished iteration 1 at 2025-06-03 16:59:58. Total running time: 43s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_6b75e693 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    20.8801 │
+│ time_total_s                        20.8801 │
+│ training_iteration                        1 │
+│ epoch                               2.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           1.26829 │
+│ eval_optim_threshold                0.89933 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         3.3467 │
+│ eval_samples_per_second              19.721 │
+│ eval_steps_per_second                 1.195 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_6b75e693 completed after 1 iterations at 2025-06-03 16:59:58. Total running time: 43s
+[36m(train_hpo pid=3188307)[0m {'eval_loss': 1.2682873010635376, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8993293642997742, 'eval_runtime': 3.3467, 'eval_samples_per_second': 19.721, 'eval_steps_per_second': 1.195, 'epoch': 2.7272727272727275}
+[36m(train_hpo pid=3188307)[0m {'loss': 1.4378, 'grad_norm': 7.1604084968566895, 'learning_rate': 0.0, 'epoch': 2.7272727272727275}[32m [repeated 3x across cluster][0m
+
+Trial train_hpo_398ab4df started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_398ab4df config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                             0 │
+│ num_train_epochs                          4 │
+│ pos_weight                           9.2685 │
+│ weight_decay                        0.13345 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3189031)[0m [2025-06-03 17:00:07,412] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3187942)[0m {'loss': 4.5316, 'grad_norm': 39.66161346435547, 'learning_rate': 1.8221566123442391e-06, 'epoch': 2.7272727272727275}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3187778)[0m {'train_runtime': 42.701, 'train_samples_per_second': 27.821, 'train_steps_per_second': 0.281, 'train_loss': 8.3902219136556, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3187778)[0m STATE at ending of training  :  TrainerState(epoch=5.7272727272727275, global_step=12, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=289945779677184.0, log_history=[{'loss': 9.075, 'grad_norm': 84.71575927734375, 'learning_rate': 1.246338876535363e-06, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 8.855, 'grad_norm': 81.62535858154297, 'learning_rate': 9.970711012282902e-07, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 8.4971, 'grad_norm': 65.9062271118164, 'learning_rate': 7.478033259212177e-07, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 8.5207, 'grad_norm': 79.02706146240234, 'learning_rate': 4.985355506141451e-07, 'epoch': 3.7272727272727275, 'step': 8}, {'loss': 8.4753, 'grad_norm': 71.2805404663086, 'learning_rate': 2.4926777530707256e-07, 'epoch': 4.7272727272727275, 'step': 10}, {'loss': 6.9183, 'grad_norm': 85.9457015991211, 'learning_rate': 0.0, 'epoch': 5.7272727272727275, 'step': 12}, {'train_runtime': 42.701, 'train_samples_per_second': 27.821, 'train_steps_per_second': 0.281, 'total_flos': 289945779677184.0, 'train_loss': 8.3902219136556, 'epoch': 5.7272727272727275, 'step': 12}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3189031)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial train_hpo_e551318b finished iteration 1 at 2025-06-03 17:00:14. Total running time: 58s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_e551318b result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    51.2096 │
+│ time_total_s                        51.2096 │
+│ training_iteration                        1 │
+│ epoch                               5.72727 │
+│ eval_accuracy                       0.25758 │
+│ eval_f1                                   0 │
+│ eval_loss                           6.70548 │
+│ eval_optim_threshold                0.34051 │
+│ eval_precision                            0 │
+│ eval_recall                               0 │
+│ eval_runtime                         3.7809 │
+│ eval_samples_per_second              17.456 │
+│ eval_steps_per_second                 1.058 │
+╰─────────────────────────────────────────────╯2025-06-03 17:00:14,318 - INFO - Cleaning up trial e551318b
+2025-06-03 17:00:14,318 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:00:14,318 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+[36m(train_hpo pid=3187778)[0m 2025-06-03 17:00:14,255 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3187778)[0m 2025-06-03 17:00:14,257 - INFO - eval_result: {'eval_loss': 6.705477237701416, 'eval_f1': 0.0, 'eval_recall': 0.0, 'eval_accuracy': 0.25757575757575757, 'eval_precision': 0.0, 'eval_optim_threshold': 0.3405084013938904, 'eval_runtime': 3.7809, 'eval_samples_per_second': 17.456, 'eval_steps_per_second': 1.058, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3187778)[0m 2025-06-03 17:00:14,292 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+2025-06-03 17:00:18,288 - INFO - Cleaning up trial df686b80
+2025-06-03 17:00:18,288 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_df686b80_2_learning_rate=0.0000,num_train_epochs=5,pos_weight=7.5495,weight_decay=0.1230_2025-06-03_16-59-23
+2025-06-03 17:00:18,288 - INFO - Cleaning up trial e551318b
+2025-06-03 17:00:18,288 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:00:18,288 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+[36m(train_hpo pid=3187942)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3187942)[0m   warnings.warn([32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3189488)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3189488)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3187942)[0m 2025-06-03 17:00:18,225 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3187942)[0m 2025-06-03 17:00:18,227 - INFO - eval_result: {'eval_loss': 3.481922149658203, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.5492428541183472, 'eval_runtime': 3.2741, 'eval_samples_per_second': 20.159, 'eval_steps_per_second': 1.222, 'epoch': 4.7272727272727275}
+[36m(train_hpo pid=3187942)[0m 2025-06-03 17:00:18,263 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3189488)[0m 2025-06-03 17:00:23,068 - INFO - pos_weight value in TrainingArguments : 2.546844052569046
+[36m(train_hpo pid=3189488)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3189488)[0m   super().__init__(*args, **kwargs)
+
+
+Trial train_hpo_e551318b completed after 1 iterations at 2025-06-03 17:00:14. Total running time: 58s
+[36m(train_hpo pid=3187778)[0m {'eval_loss': 6.705477237701416, 'eval_f1': 0.0, 'eval_recall': 0.0, 'eval_accuracy': 0.25757575757575757, 'eval_precision': 0.0, 'eval_optim_threshold': 0.3405084013938904, 'eval_runtime': 3.7809, 'eval_samples_per_second': 17.456, 'eval_steps_per_second': 1.058, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3187778)[0m {'loss': 6.9183, 'grad_norm': 85.9457015991211, 'learning_rate': 0.0, 'epoch': 5.7272727272727275}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3187942)[0m STATE at ending of training  :  TrainerState(epoch=4.7272727272727275, global_step=10, max_steps=10, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=5, num_input_tokens_seen=0, total_flos=239955128008704.0, log_history=[{'loss': 5.1661, 'grad_norm': 55.27841567993164, 'learning_rate': 3.6443132246884782e-06, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 4.8927, 'grad_norm': 50.79368209838867, 'learning_rate': 2.7332349185163582e-06, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 4.5316, 'grad_norm': 39.66161346435547, 'learning_rate': 1.8221566123442391e-06, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 4.4496, 'grad_norm': 46.36183166503906, 'learning_rate': 9.110783061721196e-07, 'epoch': 3.7272727272727275, 'step': 8}, {'loss': 3.3989, 'grad_norm': 41.510581970214844, 'learning_rate': 0.0, 'epoch': 4.7272727272727275, 'step': 10}, {'train_runtime': 39.6805, 'train_samples_per_second': 24.949, 'train_steps_per_second': 0.252, 'total_flos': 239955128008704.0, 'train_loss': 4.487788963317871, 'epoch': 4.7272727272727275, 'step': 10}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial status: 2 TERMINATED | 2 RUNNING | 1 PENDING
+Current time: 2025-06-03 17:00:15. Total running time: 1min 0s
+Logical resource usage: 30.0/32 CPUs, 3.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_df686b80   RUNNING           7.54953       4.55539e-06         0.123031                    5                                                                                         │
+│ train_hpo_398ab4df   RUNNING           9.2685        1.10121e-06         0.13345                     4                                                                                         │
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06         0.13641                     6        1            51.2096       6.70548    0                      0          0.257576 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05         0.251217                    3        1            20.8801       1.26829    0.852174               1          0.742424 │
+│ train_hpo_55dd4de3   PENDING           2.54684       4.03208e-05         0.243719                    5                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Trial train_hpo_df686b80 finished iteration 1 at 2025-06-03 17:00:18. Total running time: 1min 2s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_df686b80 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    47.7832 │
+│ time_total_s                        47.7832 │
+│ training_iteration                        1 │
+│ epoch                               4.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           3.48192 │
+│ eval_optim_threshold                0.54924 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         3.2741 │
+│ eval_samples_per_second              20.159 │
+│ eval_steps_per_second                 1.222 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_df686b80 completed after 1 iterations at 2025-06-03 17:00:18. Total running time: 1min 2s
+[36m(train_hpo pid=3187942)[0m {'train_runtime': 39.6805, 'train_samples_per_second': 24.949, 'train_steps_per_second': 0.252, 'train_loss': 4.487788963317871, 'epoch': 4.7272727272727275}
+
+Trial train_hpo_55dd4de3 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_55dd4de3 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         4e-05 │
+│ num_train_epochs                          5 │
+│ pos_weight                          2.54684 │
+│ weight_decay                        0.24372 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3187942)[0m {'eval_loss': 3.481922149658203, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.5492428541183472, 'eval_runtime': 3.2741, 'eval_samples_per_second': 20.159, 'eval_steps_per_second': 1.222, 'epoch': 4.7272727272727275}
+[36m(train_hpo pid=3189031)[0m {'loss': 8.9671, 'grad_norm': 71.24662780761719, 'learning_rate': 2.753032222766959e-07, 'epoch': 2.7272727272727275}[32m [repeated 4x across cluster][0m
+[36m(train_hpo pid=3189488)[0m [2025-06-03 17:00:23,351] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)[36m(train_hpo pid=3189488)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3189488)[0m   warnings.warn(
+[36m(train_hpo pid=3189031)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3189031)[0m   warnings.warn(
+[36m(train_hpo pid=3189744)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3189744)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3189744)[0m 2025-06-03 17:00:30,204 - INFO - pos_weight value in TrainingArguments : 4.942262677968309
+[36m(train_hpo pid=3189744)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3189744)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3189031)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+[36m(train_hpo pid=3189031)[0m   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+2025-06-03 17:00:30,920 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:00:30,921 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:00:30,921 - INFO - Cleaning up trial e551318b
+2025-06-03 17:00:30,921 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:00:30,921 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:00:30,921 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+[36m(train_hpo pid=3189031)[0m 2025-06-03 17:00:30,860 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3189031)[0m 2025-06-03 17:00:30,862 - INFO - eval_result: {'eval_loss': 7.257411956787109, 'eval_f1': 0.0, 'eval_recall': 0.0, 'eval_accuracy': 0.25757575757575757, 'eval_precision': 0.0, 'eval_optim_threshold': 0.3554686903953552, 'eval_runtime': 3.2906, 'eval_samples_per_second': 20.057, 'eval_steps_per_second': 1.216, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3189031)[0m 2025-06-03 17:00:30,899 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3189744)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3189744)[0m   warnings.warn(
+[36m(train_hpo pid=3190157)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3190157)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3190157)[0m 2025-06-03 17:00:40,019 - INFO - pos_weight value in TrainingArguments : 9.454327638424944
+[36m(train_hpo pid=3190157)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3190157)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3190157)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3190157)[0m   warnings.warn(
+
+[36m(train_hpo pid=3189488)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=10, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=5, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3189031)[0m {'train_runtime': 16.7632, 'train_samples_per_second': 47.246, 'train_steps_per_second': 0.477, 'train_loss': 8.779884099960327, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3189031)[0m STATE at ending of training  :  TrainerState(epoch=3.7272727272727275, global_step=8, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=189964476340224.0, log_history=[{'loss': 9.5278, 'grad_norm': 92.27220153808594, 'learning_rate': 8.259096668300877e-07, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 9.2033, 'grad_norm': 86.53816223144531, 'learning_rate': 5.506064445533918e-07, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 8.9671, 'grad_norm': 71.24662780761719, 'learning_rate': 2.753032222766959e-07, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 7.4213, 'grad_norm': 84.91514587402344, 'learning_rate': 0.0, 'epoch': 3.7272727272727275, 'step': 8}, {'train_runtime': 16.7632, 'train_samples_per_second': 47.246, 'train_steps_per_second': 0.477, 'total_flos': 189964476340224.0, 'train_loss': 8.779884099960327, 'epoch': 3.7272727272727275, 'step': 8}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3189031)[0m {'loss': 7.4213, 'grad_norm': 84.91514587402344, 'learning_rate': 0.0, 'epoch': 3.7272727272727275}
+
+Trial train_hpo_8eac876e started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_8eac876e config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         3e-05 │
+│ num_train_epochs                          3 │
+│ pos_weight                          4.94226 │
+│ weight_decay                        0.23987 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3189744)[0m [2025-06-03 17:00:30,645] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+
+Trial train_hpo_398ab4df finished iteration 1 at 2025-06-03 17:00:30. Total running time: 1min 15s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_398ab4df result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    24.8516 │
+│ time_total_s                        24.8516 │
+│ training_iteration                        1 │
+│ epoch                               3.72727 │
+│ eval_accuracy                       0.25758 │
+│ eval_f1                                   0 │
+│ eval_loss                           7.25741 │
+│ eval_optim_threshold                0.35547 │
+│ eval_precision                            0 │
+│ eval_recall                               0 │
+│ eval_runtime                         3.2906 │
+│ eval_samples_per_second              20.057 │
+│ eval_steps_per_second                 1.216 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_398ab4df completed after 1 iterations at 2025-06-03 17:00:30. Total running time: 1min 15s
+[36m(train_hpo pid=3189031)[0m {'eval_loss': 7.257411956787109, 'eval_f1': 0.0, 'eval_recall': 0.0, 'eval_accuracy': 0.25757575757575757, 'eval_precision': 0.0, 'eval_optim_threshold': 0.3554686903953552, 'eval_runtime': 3.2906, 'eval_samples_per_second': 20.057, 'eval_steps_per_second': 1.216, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3189488)[0m {'loss': 1.4436, 'grad_norm': 11.346307754516602, 'learning_rate': 3.225667134399158e-05, 'epoch': 0.7272727272727273}
+[36m(train_hpo pid=3189744)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=6, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=3, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3189488)[0m {'loss': 1.1269, 'grad_norm': 12.152046203613281, 'learning_rate': 2.419250350799368e-05, 'epoch': 1.7272727272727273}
+
+Trial train_hpo_56ed27f7 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_56ed27f7 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         4e-05 │
+│ num_train_epochs                          4 │
+│ pos_weight                          9.45433 │
+│ weight_decay                        0.22021 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3190157)[0m [2025-06-03 17:00:40,252] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3189744)[0m {'loss': 2.7951, 'grad_norm': 28.673757553100586, 'learning_rate': 1.800260137456896e-05, 'epoch': 0.7272727272727273}
+[36m(train_hpo pid=3190157)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial status: 4 TERMINATED | 3 RUNNING | 1 PENDING
+Current time: 2025-06-03 17:00:45. Total running time: 1min 30s
+Logical resource usage: 30.0/32 CPUs, 3.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_55dd4de3   RUNNING           2.54684       4.03208e-05         0.243719                    5                                                                                         │
+│ train_hpo_8eac876e   RUNNING           4.94226       2.70039e-05         0.239866                    3                                                                                         │
+│ train_hpo_56ed27f7   RUNNING           9.45433       4.00602e-05         0.220208                    4                                                                                         │
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06         0.13641                     6        1            51.2096       6.70548    0                      0          0.257576 │
+│ train_hpo_df686b80   TERMINATED        7.54953       4.55539e-06         0.123031                    5        1            47.7832       3.48192    0.852174               1          0.742424 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05         0.251217                    3        1            20.8801       1.26829    0.852174               1          0.742424 │
+│ train_hpo_398ab4df   TERMINATED        9.2685        1.10121e-06         0.13345                     4        1            24.8516       7.25741    0                      0          0.257576 │
+│ train_hpo_b0fc2ba6   PENDING           7.97828       2.7847e-06          0.185124                    2                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[36m(train_hpo pid=3190157)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3190157)[0m   warnings.warn(
+2025-06-03 17:01:00,944	ERROR tune_controller.py:1331 -- Trial task failed for trial train_hpo_8eac876e
+Traceback (most recent call last):
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/worker.py", line 2782, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/worker.py", line 929, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=3189744, ip=172.30.120.56, actor_id=3209ae27b57c21bcb87a7e4701000000, repr=train_hpo)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/trainable.py", line 330, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/function_trainable.py", line 45, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/function_trainable.py", line 261, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 161, in train_hpo
+    trainer.train()
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 2241, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 2612, in _inner_training_loop
+    self._maybe_log_save_evaluate(
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3092, in _maybe_log_save_evaluate
+    self._save_checkpoint(model, trial)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3194, in _save_checkpoint
+    self._save_optimizer_and_scheduler(output_dir)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3328, in _save_optimizer_and_scheduler
+    torch.save(self.lr_scheduler.state_dict(), os.path.join(output_dir, SCHEDULER_NAME))
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 943, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 810, in _open_zipfile_writer
+    return container(name_or_buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 781, in __init__
+    super().__init__(torch._C.PyTorchFileWriter(self.name, _compute_crc32))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Parent directory /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models/checkpoint-6 does not exist.
+2025-06-03 17:01:01,435	ERROR tune_controller.py:1331 -- Trial task failed for trial train_hpo_55dd4de3
+Traceback (most recent call last):
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/worker.py", line 2782, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/_private/worker.py", line 929, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=3189488, ip=172.30.120.56, actor_id=cdb37f7d76b33f8b5f743aa301000000, repr=train_hpo)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/trainable.py", line 330, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/function_trainable.py", line 45, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/function_trainable.py", line 261, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 161, in train_hpo
+    trainer.train()
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 2241, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 2612, in _inner_training_loop
+    self._maybe_log_save_evaluate(
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3092, in _maybe_log_save_evaluate
+    self._save_checkpoint(model, trial)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3194, in _save_checkpoint
+    self._save_optimizer_and_scheduler(output_dir)
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/trainer.py", line 3328, in _save_optimizer_and_scheduler
+    torch.save(self.lr_scheduler.state_dict(), os.path.join(output_dir, SCHEDULER_NAME))
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 943, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 810, in _open_zipfile_writer
+    return container(name_or_buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/torch/serialization.py", line 781, in __init__
+    super().__init__(torch._C.PyTorchFileWriter(self.name, _compute_crc32))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Parent directory /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models/checkpoint-10 does not exist.
+[36m(train_hpo pid=3190157)[0m 2025-06-03 17:01:04,130 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3190157)[0m 2025-06-03 17:01:04,132 - INFO - eval_result: {'eval_loss': 1.5670279264450073, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8510829210281372, 'eval_runtime': 3.3696, 'eval_samples_per_second': 19.587, 'eval_steps_per_second': 1.187, 'epoch': 3.7272727272727275}
+2025-06-03 17:01:04,200 - INFO - Cleaning up trial 56ed27f7
+2025-06-03 17:01:04,200 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_56ed27f7_7_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.4543,weight_decay=0.2202_2025-06-03_17-00-29
+2025-06-03 17:01:04,200 - INFO - Cleaning up trial e551318b
+2025-06-03 17:01:04,200 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:01:04,200 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:04,200 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:04,200 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:01:04,200 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+[36m(train_hpo pid=3190157)[0m 2025-06-03 17:01:04,171 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3190834)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3190834)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3190834)[0m 2025-06-03 17:01:11,068 - INFO - pos_weight value in TrainingArguments : 7.978279409450941
+[36m(train_hpo pid=3190834)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3190834)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3190834)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3190834)[0m   warnings.warn(
+
+[36m(train_hpo pid=3190157)[0m {'loss': 3.1371, 'grad_norm': 33.30872344970703, 'learning_rate': 2.0030081337922637e-05, 'epoch': 1.7272727272727273}[32m [repeated 3x across cluster][0m
+[36m(train_hpo pid=3190157)[0m {'train_runtime': 17.0555, 'train_samples_per_second': 46.437, 'train_steps_per_second': 0.469, 'train_loss': 3.029695361852646, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3190157)[0m STATE at ending of training  :  TrainerState(epoch=3.7272727272727275, global_step=8, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=189964476340224.0, log_history=[{'loss': 4.8794, 'grad_norm': 53.34635543823242, 'learning_rate': 3.0045122006883954e-05, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 3.1371, 'grad_norm': 33.30872344970703, 'learning_rate': 2.0030081337922637e-05, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 2.3962, 'grad_norm': 17.319520950317383, 'learning_rate': 1.0015040668961318e-05, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 1.706, 'grad_norm': 18.8750057220459, 'learning_rate': 0.0, 'epoch': 3.7272727272727275, 'step': 8}, {'train_runtime': 17.0555, 'train_samples_per_second': 46.437, 'train_steps_per_second': 0.469, 'total_flos': 189964476340224.0, 'train_loss': 3.029695361852646, 'epoch': 3.7272727272727275, 'step': 8}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3190157)[0m {'loss': 1.706, 'grad_norm': 18.8750057220459, 'learning_rate': 0.0, 'epoch': 3.7272727272727275}[32m [repeated 4x across cluster][0m
+
+Trial train_hpo_8eac876e errored after 0 iterations at 2025-06-03 17:01:00. Total running time: 1min 45s
+Error file: /tmp/ray/session_2025-06-03_16-58-47_680579_3184318/artifacts/2025-06-03_16-59-14/train_hpo_2025-06-03_16-59-14/driver_artifacts/train_hpo_8eac876e_6_learning_rate=0.0000,num_train_epochs=3,pos_weight=4.9423,weight_decay=0.2399_2025-06-03_17-00-22/error.txt
+
+Trial train_hpo_55dd4de3 errored after 0 iterations at 2025-06-03 17:01:01. Total running time: 1min 45s
+Error file: /tmp/ray/session_2025-06-03_16-58-47_680579_3184318/artifacts/2025-06-03_16-59-14/train_hpo_2025-06-03_16-59-14/driver_artifacts/train_hpo_55dd4de3_5_learning_rate=0.0000,num_train_epochs=5,pos_weight=2.5468,weight_decay=0.2437_2025-06-03_17-00-06/error.txt
+[36m(train_hpo pid=3190157)[0m {'eval_loss': 1.5670279264450073, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8510829210281372, 'eval_runtime': 3.3696, 'eval_samples_per_second': 19.587, 'eval_steps_per_second': 1.187, 'epoch': 3.7272727272727275}
+
+Trial train_hpo_56ed27f7 finished iteration 1 at 2025-06-03 17:01:04. Total running time: 1min 48s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_56ed27f7 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                     25.117 │
+│ time_total_s                         25.117 │
+│ training_iteration                        1 │
+│ epoch                               3.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           1.56703 │
+│ eval_optim_threshold                0.85108 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         3.3696 │
+│ eval_samples_per_second              19.587 │
+│ eval_steps_per_second                 1.187 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_56ed27f7 completed after 1 iterations at 2025-06-03 17:01:04. Total running time: 1min 48s
+
+Trial train_hpo_b0fc2ba6 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_b0fc2ba6 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                             0 │
+│ num_train_epochs                          2 │
+│ pos_weight                          7.97828 │
+│ weight_decay                        0.18512 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3190834)[0m [2025-06-03 17:01:11,336] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3190834)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=4, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=2, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial status: 5 TERMINATED | 2 ERROR | 1 RUNNING | 1 PENDING
+Current time: 2025-06-03 17:01:15. Total running time: 2min 0s
+Logical resource usage: 20.0/32 CPUs, 2.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_b0fc2ba6   RUNNING           7.97828       2.7847e-06          0.185124                    2                                                                                         │
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06         0.13641                     6        1            51.2096       6.70548    0                      0          0.257576 │
+│ train_hpo_df686b80   TERMINATED        7.54953       4.55539e-06         0.123031                    5        1            47.7832       3.48192    0.852174               1          0.742424 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05         0.251217                    3        1            20.8801       1.26829    0.852174               1          0.742424 │
+│ train_hpo_398ab4df   TERMINATED        9.2685        1.10121e-06         0.13345                     4        1            24.8516       7.25741    0                      0          0.257576 │
+│ train_hpo_56ed27f7   TERMINATED        9.45433       4.00602e-05         0.220208                    4        1            25.117        1.56703    0.852174               1          0.742424 │
+│ train_hpo_7b96fc9c   PENDING           9.28008       4.73492e-05         0.163021                    6                                                                                         │
+│ train_hpo_55dd4de3   ERROR             2.54684       4.03208e-05         0.243719                    5                                                                                         │
+│ train_hpo_8eac876e   ERROR             4.94226       2.70039e-05         0.239866                    3                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[36m(train_hpo pid=3191089)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3191089)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3191089)[0m 2025-06-03 17:01:16,944 - INFO - pos_weight value in TrainingArguments : 9.280083037935846
+[36m(train_hpo pid=3191089)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3191089)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3191089)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3191089)[0m   warnings.warn(
+[36m(train_hpo pid=3191304)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3191304)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3191304)[0m 2025-06-03 17:01:24,109 - INFO - pos_weight value in TrainingArguments : 7.3055930015922925
+[36m(train_hpo pid=3191304)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3191304)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3190834)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3190834)[0m   warnings.warn(
+[36m(train_hpo pid=3190834)[0m 2025-06-03 17:01:29,830 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3190834)[0m 2025-06-03 17:01:29,832 - INFO - eval_result: {'eval_loss': 3.109546661376953, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.6113053560256958, 'eval_runtime': 4.6187, 'eval_samples_per_second': 14.29, 'eval_steps_per_second': 0.866, 'epoch': 1.7272727272727273}
+2025-06-03 17:01:29,897 - INFO - Cleaning up trial b0fc2ba6
+2025-06-03 17:01:29,897 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_b0fc2ba6_8_learning_rate=0.0000,num_train_epochs=2,pos_weight=7.9783,weight_decay=0.1851_2025-06-03_17-00-39
+2025-06-03 17:01:29,897 - INFO - Cleaning up trial e551318b
+2025-06-03 17:01:29,897 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:01:29,897 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:29,897 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:29,897 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:01:29,897 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:01:29,897 - INFO - Current best: 56ed27f7 with eval_f1 : 0.8521739130434782 at iteration 1
+[36m(train_hpo pid=3190834)[0m 2025-06-03 17:01:29,872 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3191947)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3191947)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3191304)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3191304)[0m   warnings.warn(
+[36m(train_hpo pid=3191947)[0m 2025-06-03 17:01:38,946 - INFO - pos_weight value in TrainingArguments : 8.360470176973763
+[36m(train_hpo pid=3191947)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3191947)[0m   super().__init__(*args, **kwargs)
+
+
+Trial train_hpo_7b96fc9c started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_7b96fc9c config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         5e-05 │
+│ num_train_epochs                          6 │
+│ pos_weight                          9.28008 │
+│ weight_decay                        0.16302 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3191089)[0m [2025-06-03 17:01:17,351] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3190834)[0m {'loss': 4.0292, 'grad_norm': 44.0826530456543, 'learning_rate': 1.3923519932932234e-06, 'epoch': 0.7272727272727273}
+[36m(train_hpo pid=3191089)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial train_hpo_2f1f57c6 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_2f1f57c6 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         1e-05 │
+│ num_train_epochs                          3 │
+│ pos_weight                          7.30559 │
+│ weight_decay                        0.28664 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3191304)[0m [2025-06-03 17:01:24,352] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3190834)[0m {'loss': 3.1168, 'grad_norm': 40.95181655883789, 'learning_rate': 0.0, 'epoch': 1.7272727272727273}
+[36m(train_hpo pid=3190834)[0m {'train_runtime': 10.5655, 'train_samples_per_second': 37.481, 'train_steps_per_second': 0.379, 'train_loss': 3.5729963779449463, 'epoch': 1.7272727272727273}
+[36m(train_hpo pid=3190834)[0m STATE at ending of training  :  TrainerState(epoch=1.7272727272727273, global_step=4, max_steps=4, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=2, num_input_tokens_seen=0, total_flos=89983173003264.0, log_history=[{'loss': 4.0292, 'grad_norm': 44.0826530456543, 'learning_rate': 1.3923519932932234e-06, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 3.1168, 'grad_norm': 40.95181655883789, 'learning_rate': 0.0, 'epoch': 1.7272727272727273, 'step': 4}, {'train_runtime': 10.5655, 'train_samples_per_second': 37.481, 'train_steps_per_second': 0.379, 'total_flos': 89983173003264.0, 'train_loss': 3.5729963779449463, 'epoch': 1.7272727272727273, 'step': 4}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3191304)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=6, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=3, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3190834)[0m {'eval_loss': 3.109546661376953, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.6113053560256958, 'eval_runtime': 4.6187, 'eval_samples_per_second': 14.29, 'eval_steps_per_second': 0.866, 'epoch': 1.7272727272727273}
+
+Trial train_hpo_b0fc2ba6 finished iteration 1 at 2025-06-03 17:01:29. Total running time: 2min 14s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_b0fc2ba6 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    20.9873 │
+│ time_total_s                        20.9873 │
+│ training_iteration                        1 │
+│ epoch                               1.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           3.10955 │
+│ eval_optim_threshold                0.61131 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         4.6187 │
+│ eval_samples_per_second               14.29 │
+│ eval_steps_per_second                 0.866 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_b0fc2ba6 completed after 1 iterations at 2025-06-03 17:01:29. Total running time: 2min 14s
+[36m(train_hpo pid=3191089)[0m {'loss': 2.2804, 'grad_norm': 18.927387237548828, 'learning_rate': 3.15661499378226e-05, 'epoch': 1.7272727272727273}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3191304)[0m {'loss': 5.4522, 'grad_norm': 54.12454605102539, 'learning_rate': 2.262147507259716e-06, 'epoch': 1.7272727272727273}[32m [repeated 3x across cluster][0m
+
+Trial train_hpo_15863802 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_15863802 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         3e-05 │
+│ num_train_epochs                          6 │
+│ pos_weight                          8.36047 │
+│ weight_decay                        0.00109 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3191947)[0m [2025-06-03 17:01:39,347] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[36m(train_hpo pid=3191304)[0m {'train_runtime': 13.1799, 'train_samples_per_second': 45.069, 'train_steps_per_second': 0.455, 'train_loss': 5.068924188613892, 'epoch': 2.7272727272727275}
+[36m(train_hpo pid=3191304)[0m STATE at ending of training  :  TrainerState(epoch=2.7272727272727275, global_step=6, max_steps=6, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=3, num_input_tokens_seen=0, total_flos=139973824671744.0, log_history=[{'loss': 5.8531, 'grad_norm': 59.39875030517578, 'learning_rate': 4.524295014519432e-06, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 5.4522, 'grad_norm': 54.12454605102539, 'learning_rate': 2.262147507259716e-06, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 3.9015, 'grad_norm': 41.52691650390625, 'learning_rate': 0.0, 'epoch': 2.7272727272727275, 'step': 6}, {'train_runtime': 13.1799, 'train_samples_per_second': 45.069, 'train_steps_per_second': 0.455, 'total_flos': 139973824671744.0, 'train_loss': 5.068924188613892, 'epoch': 2.7272727272727275, 'step': 6}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})[36m(train_hpo pid=3191304)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3191304)[0m   warnings.warn(
+[36m(train_hpo pid=3191304)[0m 2025-06-03 17:01:44,218 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3191304)[0m 2025-06-03 17:01:44,220 - INFO - eval_result: {'eval_loss': 4.07541036605835, 'eval_f1': 0.3389830508474576, 'eval_recall': 0.20408163265306123, 'eval_accuracy': 0.4090909090909091, 'eval_precision': 1.0, 'eval_optim_threshold': 0.47541165351867676, 'eval_runtime': 3.3121, 'eval_samples_per_second': 19.927, 'eval_steps_per_second': 1.208, 'epoch': 2.7272727272727275}
+[36m(train_hpo pid=3191304)[0m 2025-06-03 17:01:44,254 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+2025-06-03 17:01:44,277 - INFO - Cleaning up trial 2f1f57c6
+2025-06-03 17:01:44,278 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_2f1f57c6_10_learning_rate=0.0000,num_train_epochs=3,pos_weight=7.3056,weight_decay=0.2866_2025-06-03_17-01-15
+2025-06-03 17:01:44,278 - INFO - Cleaning up trial e551318b
+2025-06-03 17:01:44,278 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:01:44,278 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:44,278 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:44,278 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:01:44,278 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:01:44,278 - INFO - Current best: 56ed27f7 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:44,278 - INFO - Current best: b0fc2ba6 with eval_f1 : 0.8521739130434782 at iteration 1
+
+[36m(train_hpo pid=3191304)[0m {'loss': 3.9015, 'grad_norm': 41.52691650390625, 'learning_rate': 0.0, 'epoch': 2.7272727272727275}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3191947)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3191304)[0m {'eval_loss': 4.07541036605835, 'eval_f1': 0.3389830508474576, 'eval_recall': 0.20408163265306123, 'eval_accuracy': 0.4090909090909091, 'eval_precision': 1.0, 'eval_optim_threshold': 0.47541165351867676, 'eval_runtime': 3.3121, 'eval_samples_per_second': 19.927, 'eval_steps_per_second': 1.208, 'epoch': 2.7272727272727275}
+
+Trial train_hpo_2f1f57c6 finished iteration 1 at 2025-06-03 17:01:44. Total running time: 2min 28s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_2f1f57c6 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    21.0968 │
+│ time_total_s                        21.0968 │
+│ training_iteration                        1 │
+│ epoch                               2.72727 │
+│ eval_accuracy                       0.40909 │
+│ eval_f1                             0.33898 │
+│ eval_loss                           4.07541 │
+│ eval_optim_threshold                0.47541 │
+│ eval_precision                            1 │
+│ eval_recall                         0.20408 │
+│ eval_runtime                         3.3121 │
+│ eval_samples_per_second              19.927 │
+│ eval_steps_per_second                 1.208 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_2f1f57c6 completed after 1 iterations at 2025-06-03 17:01:44. Total running time: 2min 28s
+
+Trial status: 7 TERMINATED | 2 ERROR | 2 RUNNING | 1 PENDING
+Current time: 2025-06-03 17:01:45. Total running time: 2min 30s
+Logical resource usage: 30.0/32 CPUs, 3.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_7b96fc9c   RUNNING           9.28008       4.73492e-05       0.163021                      6                                                                                         │
+│ train_hpo_15863802   RUNNING           8.36047       3.23119e-05       0.00108909                    6                                                                                         │
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06       0.13641                       6        1            51.2096       6.70548    0               0                 0.257576 │
+│ train_hpo_df686b80   TERMINATED        7.54953       4.55539e-06       0.123031                      5        1            47.7832       3.48192    0.852174        1                 0.742424 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05       0.251217                      3        1            20.8801       1.26829    0.852174        1                 0.742424 │
+│ train_hpo_398ab4df   TERMINATED        9.2685        1.10121e-06       0.13345                       4        1            24.8516       7.25741    0               0                 0.257576 │
+│ train_hpo_56ed27f7   TERMINATED        9.45433       4.00602e-05       0.220208                      4        1            25.117        1.56703    0.852174        1                 0.742424 │
+│ train_hpo_b0fc2ba6   TERMINATED        7.97828       2.7847e-06        0.185124                      2        1            20.9873       3.10955    0.852174        1                 0.742424 │
+│ train_hpo_2f1f57c6   TERMINATED        7.30559       6.78644e-06       0.286643                      3        1            21.0968       4.07541    0.338983        0.204082          0.409091 │
+│ train_hpo_614209a1   PENDING           4.22633       2.07214e-05       0.263741                      4                                                                                         │
+│ train_hpo_55dd4de3   ERROR             2.54684       4.03208e-05       0.243719                      5                                                                                         │
+│ train_hpo_8eac876e   ERROR             4.94226       2.70039e-05       0.239866                      3                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+[36m(train_hpo pid=3191947)[0m {'loss': 4.8133, 'grad_norm': 51.139015197753906, 'learning_rate': 2.6926604377058517e-05, 'epoch': 0.7272727272727273}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3191089)[0m {'train_runtime': 29.2172, 'train_samples_per_second': 40.661, 'train_steps_per_second': 0.411, 'train_loss': 1.9490216672420502, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3191089)[0m STATE at ending of training  :  TrainerState(epoch=5.7272727272727275, global_step=12, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=289945779677184.0, log_history=[{'loss': 4.0057, 'grad_norm': 34.621131896972656, 'learning_rate': 3.945768742227825e-05, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 2.2804, 'grad_norm': 18.927387237548828, 'learning_rate': 3.15661499378226e-05, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 1.608, 'grad_norm': 3.664794445037842, 'learning_rate': 2.367461245336695e-05, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 1.4967, 'grad_norm': 4.989622116088867, 'learning_rate': 1.57830749689113e-05, 'epoch': 3.7272727272727275, 'step': 8}, {'loss': 1.3399, 'grad_norm': 6.2668962478637695, 'learning_rate': 7.89153748445565e-06, 'epoch': 4.7272727272727275, 'step': 10}, {'loss': 0.9635, 'grad_norm': 4.9682135581970215, 'learning_rate': 0.0, 'epoch': 5.7272727272727275, 'step': 12}, {'train_runtime': 29.2172, 'train_samples_per_second': 40.661, 'train_steps_per_second': 0.411, 'total_flos': 289945779677184.0, 'train_loss': 1.9490216672420502, 'epoch': 5.7272727272727275, 'step': 12}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})[36m(train_hpo pid=3191089)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3191089)[0m   warnings.warn([32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3192261)[0m Some weights of BertForSequenceClassification were not initialized from the model checkpoint at dmis-lab/biobert-v1.1 and are newly initialized: ['classifier.bias', 'classifier.weight']
+[36m(train_hpo pid=3192261)[0m You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[36m(train_hpo pid=3192261)[0m 2025-06-03 17:01:53,474 - INFO - pos_weight value in TrainingArguments : 4.226333703160277
+[36m(train_hpo pid=3192261)[0m /home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_init.py:106: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+[36m(train_hpo pid=3192261)[0m   super().__init__(*args, **kwargs)
+[36m(train_hpo pid=3191089)[0m 2025-06-03 17:01:53,800 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3191089)[0m 2025-06-03 17:01:53,802 - INFO - eval_result: {'eval_loss': 1.0024296045303345, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.9505020380020142, 'eval_runtime': 3.8269, 'eval_samples_per_second': 17.246, 'eval_steps_per_second': 1.045, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3191089)[0m 2025-06-03 17:01:53,838 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+2025-06-03 17:01:53,862 - INFO - Cleaning up trial 7b96fc9c
+2025-06-03 17:01:53,862 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_7b96fc9c_9_learning_rate=0.0000,num_train_epochs=6,pos_weight=9.2801,weight_decay=0.1630_2025-06-03_17-01-08
+2025-06-03 17:01:53,862 - INFO - Cleaning up trial e551318b
+2025-06-03 17:01:53,862 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:01:53,862 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:53,862 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:53,862 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:01:53,862 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:01:53,863 - INFO - Current best: 56ed27f7 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:53,863 - INFO - Current best: b0fc2ba6 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:01:53,863 - INFO - Cleaning up trial 2f1f57c6
+2025-06-03 17:01:53,863 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_2f1f57c6_10_learning_rate=0.0000,num_train_epochs=3,pos_weight=7.3056,weight_decay=0.2866_2025-06-03_17-01-15
+[36m(train_hpo pid=3192261)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3192261)[0m   warnings.warn(
+[36m(train_hpo pid=3191947)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3191947)[0m   warnings.warn(
+[36m(train_hpo pid=3191947)[0m 2025-06-03 17:02:13,982 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3191947)[0m 2025-06-03 17:02:13,984 - INFO - eval_result: {'eval_loss': 0.9803591370582581, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8936691880226135, 'eval_runtime': 3.396, 'eval_samples_per_second': 19.435, 'eval_steps_per_second': 1.178, 'epoch': 5.7272727272727275}
+
+
+Trial train_hpo_614209a1 started with configuration:
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_614209a1 config             │
+├─────────────────────────────────────────────┤
+│ learning_rate                         2e-05 │
+│ num_train_epochs                          4 │
+│ pos_weight                          4.22633 │
+│ weight_decay                        0.26374 │
+╰─────────────────────────────────────────────╯
+[36m(train_hpo pid=3191089)[0m {'eval_loss': 1.0024296045303345, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.9505020380020142, 'eval_runtime': 3.8269, 'eval_samples_per_second': 17.246, 'eval_steps_per_second': 1.045, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3192261)[0m [2025-06-03 17:01:53,744] [INFO] [real_accelerator.py:239:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+
+Trial train_hpo_7b96fc9c finished iteration 1 at 2025-06-03 17:01:53. Total running time: 2min 38s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_7b96fc9c result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    37.8759 │
+│ time_total_s                        37.8759 │
+│ training_iteration                        1 │
+│ epoch                               5.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           1.00243 │
+│ eval_optim_threshold                 0.9505 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         3.8269 │
+│ eval_samples_per_second              17.246 │
+│ eval_steps_per_second                 1.045 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_7b96fc9c completed after 1 iterations at 2025-06-03 17:01:53. Total running time: 2min 38s
+[36m(train_hpo pid=3192261)[0m STATE at beggining of training :  TrainerState(epoch=0, global_step=0, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=0, log_history=[], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': False, 'should_epoch_stop': False, 'should_save': False, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3191947)[0m {'loss': 2.9955, 'grad_norm': 30.377197265625, 'learning_rate': 2.154128350164681e-05, 'epoch': 1.7272727272727273}[32m [repeated 2x across cluster][0m
+[36m(train_hpo pid=3191947)[0m {'loss': 1.3574, 'grad_norm': 6.782456398010254, 'learning_rate': 5.3853208754117024e-06, 'epoch': 4.7272727272727275}[32m [repeated 4x across cluster][0m
+[36m(train_hpo pid=3191947)[0m {'train_runtime': 27.8223, 'train_samples_per_second': 42.7, 'train_steps_per_second': 0.431, 'train_loss': 2.296768367290497, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3191947)[0m STATE at ending of training  :  TrainerState(epoch=5.7272727272727275, global_step=12, max_steps=12, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=6, num_input_tokens_seen=0, total_flos=289945779677184.0, log_history=[{'loss': 4.8133, 'grad_norm': 51.139015197753906, 'learning_rate': 2.6926604377058517e-05, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 2.9955, 'grad_norm': 30.377197265625, 'learning_rate': 2.154128350164681e-05, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 2.0455, 'grad_norm': 12.6666898727417, 'learning_rate': 1.615596262623511e-05, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 1.5769, 'grad_norm': 9.822504043579102, 'learning_rate': 1.0770641750823405e-05, 'epoch': 3.7272727272727275, 'step': 8}, {'loss': 1.3574, 'grad_norm': 6.782456398010254, 'learning_rate': 5.3853208754117024e-06, 'epoch': 4.7272727272727275, 'step': 10}, {'loss': 0.992, 'grad_norm': 8.681693077087402, 'learning_rate': 0.0, 'epoch': 5.7272727272727275, 'step': 12}, {'train_runtime': 27.8223, 'train_samples_per_second': 42.7, 'train_steps_per_second': 0.431, 'total_flos': 289945779677184.0, 'train_loss': 2.296768367290497, 'epoch': 5.7272727272727275, 'step': 12}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+[36m(train_hpo pid=3191947)[0m {'loss': 0.992, 'grad_norm': 8.681693077087402, 'learning_rate': 0.0, 'epoch': 5.7272727272727275}[32m [repeated 3x across cluster][0m
+[36m(train_hpo pid=3191947)[0m {'eval_loss': 0.9803591370582581, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.8936691880226135, 'eval_runtime': 3.396, 'eval_samples_per_second': 19.435, 'eval_steps_per_second': 1.178, 'epoch': 5.7272727272727275}
+[36m(train_hpo pid=3192261)[0m STATE at ending of training  :  TrainerState(epoch=3.7272727272727275, global_step=8, max_steps=8, logging_steps=500, eval_steps=500, save_steps=500, train_batch_size=19, num_train_epochs=4, num_input_tokens_seen=0, total_flos=189964476340224.0, log_history=[{'loss': 2.7429, 'grad_norm': 26.399372100830078, 'learning_rate': 1.5541050291109533e-05, 'epoch': 0.7272727272727273, 'step': 2}, {'loss': 2.0811, 'grad_norm': 15.467757225036621, 'learning_rate': 1.0360700194073021e-05, 'epoch': 1.7272727272727273, 'step': 4}, {'loss': 1.6372, 'grad_norm': 7.91660737991333, 'learning_rate': 5.180350097036511e-06, 'epoch': 2.7272727272727275, 'step': 6}, {'loss': 1.2193, 'grad_norm': 11.30162525177002, 'learning_rate': 0.0, 'epoch': 3.7272727272727275, 'step': 8}, {'train_runtime': 16.7567, 'train_samples_per_second': 47.265, 'train_steps_per_second': 0.477, 'total_flos': 189964476340224.0, 'train_loss': 1.9201474487781525, 'epoch': 3.7272727272727275, 'step': 8}], best_metric=None, best_model_checkpoint=None, is_local_process_zero=True, is_world_process_zero=True, is_hyper_param_search=False, trial_name=None, trial_params=None, stateful_callbacks={'TrainerControl': {'args': {'should_training_stop': True, 'should_epoch_stop': False, 'should_save': True, 'should_evaluate': False, 'should_log': False}, 'attributes': {}}})
+
+Trial train_hpo_15863802 finished iteration 1 at 2025-06-03 17:02:14. Total running time: 2min 58s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_15863802 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    36.0357 │
+│ time_total_s                        36.0357 │
+│ training_iteration                        1 │
+│ epoch                               5.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           0.98036 │
+│ eval_optim_threshold                0.89367 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                          3.396 │
+│ eval_samples_per_second              19.435 │
+│ eval_steps_per_second                 1.178 │
+╰─────────────────────────────────────────────╯2025-06-03 17:02:14,045 - INFO - Cleaning up trial 15863802
+2025-06-03 17:02:14,045 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_15863802_11_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.3605,weight_decay=0.0011_2025-06-03_17-01-23
+2025-06-03 17:02:14,045 - INFO - Cleaning up trial e551318b
+2025-06-03 17:02:14,045 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:02:14,046 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:14,046 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:14,046 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:02:14,046 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:02:14,046 - INFO - Current best: 56ed27f7 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:14,046 - INFO - Current best: b0fc2ba6 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:14,046 - INFO - Current best: 7b96fc9c with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:14,046 - INFO - Cleaning up trial 2f1f57c6
+2025-06-03 17:02:14,046 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_2f1f57c6_10_learning_rate=0.0000,num_train_epochs=3,pos_weight=7.3056,weight_decay=0.2866_2025-06-03_17-01-15
+[36m(train_hpo pid=3191947)[0m 2025-06-03 17:02:14,020 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3192261)[0m /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:2708: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+[36m(train_hpo pid=3192261)[0m   warnings.warn(
+2025-06-03 17:02:17,341 - INFO - Cleaning up trial 614209a1
+2025-06-03 17:02:17,341 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_614209a1_12_learning_rate=0.0000,num_train_epochs=4,pos_weight=4.2263,weight_decay=0.2637_2025-06-03_17-01-38
+2025-06-03 17:02:17,341 - INFO - Cleaning up trial e551318b
+2025-06-03 17:02:17,341 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_e551318b_1_learning_rate=0.0000,num_train_epochs=6,pos_weight=8.4937,weight_decay=0.1364_2025-06-03_16-59-15
+2025-06-03 17:02:17,341 - INFO - Current best: df686b80 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,341 - INFO - Current best: 6b75e693 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,341 - INFO - Cleaning up trial 398ab4df
+2025-06-03 17:02:17,341 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_398ab4df_4_learning_rate=0.0000,num_train_epochs=4,pos_weight=9.2685,weight_decay=0.1334_2025-06-03_16-59-37
+2025-06-03 17:02:17,341 - INFO - Current best: 56ed27f7 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,342 - INFO - Current best: b0fc2ba6 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,342 - INFO - Current best: 7b96fc9c with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,342 - INFO - Cleaning up trial 2f1f57c6
+2025-06-03 17:02:17,342 - INFO - Trial path: /home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14/train_hpo_2f1f57c6_10_learning_rate=0.0000,num_train_epochs=3,pos_weight=7.3056,weight_decay=0.2866_2025-06-03_17-01-15
+2025-06-03 17:02:17,342 - INFO - Current best: 15863802 with eval_f1 : 0.8521739130434782 at iteration 1
+2025-06-03 17:02:17,351	INFO tune.py:1009 -- Wrote the latest version of all result files and experiment state to '/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/train_hpo_2025-06-03_16-59-14' in 0.0076s.
+
+
+Trial train_hpo_15863802 completed after 1 iterations at 2025-06-03 17:02:14. Total running time: 2min 58s
+
+Trial status: 9 TERMINATED | 2 ERROR | 1 RUNNING
+Current time: 2025-06-03 17:02:15. Total running time: 3min 0s
+Logical resource usage: 10.0/32 CPUs, 1.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_614209a1   RUNNING           4.22633       2.07214e-05       0.263741                      4                                                                                         │
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06       0.13641                       6        1            51.2096      6.70548     0               0                 0.257576 │
+│ train_hpo_df686b80   TERMINATED        7.54953       4.55539e-06       0.123031                      5        1            47.7832      3.48192     0.852174        1                 0.742424 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05       0.251217                      3        1            20.8801      1.26829     0.852174        1                 0.742424 │
+│ train_hpo_398ab4df   TERMINATED        9.2685        1.10121e-06       0.13345                       4        1            24.8516      7.25741     0               0                 0.257576 │
+│ train_hpo_56ed27f7   TERMINATED        9.45433       4.00602e-05       0.220208                      4        1            25.117       1.56703     0.852174        1                 0.742424 │
+│ train_hpo_b0fc2ba6   TERMINATED        7.97828       2.7847e-06        0.185124                      2        1            20.9873      3.10955     0.852174        1                 0.742424 │
+│ train_hpo_7b96fc9c   TERMINATED        9.28008       4.73492e-05       0.163021                      6        1            37.8759      1.00243     0.852174        1                 0.742424 │
+│ train_hpo_2f1f57c6   TERMINATED        7.30559       6.78644e-06       0.286643                      3        1            21.0968      4.07541     0.338983        0.204082          0.409091 │
+│ train_hpo_15863802   TERMINATED        8.36047       3.23119e-05       0.00108909                    6        1            36.0357      0.980359    0.852174        1                 0.742424 │
+│ train_hpo_55dd4de3   ERROR             2.54684       4.03208e-05       0.243719                      5                                                                                         │
+│ train_hpo_8eac876e   ERROR             4.94226       2.70039e-05       0.239866                      3                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+[36m(train_hpo pid=3192261)[0m {'train_runtime': 16.7567, 'train_samples_per_second': 47.265, 'train_steps_per_second': 0.477, 'train_loss': 1.9201474487781525, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3192261)[0m {'loss': 1.2193, 'grad_norm': 11.30162525177002, 'learning_rate': 0.0, 'epoch': 3.7272727272727275}
+
+Trial train_hpo_614209a1 finished iteration 1 at 2025-06-03 17:02:17. Total running time: 3min 1s
+╭─────────────────────────────────────────────╮
+│ Trial train_hpo_614209a1 result             │
+├─────────────────────────────────────────────┤
+│ checkpoint_dir_name                         │
+│ time_this_iter_s                    25.1283 │
+│ time_total_s                        25.1283 │
+│ training_iteration                        1 │
+│ epoch                               3.72727 │
+│ eval_accuracy                       0.74242 │
+│ eval_f1                             0.85217 │
+│ eval_loss                           1.14147 │
+│ eval_optim_threshold                0.75251 │
+│ eval_precision                      0.74242 │
+│ eval_recall                               1 │
+│ eval_runtime                         3.3437 │
+│ eval_samples_per_second              19.738 │
+│ eval_steps_per_second                 1.196 │
+╰─────────────────────────────────────────────╯
+
+Trial train_hpo_614209a1 completed after 1 iterations at 2025-06-03 17:02:17. Total running time: 3min 1s
+
+Trial status: 10 TERMINATED | 2 ERROR
+Current time: 2025-06-03 17:02:17. Total running time: 3min 1s
+Logical resource usage: 10.0/32 CPUs, 1.0/3 GPUs (0.0/1.0 accelerator_type:A100D)
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name           status         pos_weight     learning_rate     weight_decay     num_train_epochs     iter     total time (s)     eval_loss     eval_f1     eval_recall     eval_accuracy │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_e551318b   TERMINATED        8.49369       1.49561e-06       0.13641                       6        1            51.2096      6.70548     0               0                 0.257576 │
+│ train_hpo_df686b80   TERMINATED        7.54953       4.55539e-06       0.123031                      5        1            47.7832      3.48192     0.852174        1                 0.742424 │
+│ train_hpo_6b75e693   TERMINATED        8.94984       7.98818e-05       0.251217                      3        1            20.8801      1.26829     0.852174        1                 0.742424 │
+│ train_hpo_398ab4df   TERMINATED        9.2685        1.10121e-06       0.13345                       4        1            24.8516      7.25741     0               0                 0.257576 │
+│ train_hpo_56ed27f7   TERMINATED        9.45433       4.00602e-05       0.220208                      4        1            25.117       1.56703     0.852174        1                 0.742424 │
+│ train_hpo_b0fc2ba6   TERMINATED        7.97828       2.7847e-06        0.185124                      2        1            20.9873      3.10955     0.852174        1                 0.742424 │
+│ train_hpo_7b96fc9c   TERMINATED        9.28008       4.73492e-05       0.163021                      6        1            37.8759      1.00243     0.852174        1                 0.742424 │
+│ train_hpo_2f1f57c6   TERMINATED        7.30559       6.78644e-06       0.286643                      3        1            21.0968      4.07541     0.338983        0.204082          0.409091 │
+│ train_hpo_15863802   TERMINATED        8.36047       3.23119e-05       0.00108909                    6        1            36.0357      0.980359    0.852174        1                 0.742424 │
+│ train_hpo_614209a1   TERMINATED        4.22633       2.07214e-05       0.263741                      4        1            25.1283      1.14147     0.852174        1                 0.742424 │
+│ train_hpo_55dd4de3   ERROR             2.54684       4.03208e-05       0.243719                      5                                                                                         │
+│ train_hpo_8eac876e   ERROR             4.94226       2.70039e-05       0.239866                      3                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Number of errored trials: 2
+╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name             # failures   error file                                                                                                                                                                                                                                                        │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_hpo_55dd4de3              1   /tmp/ray/session_2025-06-03_16-58-47_680579_3184318/artifacts/2025-06-03_16-59-14/train_hpo_2025-06-03_16-59-14/driver_artifacts/train_hpo_55dd4de3_5_learning_rate=0.0000,num_train_epochs=5,pos_weight=2.5468,weight_decay=0.2437_2025-06-03_17-00-06/error.txt │
+│ train_hpo_8eac876e              1   /tmp/ray/session_2025-06-03_16-58-47_680579_3184318/artifacts/2025-06-03_16-59-14/train_hpo_2025-06-03_16-59-14/driver_artifacts/train_hpo_8eac876e_6_learning_rate=0.0000,num_train_epochs=3,pos_weight=4.9423,weight_decay=0.2399_2025-06-03_17-00-22/error.txt │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 Traceback (most recent call last):
   File "/home/leandre/Projects/BioMoQA_Playground/experiments/biomoqa.py", line 54, in <module>
     main()
-  File "/home/leandre/Projects/BioMoQA_Playground/experiments/biomoqa.py", line 38, in main
-    pipeline.random_forest()
-  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 517, in random_forest
-    x_train = (x_train_df["title"].astype(str) + " " + x_train_df["abstract"].astype(str)+ " " + x_train_df["Keywords"].astype(str)).values
-               ~~~~~~~~~~^^^^^^^^^
-  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/core/frame.py", line 4102, in __getitem__
-    indexer = self.columns.get_loc(key)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/core/indexes/range.py", line 417, in get_loc
-    raise KeyError(key)
-KeyError: 'title'
+  File "/home/leandre/Projects/BioMoQA_Playground/experiments/biomoqa.py", line 43, in main
+    pipeline.whole_pipeline()
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 505, in whole_pipeline
+    avg_ens_metrics=self.run_pipeline()
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 430, in run_pipeline
+    scores_by_fold = self.train(model_name=model_name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/binary_pipeline.py", line 247, in train
+    analysis = tune.run(
+               ^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/ray/tune/tune.py", line 1035, in run
+    raise TuneError("Trials did not complete", incomplete_trials)
+ray.tune.error.TuneError: ('Trials did not complete', [train_hpo_55dd4de3, train_hpo_8eac876e])
+[36m(train_hpo pid=3192261)[0m 2025-06-03 17:02:17,270 - INFO - ROC curve saved to /home/leandre/Projects/BioMoQA_Playground/plots/roc_curve_val.png
+[36m(train_hpo pid=3192261)[0m 2025-06-03 17:02:17,272 - INFO - eval_result: {'eval_loss': 1.1414686441421509, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.7525064945220947, 'eval_runtime': 3.3437, 'eval_samples_per_second': 19.738, 'eval_steps_per_second': 1.196, 'epoch': 3.7272727272727275}
+[36m(train_hpo pid=3192261)[0m 2025-06-03 17:02:17,314 - INFO - Cleared CUDA cache. Memory allocated: 1.33 GB, Memory reserved: 1.58 GB
+[36m(train_hpo pid=3192261)[0m {'eval_loss': 1.1414686441421509, 'eval_f1': 0.8521739130434782, 'eval_recall': 1.0, 'eval_accuracy': 0.7424242424242424, 'eval_precision': 0.7424242424242424, 'eval_optim_threshold': 0.7525064945220947, 'eval_runtime': 3.3437, 'eval_samples_per_second': 19.738, 'eval_steps_per_second': 1.196, 'epoch': 3.7272727272727275}

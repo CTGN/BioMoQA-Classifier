@@ -36,19 +36,20 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     scores = 1 / (1 + np.exp(-logits.squeeze()))  # Sigmoid
     predictions = (scores > 0.5).astype(int)
     f1 = evaluate.load("f1").compute(predictions=predictions, references=labels) or {}
-    f1 = evaluate.load("recall").compute(predictions=predictions, references=labels) or {}
+    recall = evaluate.load("recall").compute(predictions=predictions, references=labels) or {}
     accuracy = evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {}
     precision = evaluate.load("precision").compute(predictions=predictions, references=labels) or {}
     optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val")
     
-    return {**f1, **accuracy, **precision, "optim_threshold": optimal_threshold}
+    return {**f1,**recall, **accuracy, **precision, "optim_threshold": optimal_threshold}
 
 
 class LossPlottingCallback(TrainerCallback):
     """Callback to log and plot training and validation losses."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.train_losses: List[float] = []
         self.eval_losses: List[float] = []
+        super().__init__()
 
     def on_epoch_end(self, args, state, control, **kwargs):
         logs = state.log_history[-1] if state.log_history else {}

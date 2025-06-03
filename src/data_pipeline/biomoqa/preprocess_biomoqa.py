@@ -1,8 +1,9 @@
 import gc
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 import os
 import sys
 import datasets
+import numpy as np
 from .create_raw import *
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))  # Adjust ".." based on your structure
@@ -23,17 +24,19 @@ def clean_data(df):
 
     df = df.dropna(subset=['title', 'abstract', 'Keywords', 'labels'])
 
-    duplicates = df[df.duplicated(subset=['abstract','title','Keywords'], keep=False)]
-    logger.info(f"Total duplicate abstracts: {len(duplicates)}")
-    logger.info(f"{duplicates[['abstract', 'labels','Keywords']].sort_values('abstract')}")
+    for col in 'title', 'abstract','doi':
+        df = df.dropna(subset=[col])
+        duplicates = df[df.duplicated(subset=[col], keep=False)]
+        logger.info(f"Total duplicate abstracts: {len(duplicates)}")
+        logger.info(f"{duplicates[['abstract', 'labels','Keywords']].sort_values('abstract')}")
 
-    df_clean = df.drop_duplicates(subset=['abstract','title','Keywords'], keep='first')
+        df_clean = df.drop_duplicates(subset=[col], keep='first')
 
-    conflicts = df.groupby(['doi'])['labels'].nunique().reset_index()
-    conflicts = conflicts[conflicts['labels'] > 1]
+        conflicts = df.groupby(col)['labels'].nunique().reset_index()
+        conflicts = conflicts[conflicts['labels'] > 1]
 
-    logger.info(f"Abstracts appearing in both classes: {len(conflicts)}")
-    logger.info(f"{conflicts}")
+        logger.info(f"Abstracts appearing in both classes: {len(conflicts)}")
+        logger.info(f"{conflicts}")
 
     # Free memory
     del duplicates
@@ -96,7 +99,7 @@ def balance_dataset(df, balance_coeff):
 
     return balanced_df
 
-def biomoqa_data_pipeline(n_folds,with_title, with_keywords, balanced=False, balance_coeff=5):
+def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=False, balance_coeff=5,nb_optional_negs=5000):
     og_df, optional_negatives_df = loading_pipeline()
     og_df=og_df[['Title', 'Abstract', 'Keywords', 'DOI','labels']]
     og_df.rename(columns={'Title': 'title', 'Abstract': 'abstract', 'DOI': 'doi'}, inplace=True)
@@ -104,48 +107,61 @@ def biomoqa_data_pipeline(n_folds,with_title, with_keywords, balanced=False, bal
     optional_negatives_df = optional_negatives_df[['title', 'text', 'MESH_terms', 'doi','labels']]
     optional_negatives_df.rename(columns={'MESH_terms': 'Keywords', 'text': 'abstract'}, inplace=True)
 
-    all_df = pd.concat([og_df, optional_negatives_df], axis=0)
+    optional_negatives_df=optional_negatives_df.sample(n=nb_optional_negs)
+    all_df = pd.concat([og_df, optional_negatives_df],ignore_index=True)
     logger.info(f"Combined dataset size: {len(all_df)}")
     clean_df = clean_data(all_df)
+    clean_df=clean_df.reset_index()
     logger.info(f"Cleaned dataset size: {len(clean_df)}")
+    logger.info(f"Numnber of positives : {len(clean_df[clean_df['labels']==1])}")
+    logger.info(f"Numnber of negatives : {len(clean_df[clean_df['labels']!=1])}")
+    clean_og_df=clean_df[clean_df['labels']!=-1]
+    opt_neg_df=clean_df[clean_df['labels']==-1]
+    logger.info(f"clean_og_df indices : {clean_og_df.index}")
+    logger.info(f"opt_neg_df indices : {opt_neg_df.index}")
 
-     #First we do k-fold cross validation for testing
-    #TODO : ensure that this does not change when running this pipeline different times for comparisons purposes
-    skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=CONFIG["seed"])
-    folds = list()
-    if with_title:
-        if with_keywords:
-            folds = list(skf.split(clean_df[['abstract','title','Keywords']], clean_df['labels']))
-        else:
-            folds = list(skf.split(clean_df[['abstract','title']], clean_df['labels']))
-    elif not with_title:
-        if with_keywords:
-            folds = list(skf.split(clean_df[['abstract','Keywords']], clean_df['labels']))
-        else:
-            folds = list(skf.split(clean_df['abstract'].to_list(), clean_df['labels']))
-        logging.info(f"fold 1 : {folds[0]}")
-    else:
-        raise ValueError("Invalid value for with_title. It must be True or False.")
-    
-    # Check distribution of labels in each fold
-    for fold_idx, (train_idx, test_idx) in enumerate(folds):
-        train_labels = clean_df.iloc[train_idx]["labels"]
-        test_labels = clean_df.iloc[test_idx]["labels"]
+    rng = np.random.RandomState(CONFIG["seed"])
+    derived_seeds = rng.randint(0, 1000000, size=n_runs)
+    folds_per_run=[]
+    for seed in derived_seeds:
+        #First we do k-fold cross validation for testing
+        #TODO : ensure that this does not change when running this pipeline different times for comparisons purposes
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
+        folds = list()
+        folds = list(skf.split(clean_og_df['abstract'].to_list(), clean_og_df['labels']))
+        
+        # Check distribution of labels in each fold
+        for fold_idx, (train_dev_idx, test_idx) in enumerate(folds):
+            test_idx=folds[fold_idx][-1]
+            #We split the original dataframe into train and dev
+            train_idx,dev_idx=train_test_split(clean_og_df.iloc[train_dev_idx].index,stratify=clean_og_df.iloc[train_dev_idx]["labels"],shuffle=True,random_state=seed)
+            train_idx=train_idx.to_list()
+            dev_idx=dev_idx.to_list()
 
-        train_label_dist = train_labels.value_counts(normalize=True)
-        test_label_dist = test_labels.value_counts(normalize=True)
+            #We then add the optional negatives to the train set
+            train_idx.extend(clean_df[clean_df['labels']==-1].index.to_list())
 
-        logger.info(f"Fold {fold_idx + 1}:")
-        logger.info(f"  Train label distribution: {train_label_dist.to_dict()}")
-        logger.info(f"  Test label distribution: {test_label_dist.to_dict()}")
-    
+            #Updates the fold indexes
+            folds[fold_idx]=[train_idx,dev_idx,test_idx]
+            train_labels = clean_df.loc[train_idx]["labels"]
+            test_labels = clean_df.loc[test_idx]["labels"]
+
+            train_label_dist = train_labels.value_counts(normalize=True)
+            test_label_dist = test_labels.value_counts(normalize=True)
+
+            logger.info(f"Fold {fold_idx + 1}:")
+            logger.info(f"  Train label distribution: {train_label_dist.to_dict()}")
+            logger.info(f"  Test label distribution: {test_label_dist.to_dict()}")
+        folds_per_run.append(folds)
+        
     clean_df.loc[clean_df["labels"] == -1, "labels"] = 0
 
     clean_ds = datasets.Dataset.from_pandas(clean_df)
 
     clean_ds = clean_ds.class_encode_column("labels")
-
-    return clean_ds, folds
+    logger.info(f"Number of positives : {len(clean_df[clean_df['labels']==1])}")
+    logger.info(f"Number of negatives : {len(clean_df[clean_df['labels']==0])}")
+    return clean_ds, folds_per_run
 
 
 if __name__ == "__main__":

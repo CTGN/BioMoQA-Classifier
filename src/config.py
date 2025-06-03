@@ -1,6 +1,5 @@
 CONFIG = {
     "seed": 42,
-    "logging_dir": "./logs",
     "plot_dir": "/home/leandre/Projects/BioMoQA_Playground/plots",
     "final_model_dir": "./final_model",
     "num_labels": 1,

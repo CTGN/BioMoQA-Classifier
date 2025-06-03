@@ -7,21 +7,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CleanupCallback(tune.Callback):
+    def __init__(self,hpo_metric) -> None:
+        super().__init__()
+        self.hpo_metric=hpo_metric
+    
     def on_trial_complete(self, iteration, trials, trial, **info):
         logger.info(f"Cleaning up trial {trial.trial_id}")
         logger.info(f"Trial path: {trial.path}")
         trials_current_best = max(
-            [trial.metric_analysis['eval_recall']['max'] for trial in trials if
-                'eval_recall' in trial.metric_analysis.keys()])
+            [trial.metric_analysis[self.hpo_metric]['max'] for trial in trials if
+                self.hpo_metric in trial.metric_analysis.keys()])
         for trial in trials:
             if trial.status == 'TERMINATED':
-                if trials_current_best > trial.metric_analysis['eval_recall']['max']:
+                if trials_current_best > trial.metric_analysis[self.hpo_metric]['max']:
                     self.cleanup_trial(trial)
                 else:
                     # Make sure it did all the iterations:
                     # assert trial.last_result['training_iteration'] == 10
                     logger.info(
-                        f"Current best: {trial.trial_id} with eval_recall : {trial.metric_analysis['eval_recall']['max']} at iteration {trial.last_result['training_iteration']}")
+                        f"Current best: {trial.trial_id} with {self.hpo_metric} : {trial.metric_analysis[self.hpo_metric]['max']} at iteration {trial.last_result['training_iteration']}")
 
     def cleanup_trial(self, trial):
         # cleaning up all the /tmp models saved for this trial
