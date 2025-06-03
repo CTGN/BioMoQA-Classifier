@@ -110,6 +110,17 @@ class CustomTrainer(Trainer):
         os.makedirs(output_dir, exist_ok=True)  # <-- Ensure directory exists
         super().save_model(output_dir, _internal_call=_internal_call)
 
+    def _save_checkpoint(self, model, trial, metrics=None):
+        # Generate the checkpoint directory path
+        checkpoint_folder = f"checkpoint-{self.state.global_step}"
+        output_dir = os.path.join(self.args.output_dir, checkpoint_folder)
+        
+        # Ensure the checkpoint directory exists before any saving operations
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Call the parent method
+        return super()._save_checkpoint(model, trial, metrics)
+
     def _save_optimizer_and_scheduler(self, output_dir):
         # Ensure the output directory exists before saving optimizer and scheduler
         os.makedirs(output_dir, exist_ok=True)
