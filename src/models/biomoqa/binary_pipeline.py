@@ -158,6 +158,9 @@ class TrainPipeline:
                     tokenizer=tokenizer,
                 )
 
+
+                os.makedirs(training_args.output_dir, exist_ok=True)
+
                 trainer.train()
                 eval_result = trainer.evaluate()
                 logger.info(f"eval_result: {eval_result}")
