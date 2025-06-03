@@ -105,6 +105,12 @@ class CustomTrainer(Trainer):
     ):
         super().__init__(*args, **kwargs)
     
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        if output_dir is None:
+            output_dir = self.args.output_dir
+        os.makedirs(output_dir, exist_ok=True)  # <-- Ensure directory exists
+        super().save_model(output_dir, _internal_call=_internal_call)
+
     def compute_loss(self, model, inputs, return_outputs: bool = False,num_items_in_batch=None):
         labels = inputs.pop("labels")
         outputs = model(**inputs)
