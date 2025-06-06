@@ -112,12 +112,15 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     clean_df = clean_data(all_df)
     clean_df=clean_df.reset_index()
     logger.info(f"Cleaned dataset size: {len(clean_df)}")
-    logger.info(f"Numnber of positives : {len(clean_df[clean_df['labels']==1])}")
-    logger.info(f"Numnber of negatives : {len(clean_df[clean_df['labels']!=1])}")
+    logger.info(f"Number of positives : {len(clean_df[clean_df['labels']==1])}")
+    logger.info(f"Number of negatives : {len(clean_df[clean_df['labels']!=1])}")
+    logger.info(f"Label distribution in cleaned data:\n{clean_df['labels'].value_counts()}")
+    logger.info(f"Sample of cleaned data:\n{clean_df[['abstract', 'labels']].head()}")
     clean_og_df=clean_df[clean_df['labels']!=-1]
     opt_neg_df=clean_df[clean_df['labels']==-1]
     logger.info(f"clean_og_df size : {len(clean_og_df)}")
     logger.info(f"opt_neg_df size : {len(opt_neg_df)}")
+    logger.info(f"Label distribution in clean_og_df:\n{clean_og_df['labels'].value_counts()}")
 
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
