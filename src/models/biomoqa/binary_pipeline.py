@@ -368,17 +368,8 @@ class TrainPipeline:
             
             scores = 1 / (1 + np.exp(-predictions.predictions.squeeze()))
             preds = (scores > 0.5).astype(int)
-            logger.info(f"Raw predictions shape: {predictions.predictions.shape}")
-            logger.info(f"Raw predictions: {predictions.predictions[:10]}")  # First 10 predictions
-            logger.info(f"Scores shape: {scores.shape}")
-            logger.info(f"Scores: {scores[:10]}")  # First 10 scores
-            logger.info(f"Preds shape: {preds.shape}")
-            logger.info(f"Preds: {preds[:10]}")  # First 10 predictions
-            logger.info(f"Test labels shape: {np.asarray(test_split['labels']).shape}")
-            logger.info(f"Test labels: {test_split['labels'][:10]}")  # First 10 labels
-            logger.info(f"Unique values in predictions: {np.unique(preds)}")
-            logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
-            logger.info(f"Confusion matrix:\n{confusion_matrix(test_split['labels'], preds)}")
+            logger.info(f"preds : {preds}")
+            logger.info(f'test_split["labels"] : {test_split["labels"]}')
             res1=detailed_metrics(preds, test_split["labels"],scores=scores)
 
             #We update the results dataframe

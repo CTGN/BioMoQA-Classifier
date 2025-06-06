@@ -112,15 +112,12 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     clean_df = clean_data(all_df)
     clean_df=clean_df.reset_index()
     logger.info(f"Cleaned dataset size: {len(clean_df)}")
-    logger.info(f"Number of positives : {len(clean_df[clean_df['labels']==1])}")
-    logger.info(f"Number of negatives : {len(clean_df[clean_df['labels']!=1])}")
-    logger.info(f"Label distribution in cleaned data:\n{clean_df['labels'].value_counts()}")
-    logger.info(f"Sample of cleaned data:\n{clean_df[['abstract', 'labels']].head()}")
+    logger.info(f"Numnber of positives : {len(clean_df[clean_df['labels']==1])}")
+    logger.info(f"Numnber of negatives : {len(clean_df[clean_df['labels']!=1])}")
     clean_og_df=clean_df[clean_df['labels']!=-1]
     opt_neg_df=clean_df[clean_df['labels']==-1]
     logger.info(f"clean_og_df size : {len(clean_og_df)}")
     logger.info(f"opt_neg_df size : {len(opt_neg_df)}")
-    logger.info(f"Label distribution in clean_og_df:\n{clean_og_df['labels'].value_counts()}")
 
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
@@ -129,31 +126,41 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
         #First we do k-fold cross validation for testing
         #TODO : ensure that this does not change when running this pipeline different times for comparisons purposes
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
-        folds = list()
-        folds = list(skf.split(clean_og_df['abstract'].to_list(), clean_og_df['labels']))
         
-        # Check distribution of labels in each fold
-        for fold_idx, (train_dev_idx, test_idx) in enumerate(folds):
-            #We split the original dataframe into train and dev
-            train_idx,dev_idx=train_test_split(clean_og_df.iloc[train_dev_idx].index,stratify=clean_og_df.iloc[train_dev_idx]["labels"],shuffle=True,random_state=seed)
-            train_idx=train_idx.to_list()
-            dev_idx=dev_idx.to_list()
+        # skf.split returns positional indices for clean_og_df
+        run_folds = []
+        for train_dev_pos_idx, test_pos_idx in skf.split(clean_og_df['abstract'], clean_og_df['labels']):
+            
+            # Convert positional indices to original DataFrame indices
+            train_dev_indices = clean_og_df.iloc[train_dev_pos_idx].index
+            test_indices = clean_og_df.iloc[test_pos_idx].index.to_list()
+            
+            # Split train_dev into train and dev
+            train_indices, dev_indices = train_test_split(
+                train_dev_indices,
+                stratify=clean_og_df.loc[train_dev_indices, "labels"],
+                shuffle=True,
+                random_state=seed
+            )
+            
+            train_indices = train_indices.to_list()
+            dev_indices = dev_indices.to_list()
 
-            #We then add the optional negatives to the train set
-            train_idx.extend(clean_df[clean_df['labels']==-1].index.to_list())
+            # Add optional negatives to the training set
+            train_indices.extend(opt_neg_df.index.to_list())
+            
+            run_folds.append([train_indices, dev_indices, test_indices])
 
-            #Updates the fold indexes
-            folds[fold_idx]=[train_idx,dev_idx,test_idx]
-            train_labels = clean_df.loc[train_idx]["labels"]
-            test_labels = clean_df.loc[test_idx]["labels"]
-
+            # Logging distributions
+            train_labels = clean_df.loc[train_indices, "labels"]
+            test_labels = clean_df.loc[test_indices, "labels"]
             train_label_dist = train_labels.value_counts(normalize=True)
             test_label_dist = test_labels.value_counts(normalize=True)
-
-            logger.info(f"Fold {fold_idx + 1}:")
+            logger.info(f"Fold {len(run_folds)}:")
             logger.info(f"  Train label distribution: {train_label_dist.to_dict()}")
             logger.info(f"  Test label distribution: {test_label_dist.to_dict()}")
-        folds_per_run.append(folds)
+
+        folds_per_run.append(run_folds)
         
     clean_df.loc[clean_df["labels"] == -1, "labels"] = 0
 
