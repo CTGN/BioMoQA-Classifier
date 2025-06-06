@@ -191,7 +191,7 @@ class TrainPipeline:
         #TODO : See how tokenizing is done to check if it alrgiht like this -> ask julien if that's ok
         #It can be a problem since we are truncating
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        data_collator = DataCollatorWithPadding(tokenizer=tokenizer,max_length=512,padding='max_length')
+        data_collator = DataCollatorWithPadding(tokenizer=tokenizer,padding=True)
 
         test_metrics=[]
         scores_by_fold=[]
@@ -534,6 +534,7 @@ class TrainPipeline:
     def store_metrics(self,metric_df,path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics",file_name="binary_metrics.csv"):
         if metric_df is not None:
             metric_df.to_csv(os.path.join(path, file_name))
+            logger.info(f"Metrics stored successfully at {os.path.join(path, file_name)}")
         else:
             raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
     

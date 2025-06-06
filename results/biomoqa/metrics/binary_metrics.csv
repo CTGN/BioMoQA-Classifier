@@ -1,2 +1,3 @@
 ,model_name,fold,loss_type,run,with_title,with_keywords,f1,recall,precision,accuracy,AP,MCC,NDCG,kappa,TN,FP,FN,TP
 0,dmis-lab/biobert-v1.1,1,BCE,1,True,True,0.9949238578680203,1.0,0.98989898989899,0.9924812030075187,1.0,0.9806202943118002,1.0000000000000004,0.98043254376931,34.0,1.0,0.0,98.0
+0,dmis-lab/biobert-v1.1,2,BCE,1,True,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0000000000000004,1.0,34.0,0.0,0.0,98.0

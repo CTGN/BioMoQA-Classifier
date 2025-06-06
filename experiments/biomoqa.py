@@ -31,7 +31,7 @@ def main():
 
     begin_pipeline=perf_counter()
     ray.init(num_gpus=torch.cuda.device_count())
-    pipeline=TrainPipeline(None,ensemble=True,hpo_metric="eval_f1",with_title=True,with_keywords=True,n_folds=3,n_trials=3, num_runs=2,nb_optional_negs=500,model_names=["dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"])
+    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_f1",with_title=args.title,with_keywords=args.keywords,n_folds=3,n_trials=3, num_runs=2,nb_optional_negs=500,model_names=["dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"])
     logger.info(f"with_title : {pipeline.with_title}")
     logger.info(f"with_keywords : {pipeline.with_keywords}")
     """
