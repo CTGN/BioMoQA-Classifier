@@ -156,7 +156,7 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
             # Logging distributions
             train_labels = clean_df.loc[train_indices, "labels"]
             test_labels = clean_df.loc[test_indices, "labels"]
-            train_label_dist = train_labels.value_counts(normalize=True)
+            train_label_dist = train_labels.value_counts(normalize=True)                        
             test_label_dist = test_labels.value_counts(normalize=True)
             logger.info(f"Fold {len(run_folds)}:")
             logger.info(f"  Train label distribution: {train_label_dist.to_dict()}")
@@ -182,6 +182,15 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     clean_ds = clean_ds.class_encode_column("labels")
     logger.info(f"Number of positives : {len(clean_df[clean_df['labels']==1])}")
     logger.info(f"Number of negatives : {len(clean_df[clean_df['labels']==0])}")
+    
+    # Ensure test indices do not include optional negatives
+    for run_folds in folds_per_run:
+        for i in range(len(run_folds)):
+            train_indices, dev_indices, test_indices = run_folds[i]
+            opt_neg_indices = set(opt_neg_df.index)
+            test_indices = [idx for idx in test_indices if idx not in opt_neg_indices]
+            run_folds[i] = [train_indices, dev_indices, test_indices]
+
     return clean_ds, folds_per_run
 
 
