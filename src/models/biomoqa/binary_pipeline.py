@@ -35,7 +35,6 @@ import transformers
 import sys
 import datasets
 from time import perf_counter
-from time import perf_counter
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
 from .HPO_callbacks import CleanupCallback
 
@@ -89,7 +88,7 @@ class TrainPipeline:
         self.run_idx=0
         self.num_runs=num_runs
         self.dataset,self.folds_per_run =biomoqa_data_pipeline(self.n_folds,self.num_runs,self.with_title,self.with_keywords,nb_optional_negs=nb_optional_negs)
-        self.folds=[]
+        self.folds = self.folds_per_run[0]
 
         naive_metrics=pd.DataFrame()
         folds=self.folds_per_run[0]
@@ -142,9 +141,9 @@ class TrainPipeline:
                     per_device_train_batch_size=batch_size,
                     per_device_eval_batch_size=batch_size,
                     metric_for_best_model=hpo_metric,
+                    load_best_model_at_end = True,
                     save_strategy='no',
                     eval_strategy="no",
-                    save_steps=float('inf'),
                 )
                 training_args.learning_rate=config["learning_rate"]
                 training_args.num_train_epochs=config["num_train_epochs"]
@@ -192,7 +191,7 @@ class TrainPipeline:
         #TODO : See how tokenizing is done to check if it alrgiht like this -> ask julien if that's ok
         #It can be a problem since we are truncating
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        data_collator = DataCollatorWithPadding(tokenizer=tokenizer,max_length=512)
+        data_collator = DataCollatorWithPadding(tokenizer=tokenizer,max_length=512,padding='max_length')
 
         test_metrics=[]
         scores_by_fold=[]
@@ -294,6 +293,7 @@ class TrainPipeline:
                     **CONFIG["default_training_args"],
                     loss_type=self.loss_type,
                     metric_for_best_model=self.hpo_metric,
+                    load_best_model_at_end=True,
                     save_strategy= "steps",
                     eval_strategy="steps",
                 )
@@ -368,8 +368,17 @@ class TrainPipeline:
             
             scores = 1 / (1 + np.exp(-predictions.predictions.squeeze()))
             preds = (scores > 0.5).astype(int)
-            logger.info(f"preds : {preds}")
-            logger.info(f'test_split["labels"] : {test_split["labels"]}')
+            logger.info(f"Raw predictions shape: {predictions.predictions.shape}")
+            logger.info(f"Raw predictions: {predictions.predictions[:10]}")  # First 10 predictions
+            logger.info(f"Scores shape: {scores.shape}")
+            logger.info(f"Scores: {scores[:10]}")  # First 10 scores
+            logger.info(f"Preds shape: {preds.shape}")
+            logger.info(f"Preds: {preds[:10]}")  # First 10 predictions
+            logger.info(f"Test labels shape: {np.asarray(test_split['labels']).shape}")
+            logger.info(f"Test labels: {test_split['labels'][:10]}")  # First 10 labels
+            logger.info(f"Unique values in predictions: {np.unique(preds)}")
+            logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
+            logger.info(f"Confusion matrix:\n{confusion_matrix(test_split['labels'], preds)}")
             res1=detailed_metrics(preds, test_split["labels"],scores=scores)
 
             #We update the results dataframe
@@ -423,7 +432,20 @@ class TrainPipeline:
         #TODO : compare the loss functions inside the pipeline function to have the same test set for each run
 
         if self.ensemble==False:
-            scores_by_fold =self.train()
+            scores_by_fold_by_model = [ [] for _ in range(self.n_folds)]
+            for i,model_name in enumerate(self.model_names):
+                logger.info(f"Training model {i+1}/{len(self.model_names)}: {model_name}")
+                scores_by_fold = self.train(model_name=model_name)
+
+                torch.cuda.empty_cache()
+                clear_cuda_cache() 
+
+                # Ensure scores_by_fold is a consistent array before appending
+                for k in range(self.n_folds):
+                    scores_by_fold_by_model[k].append(scores_by_fold[k]) 
+
+                logger.info(f"Metrics for {model_name}: {self.result_metrics[ (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == model_name)]}")
+
             clear_cuda_cache() 
             logger.info(f"Results: {self.result_metrics}")
             return self.result_metrics

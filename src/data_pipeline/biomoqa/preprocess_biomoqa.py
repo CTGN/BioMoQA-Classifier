@@ -14,34 +14,35 @@ if parent_dir not in sys.path:
 from config import CONFIG
 
 def clean_data(df):
-    """
-    Deletes duplicates and conflicts in the dataset.
-    """
-    logger.info(f"{df.head()}")
+    logger.info("Before cleaning, head:\n%s", df.head())
+    logger.info("Null counts before cleaning:\n%s", df.isnull().sum())
 
-    logger.info(f"{df.isnull().sum()}")
-
+    # Drop any row missing at least one of these four required columns
     df = df.dropna(subset=['title', 'abstract', 'Keywords', 'labels'])
 
-    for col in 'title', 'abstract','doi':
+    # Iteratively drop duplicates on title → abstract → doi
+    for col in ('title', 'abstract', 'doi'):
+        # Drop any row where this col is missing
         df = df.dropna(subset=[col])
+
+        # Log how many true duplicates (i.e., identical values in this column)
         duplicates = df[df.duplicated(subset=[col], keep=False)]
-        logger.info(f"Total duplicate abstracts: {len(duplicates)}")
-        logger.info(f"{duplicates[['abstract', 'labels','Keywords']].sort_values('abstract')}")
+        logger.info("Total duplicate %s: %d", col, len(duplicates))
 
-        df_clean = df.drop_duplicates(subset=[col], keep='first')
+        # If there are any conflicts (same col value but different labels)
+        conflict_counts = (
+            df.groupby(col)['labels']
+              .nunique()
+              .reset_index(name='n_labels')
+              .query("n_labels > 1")
+        )
+        logger.info("Conflicts on %s (same value, multiple labels):\n%s", col, conflict_counts)
 
-        conflicts = df.groupby(col)['labels'].nunique().reset_index()
-        conflicts = conflicts[conflicts['labels'] > 1]
+        # Now actually drop duplicates, keeping the first occurrence
+        df = df.drop_duplicates(subset=[col], keep='first')
 
-        logger.info(f"Abstracts appearing in both classes: {len(conflicts)}")
-        logger.info(f"{conflicts}")
+    return df
 
-    # Free memory
-    del duplicates
-    del conflicts
-    gc.collect()
-    return df_clean
 
 
 def pmids_to_text(train_df, test_df):
@@ -86,12 +87,12 @@ def balance_dataset(df, balance_coeff):
     # Ensure there are more negatives than positives before subsampling
     if len(neg) > num_pos:
         #TODO : Change the proportion value here for les or more imbalance -> compare different values, plot ? try less
-        neg_subset_train = neg.sample(n=balance_coeff*num_pos, random_state=42)
+        neg_subset_train = neg.sample(n=balance_coeff*num_pos, random_state=CONFIG["seed"])
     else:
         neg_subset_train = neg  # Fallback (unlikely in your case)
 
     balanced_df = pd.concat([pos, neg_subset_train], ignore_index=True)
-    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)  # Final shuffle
+    balanced_df = balanced_df.sample(frac=1, random_state=CONFIG["seed"]).reset_index(drop=True)  # Final shuffle
 
     logger.info(f"Balanced columns: {balanced_df.columns}")
     logger.info(f"Balanced dataset size: {len(balanced_df)}")
@@ -106,11 +107,11 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     optional_negatives_df = optional_negatives_df[['title', 'text', 'MESH_terms', 'doi','labels']]
     optional_negatives_df.rename(columns={'MESH_terms': 'Keywords', 'text': 'abstract'}, inplace=True)
 
-    optional_negatives_df=optional_negatives_df.sample(n=nb_optional_negs)
+    optional_negatives_df=optional_negatives_df.sample(n=nb_optional_negs,random_state=CONFIG['seed'])
     all_df = pd.concat([og_df, optional_negatives_df],ignore_index=True)
     logger.info(f"Combined dataset size: {len(all_df)}")
     clean_df = clean_data(all_df)
-    clean_df=clean_df.reset_index()
+    clean_df=clean_df.reset_index(drop=True)
     logger.info(f"Cleaned dataset size: {len(clean_df)}")
     logger.info(f"Numnber of positives : {len(clean_df[clean_df['labels']==1])}")
     logger.info(f"Numnber of negatives : {len(clean_df[clean_df['labels']!=1])}")
@@ -118,6 +119,7 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     opt_neg_df=clean_df[clean_df['labels']==-1]
     logger.info(f"clean_og_df size : {len(clean_og_df)}")
     logger.info(f"opt_neg_df size : {len(opt_neg_df)}")
+    
 
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
@@ -164,7 +166,18 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
         
     clean_df.loc[clean_df["labels"] == -1, "labels"] = 0
 
+    # Check if clean_df indices are different after resetting them
+    original_indices = clean_df.index
+    reset_indices = clean_df.reset_index().index
+
+    if not original_indices.equals(reset_indices):
+        logger.warning("Indices of clean_df have changed after resetting.")
+    else:
+        logger.info("Indices of clean_df remain the same after resetting.")
+
     clean_ds = datasets.Dataset.from_pandas(clean_df)
+
+    logger.info(f"clean_df index : {clean_df.index}")
 
     clean_ds = clean_ds.class_encode_column("labels")
     logger.info(f"Number of positives : {len(clean_df[clean_df['labels']==1])}")
