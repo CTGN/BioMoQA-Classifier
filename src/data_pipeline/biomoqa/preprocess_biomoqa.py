@@ -134,8 +134,8 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
         for train_dev_pos_idx, test_pos_idx in skf.split(clean_og_df['abstract'], clean_og_df['labels']):
             
             # Convert positional indices to original DataFrame indices
-            train_dev_indices = clean_og_df.iloc[train_dev_pos_idx].index
-            test_indices = clean_og_df.iloc[test_pos_idx].index.to_list()
+            train_dev_indices = clean_og_df.index[train_dev_pos_idx]
+            test_indices = clean_og_df.index[test_pos_idx].to_list()
             
             # Split train_dev into train and dev
             train_indices, dev_indices = train_test_split(
