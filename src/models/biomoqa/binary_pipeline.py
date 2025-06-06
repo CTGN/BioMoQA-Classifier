@@ -123,9 +123,9 @@ class TrainPipeline:
                 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
                 if torch.cuda.current_device()==2:
-                    batch_size=70
+                    batch_size=60
                 else:
-                    batch_size=19
+                    batch_size=20
                   
                 # Set up training arguments
                 training_args = CustomTrainingArguments(
@@ -142,6 +142,9 @@ class TrainPipeline:
                     per_device_train_batch_size=batch_size,
                     per_device_eval_batch_size=batch_size,
                     metric_for_best_model=hpo_metric,
+                    save_strategy='no',
+                    eval_strategy="no",
+                    save_steps=float('inf'),
                 )
                 training_args.learning_rate=config["learning_rate"]
                 training_args.num_train_epochs=config["num_train_epochs"]
@@ -291,6 +294,8 @@ class TrainPipeline:
                     **CONFIG["default_training_args"],
                     loss_type=self.loss_type,
                     metric_for_best_model=self.hpo_metric,
+                    save_strategy= "steps",
+                    eval_strategy="steps",
                 )
             
             training_args.pos_weight = best_config["pos_weight"] if self.loss_type == "BCE" else None
@@ -326,9 +331,9 @@ class TrainPipeline:
                 callbacks=[early_stopping_callback],
             )
 
-            logger.info(f"training size : {len(tokenized_train)}")
-            logger.info(f"dev size : {len(tokenized_dev)}")
-            logger.info(f"test size : {len(tokenized_test)}")
+            logger.info(f"training size : {len(train_split)}")
+            logger.info(f"dev size : {len(dev_split)}")
+            logger.info(f"test size : {len(test_split)}")
 
             metrics = trainer.train().metrics
 
@@ -398,7 +403,6 @@ class TrainPipeline:
 
             logger.info(f"Results for fold {fold_idx+1} : {results}")
             test_metrics.append(results)
-            logger.info(f"scores : {scores}")
             scores_by_fold.append(scores)
 
             torch.cuda.empty_cache()
@@ -427,7 +431,7 @@ class TrainPipeline:
         elif self.ensemble==True:
             logger.info(f"Ensemble learning pipeline")
             
-            scores_by_model = []
+            scores_by_fold_by_model = [ [] for _ in range(self.n_folds)]
             for i,model_name in enumerate(self.model_names):
                 logger.info(f"Training model {i+1}/{len(self.model_names)}: {model_name}")
                 scores_by_fold = self.train(model_name=model_name)
@@ -436,25 +440,19 @@ class TrainPipeline:
                 clear_cuda_cache() 
 
                 # Ensure scores_by_fold is a consistent array before appending
-                scores_by_fold = np.array(scores_by_fold, dtype=object)
-                scores_by_model.append(scores_by_fold)
+                for k in range(self.n_folds):
+                    scores_by_fold_by_model[k].append(scores_by_fold[k]) 
+
                 logger.info(f"Metrics for {model_name}: {self.result_metrics[ (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == model_name)]}")
 
-            avg_ensemble_metrics=self.ensemble_pred(scores_by_model)
+            avg_ensemble_metrics=self.ensemble_pred(scores_by_fold_by_model)
 
             return avg_ensemble_metrics
         
-    def ensemble_pred(self, scores_by_model):
+    def ensemble_pred(self, scores_by_fold_by_model):
         # Ensure scores_by_model is a valid numpy array
-        scores_by_model = np.array(scores_by_model)
-        if scores_by_model.ndim != 3:
-            raise ValueError("scores_by_model must be a 3D array with shape (n_models, n_folds, n_samples).")
-
-        logger.info(f"score by model shape (before ensembling): {scores_by_model.shape}")
-        scores_by_fold = scores_by_model.transpose(1, 0, 2)  # Transpose to (n_folds, n_models, n_samples)
-
         for fold_idx in range(len(self.folds)):
-            avg_models_scores = np.mean(scores_by_fold[fold_idx], axis=0)  # Average scores across models
+            avg_models_scores = np.mean(np.array(scores_by_fold_by_model[fold_idx]), axis=0)  # Average scores across models
             logger.info(f"\nfold number {fold_idx + 1} / {len(self.folds)}")
 
             _,_, test_indices = self.folds[fold_idx]

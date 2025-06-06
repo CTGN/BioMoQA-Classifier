@@ -20,7 +20,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-from sklearn.metrics import make_scorer,f1_score,accuracy_score,recall_score,precision_score
+from sklearn.metrics import cohen_kappa_score,ndcg_score,matthews_corrcoef,average_precision_score
 from torchvision.ops import sigmoid_focal_loss
 from src.utils import *
 import logging
@@ -40,7 +40,13 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     precision = evaluate.load("precision").compute(predictions=predictions, references=labels) or {}
     optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val")
     
-    return {**f1,**recall, **accuracy, **precision, "optim_threshold": optimal_threshold}
+    
+    return {**f1,**recall, **accuracy, **precision, "optim_threshold": optimal_threshold,
+            "AP":average_precision_score(labels,scores,average="weighted") if scores is not None else {},
+            "MCC":matthews_corrcoef(labels,predictions),
+            "NDCG":ndcg_score(np.asarray(labels).reshape(1, -1),scores.reshape(1, -1)) if scores is not None else {},
+            "kappa":cohen_kappa_score(labels,predictions)
+            }
 
 
 class LossPlottingCallback(TrainerCallback):
@@ -103,28 +109,6 @@ class CustomTrainer(Trainer):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
-    
-    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
-        if output_dir is None:
-            output_dir = self.args.output_dir
-        os.makedirs(output_dir, exist_ok=True)  # <-- Ensure directory exists
-        super().save_model(output_dir, _internal_call=_internal_call)
-
-    def _save_checkpoint(self, model, trial, metrics=None):
-        # Generate the checkpoint directory path
-        checkpoint_folder = f"checkpoint-{self.state.global_step}"
-        output_dir = os.path.join(self.args.output_dir, checkpoint_folder)
-        
-        # Ensure the checkpoint directory exists before any saving operations
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Call the parent method
-        return super()._save_checkpoint(model, trial, metrics)
-
-    def _save_optimizer_and_scheduler(self, output_dir):
-        # Ensure the output directory exists before saving optimizer and scheduler
-        os.makedirs(output_dir, exist_ok=True)
-        super()._save_optimizer_and_scheduler(output_dir)
 
     def compute_loss(self, model, inputs, return_outputs: bool = False,num_items_in_batch=None):
         labels = inputs.pop("labels")

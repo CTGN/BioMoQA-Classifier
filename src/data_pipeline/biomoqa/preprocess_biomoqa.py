@@ -8,7 +8,6 @@ from .create_raw import *
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))  # Adjust ".." based on your structure
 
-# Add it to sys.path
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
@@ -117,8 +116,8 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
     logger.info(f"Numnber of negatives : {len(clean_df[clean_df['labels']!=1])}")
     clean_og_df=clean_df[clean_df['labels']!=-1]
     opt_neg_df=clean_df[clean_df['labels']==-1]
-    logger.info(f"clean_og_df indices : {clean_og_df.index}")
-    logger.info(f"opt_neg_df indices : {opt_neg_df.index}")
+    logger.info(f"clean_og_df size : {len(clean_og_df)}")
+    logger.info(f"opt_neg_df size : {len(opt_neg_df)}")
 
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
