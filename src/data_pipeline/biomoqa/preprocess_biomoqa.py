@@ -134,7 +134,6 @@ def biomoqa_data_pipeline(n_folds,n_runs,with_title, with_keywords, balanced=Fal
         
         # Check distribution of labels in each fold
         for fold_idx, (train_dev_idx, test_idx) in enumerate(folds):
-            test_idx=folds[fold_idx][-1]
             #We split the original dataframe into train and dev
             train_idx,dev_idx=train_test_split(clean_og_df.iloc[train_dev_idx].index,stratify=clean_og_df.iloc[train_dev_idx]["labels"],shuffle=True,random_state=seed)
             train_idx=train_idx.to_list()

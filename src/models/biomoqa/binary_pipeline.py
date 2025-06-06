@@ -374,7 +374,7 @@ class TrainPipeline:
             logger.info(f"Scores: {scores[:10]}")  # First 10 scores
             logger.info(f"Preds shape: {preds.shape}")
             logger.info(f"Preds: {preds[:10]}")  # First 10 predictions
-            logger.info(f"Test labels shape: {test_split['labels'].shape}")
+            logger.info(f"Test labels shape: {np.asarray(test_split['labels']).shape}")
             logger.info(f"Test labels: {test_split['labels'][:10]}")  # First 10 labels
             logger.info(f"Unique values in predictions: {np.unique(preds)}")
             logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
