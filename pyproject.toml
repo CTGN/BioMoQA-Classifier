@@ -44,6 +44,7 @@ dependencies = [
     "sentence-transformers>=3.4.1",
     "sentencepiece>=0.2.0",
     "setuptools>=76.0.0",
+    "spacy>=3.8.7",
     "tenacity>=9.0.0",
     "tensorboard>=2.19.0",
     "tensorboardx>=2.6.2.2",

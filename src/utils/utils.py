@@ -32,6 +32,13 @@ from src.config import CONFIG
 
 logger = logging.getLogger(__name__)
 
+def save_dataframe(metric_df,path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics",file_name="binary_metrics.csv"):
+        if metric_df is not None:
+            metric_df.to_csv(os.path.join(path, file_name))
+            logger.info(f"Metrics stored successfully at {os.path.join(path, file_name)}")
+        else:
+            raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
+
 def detailed_metrics(predictions: np.ndarray, labels: np.ndarray,scores =None) -> Dict[str, float]:
     """Compute and display detailed metrics including confusion matrix."""
     cm = confusion_matrix(labels, predictions, labels=[0, 1])

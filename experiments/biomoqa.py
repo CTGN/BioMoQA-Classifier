@@ -31,17 +31,22 @@ def main():
 
     begin_pipeline=perf_counter()
     ray.init(num_gpus=torch.cuda.device_count())
-    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_f1",with_title=args.title,with_keywords=args.keywords,n_folds=3,n_trials=3, num_runs=2,nb_optional_negs=500,model_names=["dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"])
-    logger.info(f"with_title : {pipeline.with_title}")
-    logger.info(f"with_keywords : {pipeline.with_keywords}")
-    """
-    for model_name in pipeline.model_names:
-        pipeline.svm_bert(model_name)
-    """
-    pipeline.whole_pipeline()
-    pipeline.svm()
-    pipeline.random_forest()
-    torch.cuda.empty_cache()  # Clear CUDA cache after pipeline
+    
+    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_kappa",with_title=args.title,with_keywords=args.keywords,n_folds=5,n_trials=30, num_runs=2,nb_optional_negs=0)
+
+    for nb_optional_negs in [0,100,500]:
+        pipeline.nb_optional_negs=nb_optional_negs
+        pipeline.load_dataset()
+        pipeline._compute_naive_metrics()
+        
+        """
+        for model_name in pipeline.model_names:
+            pipeline.svm_bert(model_name)
+        """
+        pipeline.whole_pipeline()
+        pipeline.svm()
+        pipeline.random_forest()
+        torch.cuda.empty_cache()  # Clear CUDA cache after pipeline
     end_pipeline=perf_counter()
     pipeline_runtime=end_pipeline-begin_pipeline
     logger.info(f"Total running time : {pipeline_runtime}")

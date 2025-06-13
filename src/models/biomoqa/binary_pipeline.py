@@ -71,52 +71,138 @@ logger = logging.getLogger(__name__)
 # Maybe make pandas df for results where you would have the following attributes : model_name, f1, accuracy,tp, fp, tn, fn 
 
 class TrainPipeline:
+    # Class-level constants (shared defaults)
+    DEFAULT_MODEL_NAMES: List[str] = [
+        "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract",
+        "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext",
+        "FacebookAI/roberta-base",
+        "dmis-lab/biobert-v1.1",
+        "google-bert/bert-base-uncased",
+    ]
+    RESULT_COLUMNS = ["model_name", "fold", "loss_type", "run", "with_title", "with_keywords"]
+    SVM_COLUMNS = ["model_name", "fold", "kernel", "run", "with_title", "with_keywords"]
+    RF_COLUMNS = ["model_name", "fold", "criterion", "num_trees", "run", "with_title", "with_keywords"]
 
-    def __init__(self,loss_type="BCE",hpo_metric="eval_recall",ensemble : Optional[bool] =False,n_trials=10,num_runs=5,with_title : Optional[bool] =False,with_keywords : Optional[bool] =False,nb_optional_negs=5000,n_folds=5,model_names = ["microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract", "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext","FacebookAI/roberta-base", "dmis-lab/biobert-v1.1", "google-bert/bert-base-uncased"]):
+    def __init__(
+        self,
+        loss_type: str = "BCE",
+        hpo_metric: str = "eval_recall",
+        ensemble: bool = False,
+        n_trials: int = 10,
+        num_runs: int = 5,
+        with_title: bool = False,
+        with_keywords: bool = False,
+        nb_optional_negs: int = 5000,
+        n_folds: int = 5,
+        model_names: Optional[List[str]] = None,
+    ):
+        from transformers import set_seed
+        from src.config import CONFIG
+        from src.data_pipeline.biomoqa.preprocess_biomoqa import biomoqa_data_pipeline
+        from src.utils import set_random_seeds, detailed_metrics
+
+        # Initialize random seeds
         set_random_seeds(CONFIG["seed"])
-        self.loss_type=loss_type
-        self.ensemble=ensemble
-        self.with_title=with_title
-        self.with_keywords=with_keywords
-        self.n_folds=n_folds
-        self.n_trials=n_trials
-        self.result_metrics=pd.DataFrame(columns=["model_name", "fold", "loss_type", "run","with_title","with_keywords"])
-        self.svm_metrics=pd.DataFrame(columns=["model_name", "fold", "kernel", "run","with_title","with_keywords"])
-        self.random_forest_metrics=pd.DataFrame(columns=["model_name", "fold", "criterion","num_trees","run","with_title","with_keywords"])
-        self.hpo_metric=hpo_metric
-        self.model_names=model_names
-        self.run_idx=0
-        self.num_runs=num_runs
-        self.dataset,self.folds_per_run =biomoqa_data_pipeline(self.n_folds,self.num_runs,self.with_title,self.with_keywords,nb_optional_negs=nb_optional_negs)
+        set_seed(CONFIG["seed"])
+
+        # Instance attributes
+        self.loss_type = loss_type
+        self.hpo_metric = hpo_metric
+        self.ensemble = ensemble
+        self.n_trials = n_trials
+        self.num_runs = num_runs
+        self.with_title = with_title
+        self.with_keywords = with_keywords
+        self.nb_optional_negs = nb_optional_negs
+        self.n_folds = n_folds
+        # allow override of default models
+        self.model_names = model_names or self.DEFAULT_MODEL_NAMES
+
+        self.run_idx = 0
+        self.dataset = None
+        self.folds_per_run = None
+        self.folds = None
+
+        # Metrics storage
+        self.result_metrics = pd.DataFrame(columns=self.RESULT_COLUMNS)
+        self.svm_metrics = pd.DataFrame(columns=self.SVM_COLUMNS)
+        self.random_forest_metrics = pd.DataFrame(columns=self.RF_COLUMNS)
+
+    def load_dataset(self, pipeline_fn=biomoqa_data_pipeline):
+        self.dataset, self.folds_per_run = pipeline_fn(
+            self.n_folds,
+            self.num_runs,
+            self.with_title,
+            self.with_keywords,
+            nb_optional_negs=self.nb_optional_negs,
+        )
         self.folds = self.folds_per_run[0]
 
-        naive_metrics=pd.DataFrame()
-        folds=self.folds_per_run[0]
-        for fold_idx,(_,_,test_indices) in enumerate(folds):
-            test_split=self.dataset.select(test_indices)
-            
-            res=detailed_metrics(np.asarray([1 for _ in range(len(test_indices))]),test_split['labels'],scores=np.asarray([1.0 for _ in range(len(test_indices))]))
-            naive_metrics = pd.concat([
-                naive_metrics,
-                pd.DataFrame([{
-                    "approach": "always pos",
-                    "fold": fold_idx+1,
-                    **res
-                }])
-            ])
+    def _compute_naive_metrics(self, metrics_fn=detailed_metrics):
+        naive_metrics = pd.DataFrame()
+        for fold_idx, (_, _, test_indices) in enumerate(self.folds):
+            test_split = self.dataset.select(test_indices)
 
-            res=detailed_metrics(np.asarray([0 for _ in range(len(test_indices))]),test_split['labels'],scores=np.asarray([0.0 for _ in range(len(test_indices))]))
-            naive_metrics = pd.concat([
-                naive_metrics,
-                pd.DataFrame([{
-                    "approach": "always neg",
-                    "fold": fold_idx+1,
-                    **res
-                }])
-            ])
-        self.store_metrics(naive_metrics,file_name="naive_metrics.csv")
-        logger.info(f"Pipeline for loss type {self.loss_type} and ensemble={self.ensemble}")
+            # always positive
+            res_pos = metrics_fn(
+                np.asarray([1 for _ in range(len(test_indices))]),
+                test_split["labels"],
+                scores=np.asarray([1.0 for _ in range(len(test_indices))]),
+            )
+            naive_metrics = pd.concat(
+                [
+                    naive_metrics,
+                    pd.DataFrame(
+                        [{
+                            "approach": "always pos",
+                            "fold": fold_idx + 1,
+                            "nb_added_negs": self.nb_optional_negs,
+                            **res_pos,
+                        }]
+                    ),
+                ],
+                ignore_index=True,
+            )
 
+            # always negative
+            res_neg = metrics_fn(
+                np.asarray([0 for _ in range(len(test_indices))]),
+                test_split["labels"],
+                scores=np.asarray([0.0 for _ in range(len(test_indices))]),
+            )
+            naive_metrics = pd.concat(
+                [
+                    naive_metrics,
+                    pd.DataFrame(
+                        [{
+                            "approach": "always neg",
+                            "fold": fold_idx + 1,
+                            "nb_added_negs": self.nb_optional_negs,
+                            **res_neg,
+                        }]
+                    ),
+                ],
+                ignore_index=True,
+            )
+        # Persist results
+        from src.utils import save_dataframe
+
+        save_dataframe(naive_metrics, file_name="naive_metrics.csv")
+    
+    def map_name(self,model_name):
+        if model_name == "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract":
+            return "BiomedBERT-abs"
+        elif model_name == "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext":
+            return "BiomedBERT-abs-ft"
+        elif model_name == "FacebookAI/roberta-base":
+            return "roberta-base"
+        elif model_name == "dmis-lab/biobert-v1.1":
+            return "biobert-v1"
+        elif model_name == "google-bert/bert-base-uncased":
+            return "bert-base"
+        else:
+            return model_name
+        
     @staticmethod
     def train_hpo(config,model_name,fold_idx,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
                 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
@@ -207,6 +293,10 @@ class TrainPipeline:
             logger.info(f"train split size : {len(train_split)}")
             logger.info(f"dev split size : {len(dev_split)}")
             logger.info(f"test split size : {len(test_split)}")
+
+            test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/test{fold_idx}.csv")
+            train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/train{fold_idx}.csv")
+            dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/dev{fold_idx}.csv")
             
             
             tokenized_train,tokenized_dev, tokenized_test = tokenize_datasets(train_split,dev_split,test_split, tokenizer=tokenizer,with_title=self.with_title,with_keywords=self.with_keywords)
@@ -217,8 +307,9 @@ class TrainPipeline:
             
             # Define hyperparameter search space based on loss_type
             if self.loss_type == "BCE":
+                pos_weight_range=tune.uniform(0.0,1.0) if self.nb_optional_negs==0 else tune.uniform(1.0,8.0)
                 tune_config = {
-                    "pos_weight": tune.uniform(1.0,10.0),
+                    "pos_weight": pos_weight_range,
                     "learning_rate": tune.loguniform(1e-6, 1e-4),
                     #"gradient_accumulation_steps": tune.choice([2,4,8]),
                     "weight_decay": tune.uniform(0.0, 0.3),
@@ -226,8 +317,8 @@ class TrainPipeline:
                     }  # Tune pos_weight for BCE
             elif self.loss_type == "focal":
                 tune_config = {
-                    "alpha": tune.uniform(0.5, 1.0),  # Tune alpha for focal loss
-                    "gamma": tune.uniform(2.0, 10.0),   # Tune gamma for focal loss
+                    "alpha": tune.uniform(0.0, 1.0),  # Tune alpha for focal loss
+                    "gamma": tune.uniform(0.0, 10.0),   # Tune gamma for focal loss
                     "learning_rate": tune.loguniform(1e-6, 1e-4),
                     #"gradient_accumulation_steps": tune.choice([2,4,8]),
                     "weight_decay": tune.uniform(0.0, 0.3),
@@ -376,6 +467,8 @@ class TrainPipeline:
             logger.info(f"Preds: {preds[:10]}")  # First 10 predictions
             logger.info(f"Test labels shape: {np.asarray(test_split['labels']).shape}")
             logger.info(f"Test labels: {test_split['labels'][:10]}")  # First 10 labels
+            logger.info(f"Test split: {test_split}")
+
             logger.info(f"Unique values in predictions: {np.unique(preds)}")
             logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
             logger.info(f"Confusion matrix:\n{confusion_matrix(test_split['labels'], preds)}")
@@ -385,19 +478,20 @@ class TrainPipeline:
             self.result_metrics = pd.concat([
                 self.result_metrics,
                 pd.DataFrame([{
-                    "model_name": model_name,
+                    "model_name": self.map_name(model_name),
                     "loss_type": self.loss_type,
                     "fold": fold_idx+1,
                     "run": self.run_idx+1, 
                     "with_title":self.with_title,
                     "with_keywords":self.with_keywords,
+                    "nb_added_negs": self.nb_optional_negs,
                     **res1
                 }])
             ])
-            fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
+            fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':scores,"fold":[fold_idx for _ in range(len(preds))]})
             preds_df_list.append(fold_preds_df)
             
-            self.store_metrics(self.result_metrics)
+            save_dataframe(self.result_metrics)
 
             plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
             plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
@@ -418,7 +512,7 @@ class TrainPipeline:
             clear_cuda_cache()
         torch.cuda.empty_cache()
         clear_cuda_cache()
-        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"{os.path.basename(model_name)}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
+        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"{self.map_name(os.path.basename(model_name))}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
 
         return scores_by_fold
 
@@ -444,7 +538,7 @@ class TrainPipeline:
                 for k in range(self.n_folds):
                     scores_by_fold_by_model[k].append(scores_by_fold[k]) 
 
-                logger.info(f"Metrics for {model_name}: {self.result_metrics[ (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == model_name)]}")
+                logger.info(f"Metrics for {model_name}: {self.result_metrics[ (self.result_metrics['loss_type'] == self.loss_type) & (self.result_metrics['model_name'] == self.map_name(model_name))]}")
 
             clear_cuda_cache() 
             logger.info(f"Results: {self.result_metrics}")
@@ -473,6 +567,7 @@ class TrainPipeline:
         
     def ensemble_pred(self, scores_by_fold_by_model):
         # Ensure scores_by_model is a valid numpy array
+        preds_df_list=[]
         for fold_idx in range(len(self.folds)):
             avg_models_scores = np.mean(np.array(scores_by_fold_by_model[fold_idx]), axis=0)  # Average scores across models
             logger.info(f"\nfold number {fold_idx + 1} / {len(self.folds)}")
@@ -494,13 +589,18 @@ class TrainPipeline:
                     "model_name": "Ensemble",
                     "loss_type": self.loss_type,
                     "fold": fold_idx+1,
-                    "run": self.run_idx,
+                    "run": self.run_idx+1,
                     "with_title":self.with_title,
                     "with_keywords":self.with_keywords,
+                    "nb_added_negs": self.nb_optional_negs,
                     **result
                 }])
             ], ignore_index=True)
-        self.store_metrics(self.result_metrics)
+            fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':avg_models_scores,"fold":[fold_idx for _ in range(len(preds))]})
+            preds_df_list.append(fold_preds_df)
+        
+        save_dataframe(self.result_metrics)
+        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"Ensemble{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
         
         # Group by relevant columns and calculate mean metrics
         avg_metrics = self.result_metrics.groupby(
@@ -516,6 +616,8 @@ class TrainPipeline:
         return filtered_metrics
 
     def whole_pipeline(self):
+        logger.info(f"with_title : {self.with_title}")
+        logger.info(f"with_keywords : {self.with_keywords}")
 
         loss_type_list=["BCE","focal"]
         for loss_type in loss_type_list:
@@ -526,17 +628,10 @@ class TrainPipeline:
                 logger.info(f"Run no {self.run_idx+1}/{self.num_runs}")
                 logger.info(f"Loss Type : {loss_type}")
                 avg_ens_metrics=self.run_pipeline()
-                self.store_metrics(self.result_metrics)
+                save_dataframe(self.result_metrics)
             self.folds=[]
 
         return self.result_metrics
-
-    def store_metrics(self,metric_df,path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics",file_name="binary_metrics.csv"):
-        if metric_df is not None:
-            metric_df.to_csv(os.path.join(path, file_name))
-            logger.info(f"Metrics stored successfully at {os.path.join(path, file_name)}")
-        else:
-            raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
     
 
     def random_forest(self):
@@ -604,6 +699,7 @@ class TrainPipeline:
                                 "run": self.run_idx, 
                                 "with_title": self.with_title,
                                 "with_keywords":self.with_keywords,
+                                "nb_added_negs": self.nb_optional_negs,
                                 **results
                             }])
                         ])
@@ -611,7 +707,7 @@ class TrainPipeline:
                         fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
                         preds_df_list.append(fold_preds_df)
 
-                    self.store_metrics(self.random_forest_metrics,file_name="random_forest_metrics.csv")
+                    save_dataframe(self.random_forest_metrics,file_name="random_forest_metrics.csv")
                     pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/rf",f"rf_{criterion}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_{num_trees}_run-{self.run_idx}.csv"))
 
 
@@ -682,12 +778,13 @@ class TrainPipeline:
                             "run": self.run_idx,
                             "with_title": self.with_title,
                             "with_keywords":self.with_keywords,
+                            "nb_added_negs": self.nb_optional_negs,
                             **results
                         }])
                     ])
                     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
                     preds_df_list.append(fold_preds_df)
-                self.store_metrics(self.svm_metrics, file_name="svm_metrics.csv")
+                save_dataframe(self.svm_metrics, file_name="svm_metrics.csv")
                 pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm", f"svm_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
 
     def svm_bert(self, model_name):
@@ -767,13 +864,14 @@ class TrainPipeline:
                             "run": self.run_idx,
                             "with_title":self.with_title,
                             "with_keywords":self.with_keywords,
+                            "nb_added_negs": self.nb_optional_negs,
                             **results
                         }])
                     ])
                     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
                     preds_df_list.append(fold_preds_df)
 
-                self.store_metrics(self.svm_metrics, file_name=f"svm_bert_{model_name.replace('/', '_')}_metrics.csv")
+                save_dataframe(self.svm_metrics, file_name=f"svm_bert_{model_name.replace('/', '_')}_metrics.csv")
                 pd.concat(preds_df_list).to_csv(os.path.join(
                     "/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm_bert",
                     f"svm_bert_{model_name.replace('/', '_')}_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"

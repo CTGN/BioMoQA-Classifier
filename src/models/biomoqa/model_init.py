@@ -41,11 +41,12 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val")
     
     
-    return {**f1,**recall, **accuracy, **precision, "optim_threshold": optimal_threshold,
+    return {**f1,**accuracy,
+            "kappa":cohen_kappa_score(labels,predictions),
+            **precision,**recall, "optim_threshold": optimal_threshold,
             "AP":average_precision_score(labels,scores,average="weighted") if scores is not None else {},
             "MCC":matthews_corrcoef(labels,predictions),
-            "NDCG":ndcg_score(np.asarray(labels).reshape(1, -1),scores.reshape(1, -1)) if scores is not None else {},
-            "kappa":cohen_kappa_score(labels,predictions)
+            "NDCG":ndcg_score(np.asarray(labels).reshape(1, -1),scores.reshape(1, -1)) if scores is not None else {}
             }
 
 
