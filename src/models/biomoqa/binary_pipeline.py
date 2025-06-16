@@ -209,7 +209,7 @@ class TrainPipeline:
         model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
         if torch.cuda.current_device()==2:
-            batch_size=100
+            batch_size=150
         else:
             batch_size=20
             
@@ -372,7 +372,7 @@ class TrainPipeline:
             logger.info(f"Best config : {best_config}")
             logger.info(f"Best trial after optimization: {best_results}")
 
-            plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=self.hpo_metric,file_name=f"metrics_evol_{model_name}_fold-{fold_idx}_title-{self.with_title}_rum_{self.run_idx}.png")
+            plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=self.hpo_metric,file_name=f"metrics_evol_{self.map_name(model_name)}_fold-{fold_idx}_title-{self.with_title}_rum_{self.run_idx}.png")
             
             
             #TODO : Check Julien's article about how to implement that (ask him about the threholding optimization)
