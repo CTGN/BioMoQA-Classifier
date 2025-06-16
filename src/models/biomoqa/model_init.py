@@ -110,6 +110,11 @@ class CustomTrainer(Trainer):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        # Cache the pos_weight tensor on the correct device once to avoid
+        # per-step allocations on the GPU that can cause fragmentation and
+        # sporadic "CUDA launch failure" errors when training on very large
+        # datasets.
+        self._cached_pos_weight_tensor = None
 
     def compute_loss(self, model, inputs, return_outputs: bool = False,num_items_in_batch=None):
         labels = inputs.pop("labels")
@@ -120,8 +125,14 @@ class CustomTrainer(Trainer):
             logits = outputs.logits.view(-1)
         
         if self.args.loss_type == "BCE":
-            pos_weight=torch.tensor(self.args.pos_weight,device=self.model.device)
-            loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+            if self._cached_pos_weight_tensor is None or self._cached_pos_weight_tensor.device != self.model.device:
+                # Store a single, correctly-typed tensor on the same device as the model
+                self._cached_pos_weight_tensor = torch.tensor(
+                    self.args.pos_weight,
+                    device=self.model.device,
+                    dtype=logits.dtype  # match fp16/fp32 automatically
+                )
+            loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=self._cached_pos_weight_tensor)
             loss = loss_fn(logits, labels.float())
         elif self.args.loss_type == "focal":
             loss = sigmoid_focal_loss(logits, labels.float(), alpha=self.args.alpha, gamma=self.args.gamma, reduction="mean")
