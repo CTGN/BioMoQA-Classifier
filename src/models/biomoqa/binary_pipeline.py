@@ -205,58 +205,66 @@ class TrainPipeline:
         
     @staticmethod
     def train_hpo(config,model_name,fold_idx,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
-        #ray.tune.utils.wait_for_gpu(target_util=0.15)
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
-
-        if torch.cuda.current_device()==2:
-            batch_size=100
-        else:
-            batch_size=20
+        try:
+            # Clear CUDA cache at the start of each trial
+            torch.cuda.empty_cache()
             
-        # Set up training arguments
-        training_args = CustomTrainingArguments(
-            output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
-            seed=CONFIG["seed"],
-            data_seed=CONFIG["seed"],
-            **CONFIG["default_training_args"],
-            loss_type=loss_type,
-            pos_weight=config["pos_weight"] if loss_type=="BCE" else None,
-            alpha=config["alpha"] if loss_type=="focal" else None,
-            gamma=config["gamma"]if loss_type=="focal" else None,
-            weight_decay=config["weight_decay"],
-            disable_tqdm=True,
-            per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=batch_size,
-            metric_for_best_model=hpo_metric,
-            load_best_model_at_end = True,
-            save_strategy='no',
-            eval_strategy="no",
-        )
-        training_args.learning_rate=config["learning_rate"]
-        training_args.num_train_epochs=config["num_train_epochs"]
+            #ray.tune.utils.wait_for_gpu(target_util=0.15)
+            model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
-        # Initialize trainer for hyperparameter search
-        trainer = CustomTrainer(
-            model=model,
-            args=training_args,
-            train_dataset=tokenized_train,
-            eval_dataset=tokenized_dev,
-            callbacks=[LearningRateCallback()],
-            data_collator=data_collator,
-            compute_metrics=compute_metrics,
-            tokenizer=tokenizer,
-        )
+            # Use a consistent, conservative batch size on every GPU.
+            # Dynamically inflating the batch size on a specific GPU can
+            # silently push memory utilisation over the fragmentation
+            # threshold and provoke "unspecified launch failure" errors.
+            batch_size = 20
+            
+            # Set up training arguments
+            training_args = CustomTrainingArguments(
+                output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
+                seed=CONFIG["seed"],
+                data_seed=CONFIG["seed"],
+                **CONFIG["default_training_args"],
+                loss_type=loss_type,
+                pos_weight=config["pos_weight"] if loss_type=="BCE" else None,
+                alpha=config["alpha"] if loss_type=="focal" else None,
+                gamma=config["gamma"]if loss_type=="focal" else None,
+                weight_decay=config["weight_decay"],
+                disable_tqdm=True,
+                per_device_train_batch_size=batch_size,
+                per_device_eval_batch_size=batch_size,
+                metric_for_best_model=hpo_metric,
+                load_best_model_at_end = True,
+                save_strategy='no',
+                eval_strategy="no",
+            )
+            training_args.learning_rate=config["learning_rate"]
+            training_args.num_train_epochs=config["num_train_epochs"]
+
+            # Initialize trainer for hyperparameter search
+            trainer = CustomTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=tokenized_train,
+                eval_dataset=tokenized_dev,
+                callbacks=[LearningRateCallback()],
+                data_collator=data_collator,
+                compute_metrics=compute_metrics,
+                tokenizer=tokenizer,
+            )
 
 
-        os.makedirs(training_args.output_dir, exist_ok=True)
+            os.makedirs(training_args.output_dir, exist_ok=True)
 
-        trainer.train()
-        eval_result = trainer.evaluate()
-        logger.info(f"eval_result: {eval_result}")
+            trainer.train()
+            eval_result = trainer.evaluate()
+            logger.info(f"eval_result: {eval_result}")
 
-        clear_cuda_cache()
+            clear_cuda_cache()
 
-        return eval_result
+            return eval_result
+        except Exception as e:
+            logger.error(f"Error in train_hpo: {e}")
+            return None
     
     def train(self,model_name):
         """Fine-tune a pre-trained model with optimized loss parameters.
