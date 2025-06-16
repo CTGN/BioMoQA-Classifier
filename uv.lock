@@ -281,6 +281,7 @@ dependencies = [
     { name = "dependencies" },
     { name = "evaluate" },
     { name = "faiss-cpu" },
+    { name = "gputil" },
     { name = "hyperopt" },
     { name = "imblearn" },
     { name = "ipykernel" },
@@ -333,6 +334,7 @@ requires-dist = [
     { name = "dependencies", specifier = ">=7.7.1" },
     { name = "evaluate", specifier = ">=0.4.3" },
     { name = "faiss-cpu", specifier = ">=1.10.0" },
+    { name = "gputil", specifier = ">=1.4.0" },
     { name = "hyperopt", specifier = "==0.2.5" },
     { name = "imblearn", specifier = ">=0.0" },
     { name = "ipykernel", specifier = ">=6.29.5" },
@@ -1384,6 +1386,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/1b/d7/ee9d56af4e6dbe958
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/53/d35476d547a286506f0a6a634ccf1e5d288fffd53d48f0bd5fef61d68684/googleapis_common_protos-1.69.2-py3-none-any.whl", hash = "sha256:0b30452ff9c7a27d80bfc5718954063e8ab53dd3697093d3bc99581f5fd24212", size = 293215 },
 ]
+
+[[package]]
+name = "gputil"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/0e/5c61eedde9f6c87713e89d794f01e378cfd9565847d4576fa627d758c554/GPUtil-1.4.0.tar.gz", hash = "sha256:099e52c65e512cdfa8c8763fca67f5a5c2afb63469602d5dcb4d296b3661efb9", size = 5545 }
 
 [[package]]
 name = "graphene"

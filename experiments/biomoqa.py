@@ -7,6 +7,12 @@ import sys
 import os
 #TODO : add int args for n_trials...
 
+""" 
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+os.environ["PYTORCH_NO_CUDA_MEMORY_CACHING"] = "1"
+os.environ["TORCH_USE_CUDA_DSA"] = "1"
+"""
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust ".." based on your structure
 
 # Add it to sys.path
@@ -30,11 +36,13 @@ def main():
     logger = logging.getLogger(__name__)
 
     begin_pipeline=perf_counter()
+    torch.cuda.memory._record_memory_history()
     ray.init(num_gpus=torch.cuda.device_count())
     
-    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_kappa",with_title=args.title,with_keywords=args.keywords,n_folds=5,n_trials=30, num_runs=2,nb_optional_negs=0)
+    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_kappa",with_title=args.title,with_keywords=args.keywords,n_folds=5,n_trials=12, num_runs=2,nb_optional_negs=0)
 
-    for nb_optional_negs in [0,100,500]:
+    #TODO: re-run for 500
+    for nb_optional_negs in [100,500]:
         pipeline.nb_optional_negs=nb_optional_negs
         pipeline.load_dataset()
         pipeline._compute_naive_metrics()
@@ -47,6 +55,7 @@ def main():
         pipeline.svm()
         pipeline.random_forest()
         torch.cuda.empty_cache()  # Clear CUDA cache after pipeline
+        torch.cuda.memory._dump_snapshot("my_snapshot.pickle")
     end_pipeline=perf_counter()
     pipeline_runtime=end_pipeline-begin_pipeline
     logger.info(f"Total running time : {pipeline_runtime}")

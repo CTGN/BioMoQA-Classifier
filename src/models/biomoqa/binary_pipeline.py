@@ -205,58 +205,58 @@ class TrainPipeline:
         
     @staticmethod
     def train_hpo(config,model_name,fold_idx,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
-                model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
+        #ray.tune.utils.wait_for_gpu(target_util=0.15)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
-                if torch.cuda.current_device()==2:
-                    batch_size=60
-                else:
-                    batch_size=20
-                  
-                # Set up training arguments
-                training_args = CustomTrainingArguments(
-                    output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
-                    seed=CONFIG["seed"],
-                    data_seed=CONFIG["seed"],
-                    **CONFIG["default_training_args"],
-                    loss_type=loss_type,
-                    pos_weight=config["pos_weight"] if loss_type=="BCE" else None,
-                    alpha=config["alpha"] if loss_type=="focal" else None,
-                    gamma=config["gamma"]if loss_type=="focal" else None,
-                    weight_decay=config["weight_decay"],
-                    disable_tqdm=True,
-                    per_device_train_batch_size=batch_size,
-                    per_device_eval_batch_size=batch_size,
-                    metric_for_best_model=hpo_metric,
-                    load_best_model_at_end = True,
-                    save_strategy='no',
-                    eval_strategy="no",
-                )
-                training_args.learning_rate=config["learning_rate"]
-                training_args.num_train_epochs=config["num_train_epochs"]
+        if torch.cuda.current_device()==2:
+            batch_size=100
+        else:
+            batch_size=20
+            
+        # Set up training arguments
+        training_args = CustomTrainingArguments(
+            output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
+            seed=CONFIG["seed"],
+            data_seed=CONFIG["seed"],
+            **CONFIG["default_training_args"],
+            loss_type=loss_type,
+            pos_weight=config["pos_weight"] if loss_type=="BCE" else None,
+            alpha=config["alpha"] if loss_type=="focal" else None,
+            gamma=config["gamma"]if loss_type=="focal" else None,
+            weight_decay=config["weight_decay"],
+            disable_tqdm=True,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
+            metric_for_best_model=hpo_metric,
+            load_best_model_at_end = True,
+            save_strategy='no',
+            eval_strategy="no",
+        )
+        training_args.learning_rate=config["learning_rate"]
+        training_args.num_train_epochs=config["num_train_epochs"]
 
-                # Initialize trainer for hyperparameter search
-                trainer = CustomTrainer(
-                    model=model,
-                    args=training_args,
-                    train_dataset=tokenized_train,
-                    eval_dataset=tokenized_dev,
-                    callbacks=[LearningRateCallback()],
-                    data_collator=data_collator,
-                    compute_metrics=compute_metrics,
-                    tokenizer=tokenizer,
-                )
+        # Initialize trainer for hyperparameter search
+        trainer = CustomTrainer(
+            model=model,
+            args=training_args,
+            train_dataset=tokenized_train,
+            eval_dataset=tokenized_dev,
+            callbacks=[LearningRateCallback()],
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            tokenizer=tokenizer,
+        )
 
 
-                os.makedirs(training_args.output_dir, exist_ok=True)
+        os.makedirs(training_args.output_dir, exist_ok=True)
 
-                trainer.train()
-                eval_result = trainer.evaluate()
-                logger.info(f"eval_result: {eval_result}")
+        trainer.train()
+        eval_result = trainer.evaluate()
+        logger.info(f"eval_result: {eval_result}")
 
-                torch.cuda.empty_cache()
-                clear_cuda_cache()
+        clear_cuda_cache()
 
-                return eval_result
+        return eval_result
     
     def train(self,model_name):
         """Fine-tune a pre-trained model with optimized loss parameters.
@@ -283,8 +283,10 @@ class TrainPipeline:
         scores_by_fold=[]
         preds_df_list=[]
         for fold_idx in range(len(self.folds)):
+            clear_cuda_cache()
             logger.info(f"\nfold number {fold_idx+1} / {len(self.folds)}")
             
+
             train_indices, dev_indices,test_indices = self.folds[fold_idx]
             train_split = self.dataset.select(train_indices)
             dev_split = self.dataset.select(dev_indices)
@@ -300,6 +302,9 @@ class TrainPipeline:
             
             
             tokenized_train,tokenized_dev, tokenized_test = tokenize_datasets(train_split,dev_split,test_split, tokenizer=tokenizer,with_title=self.with_title,with_keywords=self.with_keywords)
+
+            max_len = max(len(batch) for batch in tokenized_train["input_ids"])
+            logger.info(f"Fold {fold_idx+1} max seq len = {max_len}")
 
             #We whould maybe perform cross val inside the model names loops ?
             #1. We run all models for each fold and we take the average of all of them at the end -> I think it is not good this way
@@ -367,7 +372,7 @@ class TrainPipeline:
             logger.info(f"Best config : {best_config}")
             logger.info(f"Best trial after optimization: {best_results}")
 
-            plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'])
+            plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=self.hpo_metric,file_name=f"metrics_evol_{model_name}_fold-{fold_idx}_title-{self.with_title}_rum_{self.run_idx}.png")
             
             
             #TODO : Check Julien's article about how to implement that (ask him about the threholding optimization)
@@ -508,11 +513,9 @@ class TrainPipeline:
             test_metrics.append(results)
             scores_by_fold.append(scores)
 
-            torch.cuda.empty_cache()
             clear_cuda_cache()
-        torch.cuda.empty_cache()
         clear_cuda_cache()
-        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"{self.map_name(os.path.basename(model_name))}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
+        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"{self.map_name(os.path.basename(model_name))}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"))
 
         return scores_by_fold
 
@@ -531,7 +534,6 @@ class TrainPipeline:
                 logger.info(f"Training model {i+1}/{len(self.model_names)}: {model_name}")
                 scores_by_fold = self.train(model_name=model_name)
 
-                torch.cuda.empty_cache()
                 clear_cuda_cache() 
 
                 # Ensure scores_by_fold is a consistent array before appending
@@ -552,7 +554,6 @@ class TrainPipeline:
                 logger.info(f"Training model {i+1}/{len(self.model_names)}: {model_name}")
                 scores_by_fold = self.train(model_name=model_name)
 
-                torch.cuda.empty_cache()
                 clear_cuda_cache() 
 
                 # Ensure scores_by_fold is a consistent array before appending
@@ -600,7 +601,7 @@ class TrainPipeline:
             preds_df_list.append(fold_preds_df)
         
         save_dataframe(self.result_metrics)
-        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"Ensemble{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
+        pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"Ensemble{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"))
         
         # Group by relevant columns and calculate mean metrics
         avg_metrics = self.result_metrics.groupby(
@@ -708,7 +709,7 @@ class TrainPipeline:
                         preds_df_list.append(fold_preds_df)
 
                     save_dataframe(self.random_forest_metrics,file_name="random_forest_metrics.csv")
-                    pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/rf",f"rf_{criterion}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_{num_trees}_run-{self.run_idx}.csv"))
+                    pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/rf",f"rf_{criterion}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_{num_trees}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"))
 
 
 
@@ -785,7 +786,7 @@ class TrainPipeline:
                     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
                     preds_df_list.append(fold_preds_df)
                 save_dataframe(self.svm_metrics, file_name="svm_metrics.csv")
-                pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm", f"svm_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"))
+                pd.concat(preds_df_list).to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm", f"svm_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"))
 
     def svm_bert(self, model_name):
         """
@@ -874,7 +875,7 @@ class TrainPipeline:
                 save_dataframe(self.svm_metrics, file_name=f"svm_bert_{model_name.replace('/', '_')}_metrics.csv")
                 pd.concat(preds_df_list).to_csv(os.path.join(
                     "/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm_bert",
-                    f"svm_bert_{model_name.replace('/', '_')}_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}.csv"
+                    f"svm_bert_{model_name.replace('/', '_')}_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"
                 ))
 
     def find_best(self,metrics_df,metric):
@@ -929,6 +930,6 @@ class TrainPipeline:
                 logger.info(f"Detailed metrics for fold {fold_idx+1}: {detailed_metrics}")
 
                 # Save predictions
-                preds_df.to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds", f"zero_shot_{model_name.replace('/', '_')}_fold-{fold_idx}.csv"), index=False)
+                preds_df.to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds", f"zero_shot_{model_name.replace('/', '_')}_fold-{fold_idx}_opt_neg-{self.nb_optional_negs}.csv"), index=False)
                 scores_by_model.append(preds_df)
         logger.info(f"Zero-shot ensemble classification : {self.ensemble_pred(scores_by_model=scores_by_model, zero_shot=True)}")

@@ -7,6 +7,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve, average_precision_score
 import torch
 import random
+import gc
 from transformers import (
     AutoTokenizer,
     BertForSequenceClassification,
@@ -333,7 +334,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
     except ImportError:
         logger.warning("Could not import ExperimentAnalysis for parallel coordinates plot")
 
-def plot_trial_performance(analysis,logger,plot_dir, metric="eval_recall"):
+def plot_trial_performance(analysis,logger,plot_dir, metric="eval_recall",file_name="trials_comparison.png"):
     """
     Plot performance across different trials.
     
@@ -357,12 +358,13 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="eval_recall"):
         plt.ylabel(metric)
         plt.title(f"Final {metric} Score by Trial")
         plt.grid(True, axis='y')
-        plt.savefig(os.path.join(plot_dir, "hyperparams", "trials_comparison_.png"))
+        plt.savefig(os.path.join(plot_dir, "hyperparams", file_name))
         plt.close()
         logger.info(f"Trial comparison plot saved")
 
 def clear_cuda_cache():
     """Clear CUDA cache and log memory usage."""
+    gc.collect()
     torch.cuda.empty_cache()
     logger.info(f"Cleared CUDA cache. Memory allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB, "
                 f"Memory reserved: {torch.cuda.memory_reserved() / 1e9:.2f} GB")
