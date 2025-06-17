@@ -1,0 +1,9 @@
+model_name: "google-bert/bert-base-uncased"
+num_trials: 20
+fold: 0
+hpo_metric: "eval_kappa"
+direction: "max"
+loss_type: "BCE"
+with_title: True
+with_keywords: False
+nb_optional_negs: 100

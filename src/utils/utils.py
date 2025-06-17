@@ -33,9 +33,23 @@ from src.config import CONFIG
 
 logger = logging.getLogger(__name__)
 
+def map_name(model_name):
+    if model_name == "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract":
+        return "BiomedBERT-abs"
+    elif model_name == "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext":
+        return "BiomedBERT-abs-ft"
+    elif model_name == "FacebookAI/roberta-base":
+        return "roberta-base"
+    elif model_name == "dmis-lab/biobert-v1.1":
+        return "biobert-v1"
+    elif model_name == "google-bert/bert-base-uncased":
+        return "bert-base"
+    else:
+        return model_name
+
 def save_dataframe(metric_df,path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics",file_name="binary_metrics.csv"):
         if metric_df is not None:
-            metric_df.to_csv(os.path.join(path, file_name))
+            metric_df.to_csv(os.path.join(path, file_name),index=False)
             logger.info(f"Metrics stored successfully at {os.path.join(path, file_name)}")
         else:
             raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
@@ -87,7 +101,7 @@ def load_datasets(processed: bool = True) -> Tuple[Dataset, Dataset]:
 
 #TODO : check python doc to see what are "*" and "**"
 def tokenize_datasets(
-    *datasets: Dataset, tokenizer: AutoTokenizer, with_title: bool, with_keywords=False
+    *datasets: Dataset, tokenizer, with_title: bool, with_keywords=False
 ) -> Tuple[Dataset, ...]:
     """Tokenize one, two, or three datasets."""
     def tokenization(batch: Dict) -> Dict:

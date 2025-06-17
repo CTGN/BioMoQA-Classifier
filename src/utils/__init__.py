@@ -1,3 +1,3 @@
-from .utils import tokenize_datasets, detailed_metrics, load_datasets, set_random_seeds, clear_cuda_cache,plot_roc_curve,plot_trial_performance,plot_precision_recall_curve,save_dataframe
+from .utils import tokenize_datasets, detailed_metrics, load_datasets, set_random_seeds, clear_cuda_cache,plot_roc_curve,plot_trial_performance,plot_precision_recall_curve,save_dataframe,map_name
 
-__all__=["tokenize_datasets", "detailed_metrics", "load_datasets", "set_random_seeds", "clear_cuda_cache","plot_roc_curve","plot_trial_performance","plot_precision_recall_curve","save_dataframe"]
+__all__=["tokenize_datasets", "detailed_metrics", "load_datasets", "set_random_seeds", "clear_cuda_cache","plot_roc_curve","plot_trial_performance","plot_precision_recall_curve","save_dataframe","map_name"]

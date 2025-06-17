@@ -4,14 +4,15 @@ import os
 import sys
 import datasets
 import numpy as np
-from .create_raw import *
+import argparse
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))  # Adjust ".." based on your structure
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground"))  # Adjust ".." based on your structure
 
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from config import CONFIG
+from src.data_pipeline.biomoqa.create_raw import *
+from src.config import CONFIG
 
 def clean_data(df):
     logger.info("Before cleaning, head:\n%s", df.head())
@@ -189,7 +190,6 @@ def biomoqa_data_pipeline(
     logger.info(f"Number of positives : {len(clean_df[clean_df['labels'] == 1])}")
     logger.info(f"Number of negatives : {len(clean_df[clean_df['labels'] == 0])}")
 
-    # Ensure test indices do not include any optional negatives (just in case)
     for run_folds in folds_per_run:
         for i in range(len(run_folds)):
             train_indices, dev_indices, test_indices = run_folds[i]
@@ -197,9 +197,7 @@ def biomoqa_data_pipeline(
             test_indices = [idx for idx in test_indices if idx not in opt_neg_indices]
             run_folds[i] = [train_indices, dev_indices, test_indices]
 
-    # === New block: Check independence of test‐folds within each run ===
     for run_idx, run_folds in enumerate(folds_per_run):
-        # Collect all test‐sets in this run
         test_sets = [set(fold[2]) for fold in run_folds]
         n_f = len(test_sets)
         for i in range(n_f):
@@ -211,21 +209,49 @@ def biomoqa_data_pipeline(
                         f"{len(overlap)} shared indices."
                     )
         logger.info(f"All {n_f} test‐folds in run {run_idx+1} are pairwise disjoint.")
+    
 
     return clean_ds, folds_per_run
 
+def main():
+
+        parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
+        parser.add_argument("-b","--balanced", action="store_true", help="Whether to balance the dataset")
+        parser.add_argument("-bc","--balance_coeff", type=int, default=5, help="Coefficient for balancing the dataset")
+        parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
+        parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
+        parser.add_argument("-t","--with_title", action="store_true", help="Whether to include title in the dataset")
+        parser.add_argument("-k","--with_keywords", action="store_true", help="Whether to include keywords in the dataset")
+        parser.add_argument("-on","--nb_opt_negs", type=int, default=500, help="Number of optional negatives to add in the train splits")
+
+
+        args = parser.parse_args()
+
+        logger.info(args)
+
+        dataset,folds_per_run=biomoqa_data_pipeline(args.n_folds, n_runs=args.n_runs, with_title=args.with_title, with_keywords=args.with_keywords, balanced=args.balanced, balance_coeff=args.balance_coeff,nb_optional_negs=args.nb_opt_negs)
+
+        for run_idx in range(len(folds_per_run)):
+            folds=folds_per_run[run_idx]
+            for fold_idx in range(args.n_folds):
+
+                train_indices, dev_indices,test_indices = folds[fold_idx]
+
+                logger.info(f"\nfold number {fold_idx+1} / {len(folds)}")
+                
+                train_split = dataset.select(train_indices)
+                dev_split = dataset.select(dev_indices)
+                test_split = dataset.select(test_indices)
+
+                logger.info(f"train split size : {len(train_split)}")
+                logger.info(f"dev split size : {len(dev_split)}")
+                logger.info(f"test split size : {len(test_split)}")
+
+                test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv")
+                train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv")
+                dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv")
+
+
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
-    parser.add_argument("--balanced", action="store_true", help="Whether to balance the dataset")
-    parser.add_argument("--balance_coeff", type=int, default=5, help="Coefficient for balancing the dataset")
-    parser.add_argument("--n_folds", type=int, default=5, help="Number of folds for cross-validation")
-    parser.add_argument("--with_title", action="store_true", help="Whether to include title in the dataset")
-    parser.add_argument("--with_keywords", action="store_true", help="Whether to include keywords in the dataset")
-    args = parser.parse_args()
-
-    biomoqa_data_pipeline(args.n_folds, args.with_title, args.with_keywords, balanced=args.balanced, balance_coeff=args.balance_coeff)
-
-    # Example usage of pmids_to_text
-    # pmids_to_text(train_df, test_df)
+    main()

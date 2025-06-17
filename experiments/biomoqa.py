@@ -7,11 +7,10 @@ import sys
 import os
 #TODO : add int args for n_trials...
 
-""" 
-os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-os.environ["PYTORCH_NO_CUDA_MEMORY_CACHING"] = "1"
-os.environ["TORCH_USE_CUDA_DSA"] = "1"
-"""
+#os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+#os.environ["TORCH_USE_CUDA_DSA"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust ".." based on your structure
 

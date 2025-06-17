@@ -1,0 +1,14 @@
+model_name: "bert-base-uncased"
+fold: 0
+run : 0
+output_dir: "outputs/checkpoints"
+best_metric: "eval_kappa"
+loss_type: "BCE"
+nb_optional_negs: 100
+with_title: True
+with_keywords: False
+default_hyperparameters:
+  learning_rate: None
+  num_train_epochs: None
+  pos_weight: None
+  weight_decay: None

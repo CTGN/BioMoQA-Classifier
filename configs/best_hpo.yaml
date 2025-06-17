@@ -1,0 +1,4 @@
+learning_rate: 7.988179462781234e-05
+num_train_epochs: 3
+pos_weight: 7.183206941666034
+weight_decay: 0.2512165066659852
