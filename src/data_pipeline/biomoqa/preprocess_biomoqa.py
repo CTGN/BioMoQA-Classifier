@@ -5,6 +5,9 @@ import sys
 import datasets
 import numpy as np
 import argparse
+import logging
+import torch
+from transformers import set_seed
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground"))  # Adjust ".." based on your structure
 
@@ -13,6 +16,15 @@ if parent_dir not in sys.path:
 
 from src.data_pipeline.biomoqa.create_raw import *
 from src.config import CONFIG
+
+logger = logging.getLogger(__name__)
+
+def set_reproducibility(seed):
+    set_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
 def clean_data(df):
     logger.info("Before cleaning, head:\n%s", df.head())
@@ -141,7 +153,7 @@ def biomoqa_data_pipeline(
 
         run_folds = []
         for train_dev_pos_idx, test_pos_idx in skf.split(clean_og_df['abstract'], clean_og_df['labels']):
-            # Convert positional indices back to the DataFrame’s original index
+            # Convert positional indices back to the DataFrame's original index
             train_dev_indices = clean_og_df.index[train_dev_pos_idx]
             test_indices = clean_og_df.index[test_pos_idx].to_list()
 
@@ -226,6 +238,7 @@ def main():
 
 
         args = parser.parse_args()
+        set_reproducibility(CONFIG["seed"])
 
         logger.info(args)
 

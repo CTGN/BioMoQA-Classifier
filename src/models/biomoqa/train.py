@@ -37,6 +37,7 @@ import datasets
 from time import perf_counter
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
 import yaml
+import pandas as pd
 
 src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
 
@@ -49,9 +50,15 @@ from src.utils import *
 from src.models.biomoqa.model_init import *
 
 from src.config import *
-import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+def set_reproducibility(seed):
+    set_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
 #TODO : Add some variables to the config file and lnk them to here from the config (ex: Early Stopping patience)
 #TODO : Make the paths reproducible
@@ -302,6 +309,7 @@ def train(cfg,hp_cfg):
 
 def main():
     args = parse_args()
+    set_reproducibility(CONFIG["seed"])
 
     logger.info(args)
 

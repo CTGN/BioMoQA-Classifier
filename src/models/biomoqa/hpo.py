@@ -37,6 +37,7 @@ import datasets
 from time import perf_counter
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
 import yaml
+import pandas as pd
 
 src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
 
@@ -49,11 +50,15 @@ from src.utils import *
 from src.models.biomoqa.model_init import *
 
 from src.config import *
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-#TODO : add ray.init() and the function that ends it
+def set_reproducibility(seed):
+    set_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run HPO for our BERT classifier")
@@ -319,6 +324,7 @@ def train_hpo(cfg,fold_idx,run_idx):
 
 def main():
     args = parse_args()
+    set_reproducibility(CONFIG["seed"])
 
     logger.info(args)
 
