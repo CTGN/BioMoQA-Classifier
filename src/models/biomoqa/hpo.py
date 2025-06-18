@@ -147,7 +147,16 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     # Dynamically inflating the batch size on a specific GPU can
     # silently push memory utilisation over the fragmentation
     # threshold and provoke "unspecified launch failure" errors.
-    batch_size = 20
+    # We can use a larger batch size on the A100 GPU (device 2)
+    gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
+    if gpu_id == "2":
+        batch_size = 100
+    else:
+        batch_size = 25
+    
+    logger.info(f"Trial on GPU {gpu_id} using batch size {batch_size}")
+    
+    # Set up training arguments
     
     # Set up training arguments
     training_args = CustomTrainingArguments(
@@ -244,7 +253,7 @@ def train_hpo(cfg,fold_idx,run_idx):
     
     # Define hyperparameter search space based on loss_type
     if cfg['loss_type'] == "BCE":
-        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(1.0,8.0)
+        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(0.0,7.0)
         tune_config = {
             "pos_weight": pos_weight_range,
             "learning_rate": tune.loguniform(1e-6, 1e-4),

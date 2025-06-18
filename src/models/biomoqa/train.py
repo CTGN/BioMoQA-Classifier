@@ -263,10 +263,9 @@ def train(cfg,hp_cfg):
     logger.info(f"\nOn test Set (optimal threshold of {threshold} according to cross validation on the training set): ")
     preds = (scores > threshold).astype(int)
     res2=detailed_metrics(preds, test_split["labels"],scores=scores)
-    results.append(res2)
     plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
 
-    logger.info(f"Results for fold {cfg['fold']+1} : {results}")
+    logger.info(f"Results for fold {cfg['fold']+1} with optim_threshold leqrned from dev set : {res2}")
 
     clear_cuda_cache()
 

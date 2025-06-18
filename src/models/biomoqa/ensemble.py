@@ -164,7 +164,7 @@ def ensemble_pred(cfg):
     save_dataframe(result_metrics)
 
     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':avg_models_scores,"fold":[cfg['fold'] for _ in range(len(preds))],"title":test_split['title'] })
-    test_preds_path=os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"fold_{cfg['fold']}_Ensemble_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
+    test_preds_path=os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/bert",f"fold-{cfg['fold']}_Ensemble_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
     
     fold_preds_df.to_csv(test_preds_path)
 

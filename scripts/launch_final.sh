@@ -9,7 +9,7 @@ MODELS=(
   google-bert/bert-base-uncased
 )
 
-NUM_OPT_NEGS=(100 500)
+NUM_OPT_NEGS=(500 100)
 
 NUM_RUNS=2
 NUM_FOLDS=5
@@ -23,7 +23,7 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             echo "Loss function: $loss"
 
             # Fold loop: 0 to 4 (not 1 to 5)
-            for fold in {0..4}; do
+            for fold in {1..4}; do
                 echo "Fold number: $fold"
                 echo "Run number: $run"
 
@@ -34,7 +34,7 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
                         --fold "$fold" \
                         --run "$run" \
                         --nb_opt_negs "$opt_negs" \
-                        --n_trials 3 \
+                        --n_trials 30 \
                         -m "$model" \
                         --with_title \
                         --loss "$loss"
