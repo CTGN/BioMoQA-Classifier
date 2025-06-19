@@ -38,13 +38,13 @@ def main():
     torch.cuda.memory._record_memory_history()
     ray.init(num_gpus=torch.cuda.device_count())
     
-    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_kappa",with_title=args.title,with_keywords=args.keywords,n_folds=5,n_trials=12, num_runs=2,nb_optional_negs=0)
+    pipeline=TrainPipeline(None,ensemble=args.ensemble,hpo_metric="eval_f1",with_title=args.title,with_keywords=args.keywords,n_folds=5,n_trials=3, num_runs=2,nb_optional_negs=500)
 
     #TODO: re-run for 500
-    for nb_optional_negs in [100,500]:
+    for nb_optional_negs in [500]:
         pipeline.nb_optional_negs=nb_optional_negs
         pipeline.load_dataset()
-        pipeline._compute_naive_metrics()
+        #pipeline._compute_naive_metrics()
         
         """
         for model_name in pipeline.model_names:

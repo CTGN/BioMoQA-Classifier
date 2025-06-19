@@ -60,6 +60,9 @@ def set_reproducibility(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
+    set_random_seeds(CONFIG["seed"])
+    set_seed(CONFIG["seed"])
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Run HPO for our BERT classifier")
     parser.add_argument(
@@ -143,7 +146,7 @@ def parse_args():
 def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
     
     # Clear CUDA cache at the start of each trial
-    torch.cuda.empty_cache()
+    clear_cuda_cache()
     
     #ray.tune.utils.wait_for_gpu(target_util=0.15)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
@@ -258,7 +261,7 @@ def train_hpo(cfg,fold_idx,run_idx):
     
     # Define hyperparameter search space based on loss_type
     if cfg['loss_type'] == "BCE":
-        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(0.0,7.0)
+        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(1.0,8.0)
         tune_config = {
             "pos_weight": pos_weight_range,
             "learning_rate": tune.loguniform(1e-6, 1e-4),
@@ -281,7 +284,7 @@ def train_hpo(cfg,fold_idx,run_idx):
     # Set up scheduler for early stopping
     scheduler = ASHAScheduler(
         metric=cfg['hpo_metric'], #When set to objective, it takes the sum of the compute-metric output. if compute-metric isnt defined, it takes the loss.
-        mode="max"
+        mode=cfg['direction']
     )
     
     # Perform hyperparameter search

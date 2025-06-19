@@ -23,7 +23,7 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             echo "Loss function: $loss"
 
             # Fold loop: 0 to 4 (not 1 to 5)
-            for fold in {1..4}; do
+            for fold in {0..4}; do
                 echo "Fold number: $fold"
                 echo "Run number: $run"
 
@@ -34,7 +34,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
                         --fold "$fold" \
                         --run "$run" \
                         --nb_opt_negs "$opt_negs" \
-                        --n_trials 30 \
+                        --n_trials 3 \
+                        --hpo_metric "eval_f1" \
                         -m "$model" \
                         --with_title \
                         --loss "$loss"
@@ -45,6 +46,7 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
                     --run "$run" \
                     -m "$model" \
                     --nb_opt_negs "$opt_negs" \
+                    -bm "eval_f1" \
                     --gpu 2\
                     --with_title \
                     --loss "$loss"

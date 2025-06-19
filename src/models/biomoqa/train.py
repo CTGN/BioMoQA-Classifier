@@ -60,6 +60,9 @@ def set_reproducibility(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
+    set_random_seeds(CONFIG["seed"])
+    set_seed(CONFIG["seed"])
+
 #TODO : Add some variables to the config file and lnk them to here from the config (ex: Early Stopping patience)
 #TODO : Make the paths reproducible
 
@@ -173,7 +176,6 @@ def train(cfg,hp_cfg):
             load_best_model_at_end=True,
             save_strategy= "steps",
             eval_strategy="steps",
-            dataloader_num_workers=0,
         )
     
     training_args.pos_weight = hp_cfg["pos_weight"] if cfg['loss_type'] == "BCE" else None

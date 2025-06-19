@@ -102,6 +102,12 @@ class TrainPipeline:
         from src.utils import set_random_seeds, detailed_metrics
 
         # Initialize random seeds
+        set_seed(CONFIG["seed"])
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        os.environ['PYTHONHASHSEED'] = str(CONFIG["seed"])
+        logger.info(f"Randomness sources seeded with {CONFIG['seed']} for reproducibility.")
+
         set_random_seeds(CONFIG["seed"])
         set_seed(CONFIG["seed"])
 
