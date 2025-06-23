@@ -186,7 +186,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
         eval_strategy="no",
     )
     training_args.learning_rate=config["learning_rate"]
-    training_args.num_train_epochs=config["num_train_epochs"]
+    training_args.num_train_epochs=7
 
     # Initialize trainer for hyperparameter search
     trainer = CustomTrainer(
@@ -261,13 +261,13 @@ def train_hpo(cfg,fold_idx,run_idx):
     
     # Define hyperparameter search space based on loss_type
     if cfg['loss_type'] == "BCE":
-        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(1.0,8.0)
+        pos_weight_range=tune.uniform(0.0,1.0) if cfg['nb_optional_negs']==0 else tune.uniform(0.0,5.0)
         tune_config = {
             "pos_weight": pos_weight_range,
             "learning_rate": tune.loguniform(1e-6, 1e-4),
             #"gradient_accumulation_steps": tune.choice([2,4,8]),
-            "weight_decay": tune.uniform(0.0, 0.3),
-            "num_train_epochs": tune.choice([2, 3, 4, 5, 6]),
+            "weight_decay":tune.loguniform(1e-6, 1e-1)
+            #"num_train_epochs": tune.choice([2, 3, 4, 5, 6]),
             }  # Tune pos_weight for BCE
     elif cfg['loss_type'] == "focal":
         tune_config = {
@@ -275,8 +275,8 @@ def train_hpo(cfg,fold_idx,run_idx):
             "gamma": tune.uniform(0.0, 10.0),   # Tune gamma for focal loss
             "learning_rate": tune.loguniform(1e-6, 1e-4),
             #"gradient_accumulation_steps": tune.choice([2,4,8]),
-            "weight_decay": tune.uniform(0.0, 0.3),
-            "num_train_epochs": tune.choice([2, 3, 4, 5, 6]),
+            "weight_decay":tune.loguniform(1e-6, 1e-1)
+            #"num_train_epochs": tune.choice([2, 3, 4, 5, 6]),
             }
     else:
         raise ValueError(f"Unsupported loss_type: {cfg['loss_type']}")
@@ -320,6 +320,16 @@ def train_hpo(cfg,fold_idx,run_idx):
 
     logger.info(f"Best config : {best_config}")
     logger.info(f"Best trial after optimization: {best_results}")
+    best_config['loss_type'] = cfg['loss_type']
+    best_config['model_name'] = cfg['model_name']
+    best_config['with_title'] = cfg['with_title']
+    best_config['with_keywords'] = cfg['with_keywords']
+    best_config['fold'] = fold_idx
+    best_config['run_idx'] = run_idx
+    best_config['hpo_metric'] = cfg['hpo_metric']
+    best_config['direction'] = cfg['direction']
+    best_config['nb_optional_negs'] = cfg['nb_optional_negs']
+    best_config['num_trials'] = cfg['num_trials']
 
     plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=cfg['hpo_metric'],file_name=f"metrics_evol_{map_name(cfg['model_name'])}_fold-{fold_idx}_title-{cfg['with_title']}_run_{run_idx}.png")
 

@@ -6,7 +6,7 @@ CONFIG = {
     "default_training_args": {
         "save_total_limit": 1,
         "learning_rate": None,
-        "gradient_accumulation_steps": 1,
+        "gradient_accumulation_steps": 4,
         "num_train_epochs": 10,
         "fp16": False,
         "logging_strategy": "epoch",

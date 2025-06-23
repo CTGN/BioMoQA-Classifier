@@ -20,7 +20,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-from sklearn.metrics import cohen_kappa_score,ndcg_score,matthews_corrcoef,average_precision_score
+from sklearn.metrics import cohen_kappa_score,ndcg_score,matthews_corrcoef,average_precision_score,roc_auc_score,fbeta_score
 from torchvision.ops import sigmoid_focal_loss
 from src.utils import *
 import logging
@@ -33,16 +33,19 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     #TODO : print the size of logits to be sure that we compute the metrics in the right way
     logits, labels = eval_pred
     scores = 1 / (1 + np.exp(-logits.squeeze()))  # Sigmoid
-    predictions = (scores > 0.5).astype(int)
+    optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val",metric="f1")
+    predictions = (scores > optimal_threshold).astype(int)
     f1 = evaluate.load("f1").compute(predictions=predictions, references=labels) or {}
     recall = evaluate.load("recall").compute(predictions=predictions, references=labels) or {}
     accuracy = evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {}
     precision = evaluate.load("precision").compute(predictions=predictions, references=labels) or {}
-    optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val")
     
     
-    return {**f1,**accuracy,
+    return {**f1,
+            "f2": fbeta_score(labels, predictions, beta=2, zero_division=0),
+            "roc_auc" : roc_auc_score(labels,scores) if scores is not None else {},
             "kappa":cohen_kappa_score(labels,predictions),
+            **accuracy,
             **precision,**recall, "optim_threshold": optimal_threshold,
             "AP":average_precision_score(labels,scores,average="weighted") if scores is not None else {},
             "MCC":matthews_corrcoef(labels,predictions),

@@ -120,6 +120,7 @@ def biomoqa_data_pipeline(
     balanced=False,
     balance_coeff=5,
     nb_optional_negs=5000
+    store=True
 ):
     og_df, optional_negatives_df = loading_pipeline()
     og_df = og_df[['Title', 'Abstract', 'Keywords', 'DOI', 'labels']]
@@ -227,43 +228,42 @@ def biomoqa_data_pipeline(
 
 def main():
 
-        parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
-        parser.add_argument("-b","--balanced", action="store_true", help="Whether to balance the dataset")
-        parser.add_argument("-bc","--balance_coeff", type=int, default=5, help="Coefficient for balancing the dataset")
-        parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
-        parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
-        parser.add_argument("-t","--with_title", action="store_true", help="Whether to include title in the dataset")
-        parser.add_argument("-k","--with_keywords", action="store_true", help="Whether to include keywords in the dataset")
-        parser.add_argument("-on","--nb_opt_negs", type=int, default=500, help="Number of optional negatives to add in the train splits")
+    parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
+    parser.add_argument("-b","--balanced", action="store_true", help="Whether to balance the dataset")
+    parser.add_argument("-bc","--balance_coeff", type=int, default=5, help="Coefficient for balancing the dataset")
+    parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
+    parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
+    parser.add_argument("-t","--with_title", action="store_true", help="Whether to include title in the dataset")
+    parser.add_argument("-k","--with_keywords", action="store_true", help="Whether to include keywords in the dataset")
+    parser.add_argument("-on","--nb_opt_negs", type=int, default=500, help="Number of optional negatives to add in the train splits")
 
 
-        args = parser.parse_args()
-        set_reproducibility(CONFIG["seed"])
+    args = parser.parse_args()
+    set_reproducibility(CONFIG["seed"])
 
-        logger.info(args)
+    logger.info(args)
 
-        dataset,folds_per_run=biomoqa_data_pipeline(args.n_folds, n_runs=args.n_runs, with_title=args.with_title, with_keywords=args.with_keywords, balanced=args.balanced, balance_coeff=args.balance_coeff,nb_optional_negs=args.nb_opt_negs)
+    dataset,folds_per_run=biomoqa_data_pipeline(args.n_folds, n_runs=args.n_runs, with_title=args.with_title, with_keywords=args.with_keywords, balanced=args.balanced, balance_coeff=args.balance_coeff,nb_optional_negs=args.nb_opt_negs)
 
-        for run_idx in range(len(folds_per_run)):
-            folds=folds_per_run[run_idx]
-            for fold_idx in range(args.n_folds):
+    for run_idx in range(len(folds_per_run)):
+        folds=folds_per_run[run_idx]
+        for fold_idx in range(args.n_folds):
 
-                train_indices, dev_indices,test_indices = folds[fold_idx]
+            train_indices, dev_indices,test_indices = folds[fold_idx]
 
-                logger.info(f"\nfold number {fold_idx+1} / {len(folds)}")
-                
-                train_split = dataset.select(train_indices)
-                dev_split = dataset.select(dev_indices)
-                test_split = dataset.select(test_indices)
+            logger.info(f"\nfold number {fold_idx+1} / {len(folds)}")
+            
+            train_split = dataset.select(train_indices)
+            dev_split = dataset.select(dev_indices)
+            test_split = dataset.select(test_indices)
 
-                logger.info(f"train split size : {len(train_split)}")
-                logger.info(f"dev split size : {len(dev_split)}")
-                logger.info(f"test split size : {len(test_split)}")
+            logger.info(f"train split size : {len(train_split)}")
+            logger.info(f"dev split size : {len(dev_split)}")
+            logger.info(f"test split size : {len(test_split)}")
 
-                test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv")
-                train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv")
-                dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv")
-
+            test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv")
+            train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv")
+            dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv")
 
 
 if __name__ == "__main__":

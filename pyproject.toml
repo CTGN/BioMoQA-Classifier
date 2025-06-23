@@ -20,6 +20,7 @@ dependencies = [
     "hyperopt==0.2.5",
     "imblearn>=0.0",
     "ipykernel>=6.29.5",
+    "ipywidgets>=8.1.7",
     "iterative-stratification>=0.1.9",
     "langchain-community>=0.3.20",
     "langchain-core>=0.3.49",

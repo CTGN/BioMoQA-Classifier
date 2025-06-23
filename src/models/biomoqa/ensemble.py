@@ -117,6 +117,7 @@ def get_scores_by_model(cfg):
         
         if os.path.isfile(test_preds_path):
             model_preds_df=pd.read_csv(test_preds_path)
+            logger.info(model_preds_df.head())
             scores_by_models.append(model_preds_df['score'])
         else:
             logger.error(f"No model scores for config : {cfg} with model {model}. Cannot run ensemble learning.")
@@ -176,7 +177,7 @@ def ensemble_pred(cfg):
     # Filter metrics for the current data_type and loss_type
     filtered_metrics = avg_metrics[
         (avg_metrics["model_name"] == "Ensemble") &
-        (avg_metrics["loss_type"] == self.loss_type)
+        (avg_metrics["loss_type"] == cfg['loss_type'])
     ]
 
     return filtered_metrics

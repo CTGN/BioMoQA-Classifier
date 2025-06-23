@@ -27,7 +27,7 @@ import os
 import seaborn as sns
 import smtplib
 from email.mime.text import MIMEText
-from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score,cohen_kappa_score
+from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score,cohen_kappa_score,roc_auc_score, f1_score, recall_score, precision_score, accuracy_score
 from src.config import CONFIG
 
 
@@ -70,6 +70,7 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray,scores =None) -
         **(evaluate.load("recall").compute(predictions=predictions, references=labels) or {}),
         **(evaluate.load("precision").compute(predictions=predictions, references=labels) or {}),
         **(evaluate.load("accuracy").compute(predictions=predictions, references=labels) or {}),
+        "roc_auc" : roc_auc_score(labels,scores) if scores is not None else {},
         "AP":average_precision_score(labels,scores,average="weighted") if scores is not None else {},
         "MCC":matthews_corrcoef(labels,predictions),
         "NDCG":ndcg_score(np.asarray(labels).reshape(1, -1),scores.reshape(1, -1)) if scores is not None else {},
@@ -131,16 +132,35 @@ def tokenize_datasets(
     logger.info(f"{len(datasets)} datasets tokenized successfully")
     return tokenized_datasets
 
-def plot_roc_curve(y_true, y_scores,logger,plot_dir,data_type=None):
+def plot_roc_curve(y_true, y_scores, logger, plot_dir, data_type=None, metric="eval_f1",store_plot=True):
     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
-    youden_j = tpr - fpr
-    optimal_idx = np.argmax(youden_j)
-    optimal_threshold = thresholds[optimal_idx]
     roc_auc = auc(fpr, tpr)
-    
-    fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    # Plot ROC curve
+    metric_scores = []
+
+    for thresh in thresholds:
+        y_pred = (y_scores >= thresh).astype(int)
+        try:
+            if metric == "f1":
+                score = f1_score(y_true, y_pred)
+            elif metric == "accuracy":
+                score = accuracy_score(y_true, y_pred)
+            elif metric == "precision":
+                score = precision_score(y_true, y_pred)
+            elif metric == "recall":
+                score = recall_score(y_true, y_pred)
+            elif metric == "kappa":
+                score = cohen_kappa_score(y_true, y_pred)
+            else:
+                raise ValueError(f"Unsupported metric: {metric}")
+        except ValueError:
+            score = 0  # Handle edge cases like all one class in y_pred
+        metric_scores.append(score)
+
+    optimal_idx = np.argmax(metric_scores)
+    optimal_threshold = thresholds[optimal_idx]
+
+    fig, ax1 = plt.subplots(figsize=(8, 6))
     ax1.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.3f})')
     ax1.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     ax1.set_xlim([0.0, 1.0])
@@ -150,21 +170,21 @@ def plot_roc_curve(y_true, y_scores,logger,plot_dir,data_type=None):
     ax1.set_title('Receiver Operating Characteristic')
     ax1.legend(loc="lower right")
 
-    # Add secondary x-axis for thresholds
     ax2 = ax1.twiny()
     ax2.set_xlim(ax1.get_xlim())
-    ax2.set_xticks(fpr[::10])  # Use every 10th FPR value for clarity
+    ax2.set_xticks(fpr[::10])
     ax2.set_xticklabels([f'{t:.2f}' for t in thresholds[::10]], rotation=45, fontsize=8)
     ax2.set_xlabel('Thresholds')
 
-    if data_type is not None:
-        plt.savefig(os.path.join(plot_dir, "roc_curve_" + data_type +".png"))
+    filename = f"roc_curve_{data_type}.png" if data_type else "roc_curve.png"
+    if store_plot:
+        plt.savefig(os.path.join(plot_dir, filename))
         plt.close()
-        logger.info(f"ROC curve saved to {plot_dir}/roc_curve_" + data_type +".png")
+        logger.info(f"ROC curve saved to {os.path.join(plot_dir, filename)}")
     else:
-        plt.savefig(os.path.join(plot_dir, "roc_curve.png"))
-        plt.close()
-        logger.info(f"ROC curve saved to {plot_dir}/roc_curve.png")
+        plt.show()
+        logger.info("ROC curve displayed")
+
     return optimal_threshold
 
 def plot_precision_recall_curve(y_true, y_scores,logger,plot_dir,data_type=None):

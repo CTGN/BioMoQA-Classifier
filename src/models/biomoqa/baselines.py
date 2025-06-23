@@ -315,7 +315,7 @@ def svm(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                     pd.DataFrame([{
                         "model_name": "SVM",
                         "fold": fold_idx+1,
-                        "run": run_idx,
+                        "run": run_idx+1,
                         "kernel": kernel,
                         "with_title": with_title,
                         "with_keywords":with_keywords,

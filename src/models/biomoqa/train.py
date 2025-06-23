@@ -182,10 +182,8 @@ def train(cfg,hp_cfg):
     training_args.alpha = hp_cfg["alpha"] if cfg['loss_type'] == "focal" else None
     training_args.gamma = hp_cfg["gamma"] if cfg['loss_type'] == "focal" else None
     training_args.learning_rate = hp_cfg["learning_rate"]
-    training_args.num_train_epochs = hp_cfg["num_train_epochs"]
+    training_args.num_train_epochs = 10
     
-
-    training_args.gradient_accumulation_steps = cfg.get("gradient_accumulation_steps", 1)
 
     class CustomEarlyStoppingCallback(EarlyStoppingCallback):
         def on_train_end(self, args, state, control, **kwargs):
@@ -218,6 +216,31 @@ def train(cfg,hp_cfg):
     metrics = trainer.train().metrics
 
     eval_results_dev=trainer.evaluate()
+
+    log_history = trainer.state.log_history
+    train_logs = [log for log in log_history if 'loss' in log and 'epoch' in log]
+    eval_logs = [log for log in log_history if 'eval_loss' in log and 'epoch' in log]
+
+    if train_logs and eval_logs:
+        train_epochs = [log['epoch'] for log in train_logs]
+        train_loss = [log['loss'] for log in train_logs]
+        eval_epochs = [log['epoch'] for log in eval_logs]
+        eval_loss = [log['eval_loss'] for log in eval_logs]
+
+        plt.figure(figsize=(12, 6))
+        plt.plot(train_epochs, train_loss, 'o-', label='Training Loss')
+        plt.plot(eval_epochs, eval_loss, 'o-', label='Validation Loss')
+        plt.title(f"Loss Evolution\nModel: {map_name(cfg['model_name'])}, Loss: {cfg['loss_type']}, Fold: {cfg['fold']}, Run: {cfg['run']}")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.legend()
+        plt.grid(True)
+        
+        plot_filename = f"loss_evolution_{map_name(cfg['model_name'])}_loss-{cfg['loss_type']}_fold-{cfg['fold']}_run-{cfg['run']}.png"
+        plot_path = os.path.join(CONFIG["plot_dir"], "Loss Evolutions",plot_filename)
+        plt.savefig(plot_path)
+        logger.info(f"Loss evolution plot saved at {plot_path}")
+        plt.close()
 
     end_time_train=perf_counter()
     logger.info(f"Training time : {end_time_train-start_time}")
@@ -269,12 +292,12 @@ def train(cfg,hp_cfg):
 
     #! The following seems weird. we are talking about decision here. View it like a ranking problem. take a perspective for usage
     threshold = eval_results_dev["eval_optim_threshold"]
-    logger.info(f"\nOn test Set (optimal threshold of {threshold} according to cross validation on the training set): ")
+    logger.info(f"\nOn test Set (New optimal threshold of {threshold} according to the dev set): ")
     preds = (scores > threshold).astype(int)
     res2=detailed_metrics(preds, test_split["labels"],scores=scores)
     plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
 
-    logger.info(f"Results for fold {cfg['fold']+1} with optim_threshold leqrned from dev set : {res2}")
+    logger.info(f"Results for fold {cfg['fold']+1} with optim_threshold learned from dev set : {res2}")
 
     clear_cuda_cache()
 
@@ -296,7 +319,9 @@ def train(cfg,hp_cfg):
             "with_title": cfg['with_title'],
             "with_keywords":cfg['with_keywords'],
             "nb_added_negs": cfg['nb_optional_negs'],
-            **res1
+            "num_trials": hp_cfg['num_trials'],
+            "hpo_metric": hp_cfg['hpo_metric'],
+            **res2
         }])
     ], ignore_index=True)
     
