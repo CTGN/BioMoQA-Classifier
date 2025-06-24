@@ -16,7 +16,7 @@ NUM_OPT_NEGS=(1000)
 
 # Number of HPO/train runs and folds
 NUM_RUNS=1
-NUM_FOLDS=4
+NUM_FOLDS=5
 
 for opt_negs in "${NUM_OPT_NEGS[@]}"; do
   echo "==> Adding ${opt_negs} optional negatives"
@@ -30,7 +30,7 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
     echo "--> Run #${run}"
     # try both losses
     # each fold
-    for (( fold=3; fold<NUM_FOLDS; fold++ )); do
+    for (( fold=0; fold<NUM_FOLDS; fold++ )); do
     echo "------> Fold: ${fold}"
       for loss in BCE; do
         echo "----> Loss function: ${loss}"
