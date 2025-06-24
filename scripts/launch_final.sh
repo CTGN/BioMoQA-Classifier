@@ -30,9 +30,9 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
     echo "--> Run #${run}"
     # try both losses
     # each fold
-    for (( fold=1; fold<NUM_FOLDS; fold++ )); do
+    for (( fold=3; fold<NUM_FOLDS; fold++ )); do
     echo "------> Fold: ${fold}"
-      for loss in BCE focal; do
+      for loss in BCE; do
         echo "----> Loss function: ${loss}"
         # each model
         for model in "${MODELS[@]}"; do

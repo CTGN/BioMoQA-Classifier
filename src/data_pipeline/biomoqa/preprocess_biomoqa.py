@@ -119,7 +119,7 @@ def biomoqa_data_pipeline(
     with_keywords,
     balanced=False,
     balance_coeff=5,
-    nb_optional_negs=5000
+    nb_optional_negs=5000,
     store=True
 ):
     og_df, optional_negatives_df = loading_pipeline()
