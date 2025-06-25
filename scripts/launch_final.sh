@@ -23,7 +23,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
   uv run src/data_pipeline/biomoqa/preprocess_biomoqa.py \
     -nf "${NUM_FOLDS}" \
     -nr "${NUM_RUNS}" \
-    -on "${opt_negs}"
+    -on "${opt_negs}"\
+    -t
 
   # repeat for each run
   for (( run=0; run<NUM_RUNS; run++ )); do
@@ -46,7 +47,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             --n_trials 25 \
             --hpo_metric "eval_roc_auc" \
             -m "${model}" \
-            --loss "${loss}" 
+            --loss "${loss}" \
+            -t
 
           # Training with best HPO config
           uv run src/models/biomoqa/train.py \
@@ -58,7 +60,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             --nb_opt_negs "${opt_negs}" \
             -bm "eval_roc_auc" \
             --gpu 2 \
-            --loss "${loss}" 
+            --loss "${loss}" \
+            -t
         done
 
         # Ensemble step for this fold/run
@@ -68,7 +71,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
           --fold "${fold}" \
           --run "${run}" \
           --nb_opt_negs "${opt_negs}" \
-          --loss "${loss}" 
+          --loss "${loss}" \
+          -t
       done
     done
   done
