@@ -8,6 +8,7 @@ import argparse
 import logging
 import torch
 from transformers import set_seed
+import matplotlib.pyplot as plt
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground"))  # Adjust ".." based on your structure
 
@@ -143,6 +144,24 @@ def biomoqa_data_pipeline(
     opt_neg_df = clean_df[clean_df['labels'] == -1]
     logger.info(f"clean_og_df size : {len(clean_og_df)}")
     logger.info(f"opt_neg_df size : {len(opt_neg_df)}")
+
+
+    # Count the number of positives, original negatives, and optional negatives
+    n_positives = len(clean_og_df[clean_og_df['labels'] == 1])
+    n_original_negatives = len(clean_og_df[clean_og_df['labels'] == 0])
+    n_optional_negatives = len(opt_neg_df)
+
+    labels = ['Original Positives', 'Original Negatives', 'Added Negatives']
+    sizes = [n_positives, n_original_negatives, n_optional_negatives]
+
+    plt.figure(figsize=(6, 6))
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')
+    plt.tight_layout()
+    # Add the title lower, below the pie chart
+    plt.gcf().text(0.5, 0.8, 'Dataset Distribution', ha='center', fontsize=14)
+    plt.savefig('/home/leandre/Projects/BioMoQA_Playground/plots/data/dataset_distribution.png')
+    plt.show()
 
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)

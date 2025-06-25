@@ -1,9 +1,9 @@
 direction: max
-fold: 3
+fold: 0
 hpo_metric: eval_roc_auc
 learning_rate: 7.575992927954462e-05
 loss_type: BCE
-model_name: google-bert/bert-base-uncased
+model_name: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract
 nb_optional_negs: 1000
 num_trials: 25
 pos_weight: 2.99135153792754
