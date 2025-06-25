@@ -20,16 +20,16 @@
 \contentsline {subsection}{\numberline {3.4.1}Recurrent Neural Networks (RNNs)}{16}{subsection.3.4.1}%
 \contentsline {subsection}{\numberline {3.4.2}Long Short-Term Memory (LSTM)}{16}{subsection.3.4.2}%
 \contentsline {subsection}{\numberline {3.4.3}Attention for Neural Networks}{17}{subsection.3.4.3}%
-\contentsline {subsection}{\numberline {3.4.4}Seq2seq}{18}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.4}Seq2seq}{17}{subsection.3.4.4}%
 \contentsline {subsection}{\numberline {3.4.5}Transformers}{18}{subsection.3.4.5}%
-\contentsline {subsection}{\numberline {3.4.6}BERT}{19}{subsection.3.4.6}%
+\contentsline {subsection}{\numberline {3.4.6}BERT}{18}{subsection.3.4.6}%
 \contentsline {subsection}{\numberline {3.4.7}BERT Variations}{19}{subsection.3.4.7}%
-\contentsline {subsection}{\numberline {3.4.8}Heads}{20}{subsection.3.4.8}%
+\contentsline {subsection}{\numberline {3.4.8}Heads}{19}{subsection.3.4.8}%
 \contentsline {subsection}{\numberline {3.4.9}Fine-tuning}{20}{subsection.3.4.9}%
 \contentsline {subsection}{\numberline {3.4.10}Optimization Algorithms}{20}{subsection.3.4.10}%
 \contentsline {subsubsection}{Stochastic Gradient Descent}{20}{subsubsection*.4}%
-\contentsline {subsubsection}{SGD with Momentum}{21}{subsubsection*.5}%
-\contentsline {subsubsection}{RMSProp}{21}{subsubsection*.6}%
+\contentsline {subsubsection}{SGD with Momentum}{20}{subsubsection*.5}%
+\contentsline {subsubsection}{RMSProp}{20}{subsubsection*.6}%
 \contentsline {subsubsection}{Adam}{21}{subsubsection*.7}%
 \contentsline {subsubsection}{AdamW}{21}{subsubsection*.8}%
 \contentsline {section}{\numberline {3.5}Evaluation}{21}{section.3.5}%
@@ -38,7 +38,7 @@
 \contentsline {subsection}{\numberline {3.5.3}Metrics}{23}{subsection.3.5.3}%
 \contentsline {subsubsection}{Accuracy}{23}{subsubsection*.9}%
 \contentsline {subsubsection}{Recall}{23}{subsubsection*.10}%
-\contentsline {subsubsection}{Precision}{24}{subsubsection*.11}%
+\contentsline {subsubsection}{Precision}{23}{subsubsection*.11}%
 \contentsline {subsubsection}{F1 Score}{24}{subsubsection*.12}%
 \contentsline {subsubsection}{F$\boldsymbol {\beta }$ Score}{24}{subsubsection*.13}%
 \contentsline {subsubsection}{Matthews Correlation Coefficient (MCC)}{24}{subsubsection*.14}%
@@ -46,10 +46,10 @@
 \contentsline {subsubsection}{Normalized Discounted Cumulative Gain (nDCG)}{25}{subsubsection*.16}%
 \contentsline {subsubsection}{Precision-Recall Curve (PR)}{25}{subsubsection*.17}%
 \contentsline {subsubsection}{Average Precision (AP)}{25}{subsubsection*.18}%
-\contentsline {subsubsection}{ROC Curve}{26}{subsubsection*.19}%
+\contentsline {subsubsection}{ROC Curve}{25}{subsubsection*.19}%
 \contentsline {subsubsection}{Area Under the Curve (AUC)}{26}{subsubsection*.20}%
 \contentsline {subsection}{\numberline {3.5.4}Hyperparameter Optimization}{26}{subsection.3.5.4}%
-\contentsline {subsection}{\numberline {3.5.5}Statistical Test}{27}{subsection.3.5.5}%
+\contentsline {subsection}{\numberline {3.5.5}Statistical Test}{26}{subsection.3.5.5}%
 \contentsline {subsubsection}{Friedman test + Nemnyi}{27}{subsubsection*.21}%
 \contentsline {subsubsection}{McNemar's test}{28}{subsubsection*.22}%
 \contentsline {chapter}{\numberline {4}Data}{30}{chapter.4}%

@@ -292,7 +292,7 @@ As for encoding a given word, WordPiece splits it according to the longest subwo
 \State Set $T \leftarrow [\,]$, position $i \leftarrow 1$
 \While{$i \le |w|$}
   \State Let $j \leftarrow |w|$
-  \State \textbf{while} $j > i$:
+  \While{$i \le |w|$}
     \If{substring $s = w[i\!\colon\!j] \in V$ (or \texttt{\#\#}$s$ for $i>1$)}
       \State Append $s$ (with \texttt{\#\#} if $i>1$) to $T$
       \State Set $i \leftarrow j$
@@ -502,7 +502,7 @@ RMSProp is an adaptive learning rate algorithm that maintains a moving average o
 \[ E[g^2]_t = \beta E[g^2]_{t-1} + (1-\beta) g_t^2 \quad ; \quad \theta \leftarrow \theta - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} g_t \]
 
 \subsubsection{Adam}
-The Adam optimizer (Kingma & Ba, 2014) is arguably the most popular and effective optimization algorithm. It combines the ideas of momentum and RMSProp. It stores an exponentially decaying average of past gradients (\(m_t\), like momentum) and past squared gradients (\(v_t\), like RMSProp).
+The Adam optimizer (Kingma \& Ba, 2014) is arguably the most popular and effective optimization algorithm. It combines the ideas of momentum and RMSProp. It stores an exponentially decaying average of past gradients (\(m_t\), like momentum) and past squared gradients (\(v_t\), like RMSProp).
 \[ \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad ; \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t} \quad ; \quad \theta \leftarrow \theta - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} \]
 The terms \(\hat{m}_t\) and \(\hat{v}_t\) are bias-corrected estimates to account for the initialization of the moving averages at zero.
 
@@ -750,19 +750,19 @@ Our experimental workflow is designed to ensure a robust and fair comparison of 
         \node (loop) [decision, below of=preprocess, yshift=-1cm] {For each fold};
         \node (hpo) [process, below of=loop, yshift=-1cm] {Hyperparameter Optimization (25 Trials, ROC-AUC)};
         \node (train) [process, below of=hpo] {Train Model with Best Hyperparameters};
-        \node (ensemble) [process, right of=train, xshift=3cm] {Ensemble Predictions};
-        \node (data) [data, right of=loop, xshift=3cm] {Models \& Results};
+        \node (ensemble) [process, right of=train, xshift=6cm] {Ensemble Predictions};
+        \node (data) [data, right of=loop, xshift=6cm] {Models \& Results};
         
         \draw [arrow] (start) -- (preprocess);
         \draw [arrow] (preprocess) -- (loop);
         \draw [arrow] (loop) -- node[right] {Train/Validation Split} (hpo);
         \draw [arrow] (hpo) -- (train);
-        \draw [arrow] (train.east) -- ++(0.5,0) |- (data);
+        \draw [arrow] (train.east) -- ++(1.5,0) |- (data);
         \draw [arrow] (train) -- (ensemble);
         \draw [arrow] (ensemble) -- (data);
         
         \draw [decorate,decoration={brace,amplitude=10pt},xshift=-4pt,yshift=0pt]
-        (hpo.west) -- (train.west) node [black,midway,xshift=-0.6cm] {For each Model \& Loss};
+        (-5,-11) -- (-5,-7) node [black,midway,xshift=-0.6cm,yshift=2.2cm,rotate=90] {For each Model \& Loss};
     \end{tikzpicture}
     \caption{Experimental workflow for model training and evaluation.}
     \label{fig:workflow}
