@@ -10,4 +10,4 @@ pos_weight: 2.99135153792754
 run_idx: 0
 weight_decay: 3.805210924495089e-05
 with_keywords: false
-with_title: false
+with_title: true
