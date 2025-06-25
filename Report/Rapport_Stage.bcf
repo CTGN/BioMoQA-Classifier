@@ -2372,12 +2372,13 @@
     <bcf:datasource type="file" datatype="bibtex" glob="false">references.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1" intorder="1">citeulike:123456</bcf:citekey>
-    <bcf:citekey order="2" intorder="1">jurafsky2009speech</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">nih:stats2024</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">sennrich2015neural</bcf:citekey>
-    <bcf:citekey order="5" intorder="1">wu2016google</bcf:citekey>
+    <bcf:citekey order="1" intorder="1">nih:stats2024</bcf:citekey>
+    <bcf:citekey order="2" intorder="1">citeulike:123456</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">sennrich2015neural</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">wu2016google</bcf:citekey>
+    <bcf:citekey order="5" intorder="1">devlin2019bert</bcf:citekey>
     <bcf:citekey order="6" intorder="1">devlin2019bert</bcf:citekey>
+    <bcf:citekey order="6" intorder="2">lee2020biobert</bcf:citekey>
     <bcf:citekey order="7" intorder="1">lin2017focal</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->

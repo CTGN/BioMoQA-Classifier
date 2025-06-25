@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.24)  24 JUN 2025 19:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.24)  25 JUN 2025 11:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1115,127 +1115,110 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 [3]
 Chapter 1.
 
-LaTeX Warning: Citation 'citeulike:123456' on page 4 undefined on input line 83
-.
-
-
-LaTeX Warning: Citation 'jurafsky2009speech' on page 4 undefined on input line 
-85.
-
-
-LaTeX Warning: Citation 'nih:stats2024' on page 4 undefined on input line 90.
-
-
 
 [4
 
 ]
+
+[5]
 Chapter 2.
 
-Underfull \hbox (badness 10000) in paragraph at lines 98--109
-
- []
+LaTeX Warning: Citation 'nih:stats2024' on page 6 undefined on input line 101.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 98--109
-
- []
+LaTeX Warning: Citation 'citeulike:123456' on page 6 undefined on input line 10
+1.
 
 
 
-[5
+[6
 
 ]
 
-[6]
+[7{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
+}]
 Chapter 3.
 
-Underfull \hbox (badness 10000) in paragraph at lines 121--124
+Underfull \hbox (badness 10000) in paragraph at lines 131--134
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 121--124
+Underfull \hbox (badness 10000) in paragraph at lines 131--134
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 126--134
+Underfull \hbox (badness 10000) in paragraph at lines 136--144
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 136--137
+Underfull \hbox (badness 10000) in paragraph at lines 146--147
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--145
+Underfull \hbox (badness 10000) in paragraph at lines 151--155
 
  []
 
 
 
-[7
+[8
 
-{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-
-Overfull \hbox (2.6152pt too wide) in paragraph at lines 184--184
+]
+Overfull \hbox (2.6152pt too wide) in paragraph at lines 194--194
  []|\OT1/cmr/m/n/12 Encoding| 
  []
 
 
 
-[8]
-
-LaTeX Warning: Citation 'sennrich2015neural' on page 9 undefined on input line 
-195.
-
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 201.
-
-
 [9]
 
-LaTeX Warning: Citation 'wu2016google' on page 10 undefined on input line 242.
+LaTeX Warning: Citation 'sennrich2015neural' on page 10 undefined on input line
+ 205.
+
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 211.
 
 
-LaTeX Warning: Citation 'devlin2019bert' on page 10 undefined on input line 242
+[10]
+
+LaTeX Warning: Citation 'wu2016google' on page 11 undefined on input line 252.
+
+
+LaTeX Warning: Citation 'devlin2019bert' on page 11 undefined on input line 252
 .
 
 
-Overfull \hbox (34.46046pt too wide) in paragraph at lines 242--243
+Overfull \hbox (34.46046pt too wide) in paragraph at lines 252--253
 \OT1/cmr/m/n/12 Wordpiece, as it is used in re-cent mod-els, was in-tro-duced i
 n 2016 by Google ([[]]).
  []
 
 
 
-[10]
-
 [11]
-Overfull \hbox (2.37773pt too wide) in paragraph at lines 317--317
+
+[12]
+Overfull \hbox (2.37773pt too wide) in paragraph at lines 327--327
 |[]\OT1/cmr/bx/n/14.4 Term Fre-quency{Inverse Doc-u-ment Fre-quency (TF-IDF)| 
  []
 
 
 
-[12]
-
 [13]
-
-LaTeX Warning: Reference `bert_section' on page 14 undefined on input line 358.
-
-
-
 
 [14]
 
 [15]
-<images/lstm_cell.png, id=366, 806.89455pt x 303.17265pt>
+
+[16]
+<images/lstm_cell.png, id=399, 806.89455pt x 303.17265pt>
 File: images/lstm_cell.png Graphic file (type png)
 <use images/lstm_cell.png>
-Package pdftex.def Info: images/lstm_cell.png  used on input line 419.
+Package pdftex.def Info: images/lstm_cell.png  used on input line 429.
 (pdftex.def)             Requested size: 354.86412pt x 133.3316pt.
 
 
@@ -1243,26 +1226,29 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
-[16]
+[17]
 
-[17 <./images/lstm_cell.png>]
-<images/transformer_arch.png, id=378, 448.67625pt x 659.46375pt>
+[18 <./images/lstm_cell.png>]
+<images/transformer_arch.png, id=417, 448.67625pt x 659.46375pt>
 File: images/transformer_arch.png Graphic file (type png)
 <use images/transformer_arch.png>
-Package pdftex.def Info: images/transformer_arch.png  used on input line 453.
+Package pdftex.def Info: images/transformer_arch.png  used on input line 463.
 (pdftex.def)             Requested size: 399.21791pt x 586.79007pt.
 
 
-LaTeX Warning: Float too large for page by 4.5366pt on input line 455.
+LaTeX Warning: Float too large for page by 4.5366pt on input line 465.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
-[18]
-
 [19]
+
+LaTeX Warning: Reference `tab:model_comparison' on page 20 undefined on input l
+ine 486.
+
+
 
 [20]
 
@@ -1282,143 +1268,146 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [28]
 
-[29 <./images/transformer_arch.png (PNG copy)>]
+[29]
+
+[30 <./images/transformer_arch.png (PNG copy)>]
 Chapter 4.
 
 
-[30
+[31
 
 ]
-<images/class_distribution.png, id=462, 462.528pt x 346.896pt>
+<images/class_distribution.png, id=513, 433.62pt x 433.62pt>
 File: images/class_distribution.png Graphic file (type png)
 <use images/class_distribution.png>
-Package pdftex.def Info: images/class_distribution.png  used on input line 722.
+Package pdftex.def Info: images/class_distribution.png  used on input line 774.
 
-(pdftex.def)             Requested size: 266.14978pt x 199.62244pt.
-<images/wordcloud.png, id=464, 850.6179pt x 367.1316pt>
-File: images/wordcloud.png Graphic file (type png)
-<use images/wordcloud.png>
-Package pdftex.def Info: images/wordcloud.png  used on input line 733.
-(pdftex.def)             Requested size: 354.86412pt x 153.16345pt.
+(pdftex.def)             Requested size: 266.14978pt x 266.16194pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
+<images/wordcloud.png, id=515, 850.6179pt x 367.1316pt>
+File: images/wordcloud.png Graphic file (type png)
+<use images/wordcloud.png>
+Package pdftex.def Info: images/wordcloud.png  used on input line 785.
+(pdftex.def)             Requested size: 354.86412pt x 153.16345pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
-[31 <./images/class_distribution.png>]
+LaTeX Warning: Citation 'devlin2019bert' on page 32 undefined on input line 791
+.
 
-[32 <./images/wordcloud.png>]
+
+LaTeX Warning: Citation 'lee2020biobert' on page 32 undefined on input line 791
+.
+
+
+Overfull \hbox (11.48628pt too wide) in paragraph at lines 791--792
+\OT1/cmr/m/n/12 abstract, and BiomedBERT-fulltext), were pre-trained on large c
+or-pora in-clud-ing PubMed
+ []
+
+
+
+[32]
+
+[33 <./images/class_distribution.png> <./images/wordcloud.png>]
+
+[34]
 Chapter 5.
 
-Overfull \hbox (14.80049pt too wide) in paragraph at lines 766--767
+Overfull \hbox (14.80049pt too wide) in paragraph at lines 827--828
  [][] 
  []
 
 
 
-[33
+[35
 
 ]
 
-LaTeX Warning: Citation 'lin2017focal' on page 34 undefined on input line 786.
+[36]
+
+LaTeX Warning: Citation 'lin2017focal' on page 37 undefined on input line 851.
 
 
-
-[34]
-Overfull \hbox (4.45825pt too wide) in paragraph at lines 795--796
+Overfull \hbox (4.45825pt too wide) in paragraph at lines 860--861
 []\OT1/cmr/bx/n/12 BioBERT \OT1/cmr/m/n/12 and \OT1/cmr/bx/n/12 BiomedNLP-Biome
 dBERT\OT1/cmr/m/n/12 : BERT mod-els pre-trained on large
  []
 
 
 
-[35]
+[37]
 Chapter 6.
-<images/model_comparison_boxplot.png, id=494, 449.5194pt x 335.3328pt>
+<images/model_comparison_boxplot.png, id=554, 449.5194pt x 335.3328pt>
 File: images/model_comparison_boxplot.png Graphic file (type png)
 <use images/model_comparison_boxplot.png>
 Package pdftex.def Info: images/model_comparison_boxplot.png  used on input lin
-e 836.
+e 901.
 (pdftex.def)             Requested size: 399.21791pt x 297.81587pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
 
-[36
+[38
 
 ]
-
-LaTeX Warning: File `images/nemenyi.png' not found on input line 847.
-
-
-! Package pdftex.def Error: File `images/nemenyi.png' not found: using draft se
-tting.
-
-See the pdftex.def package documentation for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.847 ...[width=1.0\textwidth]{images/nemenyi.png}
-                                                  
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
+<images/nemenyi.png, id=564, 1503.216pt x 347.6187pt>
+File: images/nemenyi.png Graphic file (type png)
+<use images/nemenyi.png>
+Package pdftex.def Info: images/nemenyi.png  used on input line 912.
+(pdftex.def)             Requested size: 443.57848pt x 102.57845pt.
 
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
-
-[37 <./images/model_comparison_boxplot.png>]
-
-[38]
-Chapter 7.
-
-Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 857.
-
-
-Overfull \hbox (0.44981pt too wide) in paragraph at lines 859--860
-\OT1/cmr/m/n/12 Our re-sults clearly demon-strate the value of domain-specific 
-pre-training. The BioBERT
- []
-
-
-
-[39
-
-]
+[39 <./images/model_comparison_boxplot.png> <./images/nemenyi.png>]
 
 [40]
-Chapter 8.
+Chapter 7.
 
 
 [41
 
 ]
+
+[42]
+
+[43]
+
+[44]
+Chapter 8.
+
+
+[45
+
+]
+
+[46]
 Chapter 9.
 
-LaTeX Warning: Empty bibliography on input line 883.
+LaTeX Warning: Empty bibliography on input line 991.
 
 
 
-[42
+[47
 
 ]
 Chapter 10.
 
 
-[43
+[48
 
 ]
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 892.
+(hyperref)                than one, level fixed on input line 1000.
 
 
 
-[44] (./Rapport_Stage.aux)
+[49] (./Rapport_Stage.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1427,8 +1416,17 @@ L3 programming layer <2025-01-18>
 
 LaTeX Warning: There were undefined references.
 
-Package rerunfilecheck Info: File `Rapport_Stage.out' has not changed.
-(rerunfilecheck)             Checksum: 8ECFBFE9E80B2F621D6E5D2E81816E9F;7160.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `Rapport_Stage.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `Rapport_Stage.out':
+(rerunfilecheck)             Before: D8D10E17829F6775CEA62A51F9B52834;7846
+(rerunfilecheck)             After:  B4B4067BA52050263E0A45652791AC79;9481.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                Rapport_Stage
@@ -1439,35 +1437,191 @@ Package logreq Info: Writing requests to 'Rapport_Stage.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 31311 strings out of 473190
- 602164 string characters out of 5715800
- 1403217 words of memory out of 5000000
- 53965 multiletter control sequences out of 15000+600000
+ 31347 strings out of 473190
+ 602335 string characters out of 5715800
+ 1403295 words of memory out of 5000000
+ 53949 multiletter control sequences out of 15000+600000
  569527 words of font info for 74 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,15n,91p,1190b,1151s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><
-/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></u
-sr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr
-/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr
-/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/l
-ocal/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/loc
-al/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local
-/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/te
-xlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texli
-ve/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texliv
-e/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/
-2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/20
-25/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/202
-5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/2025
-/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/
-2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on Rapport_Stage.pdf (45 pages, 1124612 bytes).
+
+pdfTeX warning (dest): name{figure.7.2} has been referenced but does not exist,
+ replaced by a fixed one
+
+
+pdfTeX warning (dest): name{figure.7.1} has been referenced but does not exist,
+ replaced by a fixed one
+
+
+pdfTeX warning (dest): name{table.7.1} has been referenced but does not exist, 
+replaced by a fixed one
+
+
+pdfTeX warning (dest): name{figure.5.2} has been referenced but does not exist,
+ replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.11.0.1} has been referenced but does not
+ exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{chapter.11} has been referenced but does not exist,
+ replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.8.1} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.8.0.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.8.0.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.6.3} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.6.2.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.6.2.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.6.2} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.6.1} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.5.5} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.5.4} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5.5} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5.4} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5.3} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section.4.5} has been referenced but does not exist
+, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.10} has been referenced but does not
+ exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.9} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.8} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.7} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.6} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.5} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.4} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.3} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2.5} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2.4} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2.3} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.1.2} has been referenced but does not 
+exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.1.1} has been referenced but does not 
+exist, replaced by a fixed one
+
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><
+/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></
+usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></u
+sr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr
+/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/l
+ocal/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/l
+ocal/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loc
+al/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local
+/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/t
+exlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texl
+ive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive
+/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/
+2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/20
+25/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2025/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/2025/t
+exmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/20
+25/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
+Output written on Rapport_Stage.pdf (50 pages, 1300479 bytes).
 PDF statistics:
- 654 PDF objects out of 1000 (max. 8388607)
- 556 compressed objects within 6 object streams
- 143 named destinations out of 1000 (max. 500000)
- 462 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 752 PDF objects out of 1000 (max. 8388607)
+ 646 compressed objects within 7 object streams
+ 195 named destinations out of 1000 (max. 500000)
+ 499 words of extra memory for PDF output out of 10000 (max. 10000000)
 
