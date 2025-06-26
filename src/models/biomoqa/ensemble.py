@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import *
 import argparse
 import evaluate
 import matplotlib.pyplot as plt
