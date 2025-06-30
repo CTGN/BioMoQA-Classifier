@@ -13,34 +13,41 @@ from collections import defaultdict
 import random
 import argparse
 
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 def merge_pos_neg(pos_ds, neg_ds, store=False):
     """
-    Merge positive and negative datasets with streaming support.
-    Memory-optimized version.
+    Merge positive and negative datasets.
     """
-    # Define label feature
+    # ! Not Sure it is useful because of the cast
+    #TODO : Change that
     label_feature = ClassLabel(names=["irrelevant", "relevant"])
     
-    # Process datasets with more efficient mapping
+    # Mappign function to add labels to positives and negatives data
     def add_labels(examples, label_value):
         examples["labels"] = [label_value] * len(examples["title"])
         return examples
     
-    # Create new features once
+    # Create the labels column
     new_features = pos_ds.features.copy()
     new_features["labels"] = label_feature
     
-    # Apply transformations one at a time to reduce memory usage
+    #Add postives labels by batch
     pos_ds = pos_ds.map(
         lambda x: add_labels(x, 1),
         batched=True,
-        batch_size=100,  # Smaller batch size to reduce memory usage
-        num_proc=min(4, os.cpu_count() or 1)  # Limit CPU usage
+        batch_size=100,
+        num_proc=min(4, os.cpu_count() or 1)
     )
     pos_ds = pos_ds.cast(new_features)
 
     print("pos_ds size:", len(pos_ds))
     
+    #Add negatives labels by batch
     neg_ds = neg_ds.map(
         lambda x: add_labels(x, 0),
         batched=True,
@@ -51,11 +58,13 @@ def merge_pos_neg(pos_ds, neg_ds, store=False):
 
     print("neg_ds size:", len(neg_ds))
     
-    # Interleave datasets instead of concatenating all at once
+    #Merge positives and negatives 
     merged_ds = datasets.concatenate_datasets([pos_ds, neg_ds])
     print(merged_ds)
+
     if store:
         # Save in chunks to reduce memory pressure
+        #? What are num_shards ? -> see doc
         merged_ds.save_to_disk("/home/leandre/Projects/BioMoQA_Playground/data/corpus", 
                               num_shards=4)  # Split into multiple files)
     print("Number of Positives before cleaning :",len(pos_ds))
@@ -63,7 +72,9 @@ def merge_pos_neg(pos_ds, neg_ds, store=False):
 
 def clean_ipbes(dataset,label_cols=["labels"]):
     """
-    Clean dataset using streaming operations
+    Clean dataset :
+    - 
+    - 
     """
     print("Filtering out rows with no abstracts or DOI...")
 
@@ -92,6 +103,7 @@ def clean_ipbes(dataset,label_cols=["labels"]):
     conflicting_texts = set()
     print("Size of the dataset before cleaning:", len(dataset))
 
+    #Check if, in a given batch, there is an instance for which the title or the abstract is None + check for conflicts and duplicates
     def clean_filter(examples):
         # Initialize result array
         keep = [True] * len(examples['abstract'])
@@ -120,6 +132,7 @@ def clean_ipbes(dataset,label_cols=["labels"]):
         
         return keep
 
+    #Apply the clean function acrross the whole dataset
     print("Applying clean_filter...")
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
     return dataset

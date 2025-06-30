@@ -6,13 +6,19 @@ import datasets
 import pyarrow.parquet as pq
 from pyalex import Works
 import pyalex
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 pyalex.config.email="leandre.catogni@hesge.ch"
-from pyalex import config
+pyalex.config.max_retries = 1
+pyalex.config.retry_backoff_factor = 0.1
 
-config.max_retries = 1
-config.retry_backoff_factor = 0.1
 
+
+#TODO : Use the fetch API to get the dois and get more features -> including MESH terms
 #TODO : combine the 3 files into one with a class indicator -> not sure it is a great idea
 #TODO : change functions and variable names for readability
 #TODO : our data_types depends entirely on the reading order of the data directories, we should solve this by creating a dictionarry with the name of the data directory type
@@ -20,7 +26,7 @@ config.retry_backoff_factor = 0.1
 
 def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/corpus/Raw/Corpus'):
     # Create the corpus dataset
-    print("creating corpus dataset")
+    logger.info(f"creating corpus dataset")
     dataset = load_dataset(
         'parquet', 
         data_files=[
@@ -31,12 +37,12 @@ def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/c
     split='train'
     )
     
-    print("dataset loaded")
-    print(dataset.column_names)
+    logger.info(f"dataset loaded")
+    logger.info(f"{dataset.column_names}")
 
     #To add language and doc_type columns, see below
     """
-    print("adding new columns")
+    logger.info(f"adding new columns")
     def add_new_column(batch):
         languages = []
         doc_types = []
@@ -97,7 +103,7 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
     ]
     
     for dir_path in directories:
-        print(dir_path)
+        logger.info(dir_path)
         csv_files = [
             os.path.join(dir_path, filename)
             for filename in os.listdir(dir_path)
@@ -105,11 +111,11 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
         ]
         
         if not csv_files:
-            print(f"No CSV files found in the directory: {dir_path}")
+            logger.info(f"No CSV files found in the directory: {dir_path}")
             continue
         
         try:
-            print(len(csv_files))
+            logger.info(len(csv_files))
             # Load dataset with explicit features
             combined_dataset = load_dataset(
                 "csv",
@@ -128,16 +134,14 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
             )
             
             pos_datasets.append(combined_dataset)
-            print(f"Successfully loaded dataset from: {dir_path}")
+            logger.info(f"Successfully loaded dataset from: {dir_path}")
             
         except Exception as e:
-            print(f"Error loading files from {dir_path}: {str(e)}")
+            logger.info(f"Error loading files from {dir_path}: {str(e)}")
     return pos_datasets
 
 def create_ipbes_negatives(pos_raw, corpus_ds):
     "Deletes all instances from the corpus dataset that are in the positives dataset with respect to the the abstract,title and doi or that are None"
-
-    # Create a set of positive attributes for faster lookup
 
     neg_ds=corpus_ds.remove_columns(['author','topics', 'author_abbr',"id"])
 
@@ -174,7 +178,7 @@ def create_ipbes_negatives(pos_raw, corpus_ds):
 
     return neg_ds
 
-def create_ipbes_positives(pos_raw):
+def rename_positives(pos_raw):
     """
     This function creates the positives dataset from the IPBES data.
     It loads the data from the specified directory, processes it, and returns the dataset.
@@ -190,8 +194,7 @@ def create_ipbes_positives(pos_raw):
 
 def loading_pipeline_from_raw(multi_label=False):
     """
-    This function runs the entire pipeline for creating the IPBES dataset.
-    It includes data loading, preprocessing, and saving the final dataset.
+    This function runs the entire loading pipeline of the IPBES dataset.
     """
     #TODO : Optimize this code !
 
@@ -200,45 +203,45 @@ def loading_pipeline_from_raw(multi_label=False):
 
         # Get the 3 positives from the raw directory
         pos_ds_list = get_ipbes_positives()
-        print("pos_ds features for IAS : ",pos_ds_list[0].features)
+        logger.info(f"pos_ds features for IAS : {pos_ds_list[0].features}")
 
         # Get the corpus from the raw directory
         corpus_ds = get_ipbes_corpus()
 
         #Merge positives to create the unified negative dataset
-        print("Concatenating positive datasets...")
+        logger.info(f"Concatenating positive datasets...")
         unify_pos_ds=concatenate_datasets(pos_ds_list)
         unify_pos_dataframe=unify_pos_ds.to_pandas()
         unify_pos_dataframe=unify_pos_dataframe.drop_duplicates(ignore_index=True)
         unify_pos_ds=Dataset.from_pandas(unify_pos_dataframe)
 
-        print("creating raw negative dataset")
+        logger.info(f"creating raw negative dataset")
         # Create a unified negative dataset that deducts instances from all positives types from the corpus
         neg_ds = create_ipbes_negatives(unify_pos_ds, corpus_ds)
 
-        print("creating raw positive dataset")
+        logger.info(f"creating raw positive dataset")
         # Create 3 positives dataset for each data type
-        final_pos_ds_list = [create_ipbes_positives(ds) for ds in pos_ds_list]
-        print("Finished positives and negatives creation pipeline")
+        final_pos_ds_list = [rename_positives(ds) for ds in pos_ds_list]
+        logger.info(f"Finished positives and negatives creation pipeline")
 
         return final_pos_ds_list, neg_ds, corpus_ds
     else:
         # Get the 3 positives from the raw directory
         pos_ds_list = get_ipbes_positives()
-        print("pos_ds features for IAS : ",pos_ds_list[0].features)
+        logger.info(f"pos_ds features for IAS : {pos_ds_list[0].features}")
 
         # Get the corpus from the raw directory
         corpus_ds = get_ipbes_corpus()
 
-        print("1")
+        logger.info("1")
 
         # Create 3 negatives
         neg_ds_list = [create_ipbes_negatives(pos_ds_list[i], corpus_ds) for i in range(len(pos_ds_list))]
 
-        print("2")
+        logger.info("2")
         # Create 3 positives
         final_pos_ds_list = [create_ipbes_positives(pos_ds_list[i]) for i in range(len(pos_ds_list))]
-        print("Finished positives and negatives creation pipeline")
+        logger.info("Finished positives and negatives creation pipeline")
 
         return final_pos_ds_list, neg_ds_list, corpus_ds
 
