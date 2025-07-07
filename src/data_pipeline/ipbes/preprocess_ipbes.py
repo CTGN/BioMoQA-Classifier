@@ -188,11 +188,7 @@ def clean_ipbes(dataset,label_cols=["labels"]):
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
     return dataset
 
-def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
-    """
-    Unify all positives with the negative data and add a label for each positive type (3 in our case)
-    """
-    for pos_ds in pos_ds_list:
+
 
 
 def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
