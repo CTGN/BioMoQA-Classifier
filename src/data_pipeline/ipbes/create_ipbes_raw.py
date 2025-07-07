@@ -24,7 +24,7 @@ pyalex.config.retry_backoff_factor = 0.1
 #TODO : our data_types depends entirely on the reading order of the data directories, we should solve this by creating a dictionarry with the name of the data directory type
 #! solve the last comment
 
-def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/corpus/Raw/Corpus'):
+def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/IPBES/Raw/Corpus'):
     # Create the corpus dataset
     logger.info(f"creating corpus dataset")
     dataset = load_dataset(
@@ -88,7 +88,7 @@ def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/c
     return dataset
 
 
-def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/data/corpus/Raw/Positives'):
+def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/data/IPBES/Raw/Positives'):
     """
     Creates 3 positives datasets from a directory containing all the positives.
     The returned datasets are raw and are just the combination of the several original files.
@@ -240,11 +240,14 @@ def loading_pipeline_from_raw(multi_label=False):
 
         logger.info("2")
         # Create 3 positives
-        final_pos_ds_list = [create_ipbes_positives(pos_ds_list[i]) for i in range(len(pos_ds_list))]
+        final_pos_ds_list = [rename_positives(pos_ds_list[i]) for i in range(len(pos_ds_list))]
         logger.info("Finished positives and negatives creation pipeline")
 
         return final_pos_ds_list, neg_ds_list, corpus_ds
 
+def main():
+    loading_pipeline_from_raw(multi_label=True)
+
 if __name__ == "__main__":
     # Create the IPBES dataset
-    gathered_datasets = loading_pipeline_from_raw()
+    main()
