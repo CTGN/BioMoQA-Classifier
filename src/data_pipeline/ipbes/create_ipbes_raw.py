@@ -127,6 +127,7 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
                     "Title": Value(dtype="string"),
                     "Abstract Note": Value(dtype="string"),
                     "Language": Value(dtype="string"),
+                    "Item Type": Value(dtype="string"),
                     #"ISBN":Value(dtype="string"),
                     #"ISSN":Value(dtype="string"),
                     #"Url":Value(dtype="string")
