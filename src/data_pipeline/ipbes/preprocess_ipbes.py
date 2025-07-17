@@ -14,6 +14,7 @@ import numpy as np
 from ...config import *
 from collections import defaultdict
 import random
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
 import argparse
 
 import logging
@@ -183,42 +184,47 @@ def clean_ipbes(dataset,label_cols=["labels"]):
     #Apply the clean function acrross the whole dataset
     print("Applying clean_filter...")
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
+    logger.info(f"Dataset size after cleaing : {len(dataset)}")
     return dataset
 
-def create_folds(dataset):
+def create_folds(dataset,n_folds,n_runs):
+    """
+    Give the indices from k-fold stratified cross validation, on each different run (with a different seed for each one)
+
+    Returns the the folds for each run (List of list of folds)
+    """
+    labels=['IAS','SUA','VA']
     rng = np.random.RandomState(CONFIG["seed"])
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
     folds_per_run = []
+    df=dataset.to_pandas()
 
     for seed in derived_seeds:
         # Stratified K‐Fold on only the original (non‐optional) data
-        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
+        mskf = MultilabelStratifiedKFold(n_splits=n_folds, shuffle=True, random_state=CONFIG["seed"])
 
         run_folds = []
-        for train_dev_pos_idx, test_pos_idx in skf.split(dataset['abstract'], clean_og_df['labels']):
+        for train_dev_indices, test_indices in mskf.split(dataset['abstract'], dataset.select_columns(labels).to_pandas()):
             # Convert positional indices back to the DataFrame's original index
-            train_dev_indices = clean_og_df.index[train_dev_pos_idx]
-            test_indices = clean_og_df.index[test_pos_idx].to_list()
 
-            # Split train_dev into train vs. dev
-            train_indices, dev_indices = train_test_split(
-                train_dev_indices,
-                stratify=clean_og_df.loc[train_dev_indices, "labels"],
-                shuffle=True,
+            msss = MultilabelStratifiedShuffleSplit(
+                n_splits=1,
+                test_size=0.3,
+                train_size=0.7,
                 random_state=seed
             )
 
-            train_indices = train_indices.to_list()
-            dev_indices = dev_indices.to_list()
+            # get train/dev indices, stratified on the labels
+            train_indices, dev_indices = next(msss.split(np.arange(len(train_dev_indices)),dataset.select(train_dev_indices).select_columns(labels).to_pandas()))
 
-            # Add all optional negatives to the train set
-            train_indices.extend(opt_neg_df.index.to_list())
+            train_indices = train_indices.tolist()
+            dev_indices = dev_indices.tolist()
 
             run_folds.append([train_indices, dev_indices, test_indices])
 
             # Log distributions
-            train_labels = clean_df.loc[train_indices, "labels"]
-            test_labels = clean_df.loc[test_indices, "labels"]
+            train_labels = df.loc[train_indices, labels]
+            test_labels = df.loc[test_indices, labels]
             train_label_dist = train_labels.value_counts(normalize=True)
             test_label_dist = test_labels.value_counts(normalize=True)
             logger.info(f"Fold {len(run_folds)}:")
@@ -226,7 +232,12 @@ def create_folds(dataset):
             logger.info(f"  Test label distribution: {test_label_dist.to_dict()}")
 
             
+        #TODO : Store the indices and return them
+        #TODO : Use the indices in the pipeline to get the corresponding data, and clear the cache after using them.
+        
         folds_per_run.append(run_folds)
+
+        return folds_per_run
 
 def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
     """
@@ -236,23 +247,22 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
     #Merge the positives between each other
     pos_combined = concatenate_datasets(pos_ds_list)
 
+    pos_combined=pos_combined.filter(lambda batch : [batch['Item Type'][i]=='journalArticle' for i in range(len(batch['Item Type']))],batched=True,batch_size=1000,num_proc=30)
+
     pos_combined=pos_combined.filter(lambda batch : [batch['doi'][i] is not None for i in range(len(batch['doi']))],batched=True,batch_size=1000,num_proc=(os.cpu_count()-5))
 
     doi_set = [set(ds["doi"]) for ds in pos_ds_list]
-
 
     pos_combined_df=pos_combined.to_pandas()
     pos_combined_df=pos_combined_df.drop_duplicates(ignore_index=True)
     pos_combined=Dataset.from_pandas(pos_combined_df)
 
-    pos_combined=pos_combined.filter(lambda batch : [batch['Item Type'][i]=='journalArticle' for i in range(len(batch['Item Type']))],batched=True,batch_size=1000,num_proc=30)
-
 
     print("pos_combined",pos_combined)
 
-    #Merge the positives with the negatives
-    gcombined = concatenate_datasets([pos_combined, neg_ds])
 
+    gcombined=concatenate_datasets([pos_combined,neg_ds])
+    
     #For each batch, check if dois belongs to each labels dois set assigns 1 if so, 0 if not
     def assign_membership(batch):
         dois = batch['doi']
@@ -266,11 +276,11 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
         batch_size=1000,
         num_proc=os.cpu_count()
     )
+    
 
     clean_unified_dataset=clean_ipbes(unified_dataset,label_cols=label_cols)
     
     return clean_unified_dataset
-
 
 
 def prereprocess_ipbes(pos_ds,neg_ds):
@@ -299,19 +309,21 @@ def prereprocess_ipbes(pos_ds,neg_ds):
     return clean_ds
 
 
-def data_pipeline(multi_label=True):
+def data_pipeline(n_folds,n_runs,balance_coeff=None,multi_label=True):
     """
     Load the data and preprocess it
     """
     if multi_label:
         data_type_list=["IAS","SUA","VA"]
-        pos_ds_list, neg_ds, _ = loading_pipeline_from_raw(multi_label=multi_label)
+        pos_ds_list, neg_ds = loading_pipeline_from_raw(multi_label=multi_label)
 
-        clean_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list)
-        return clean_ds
+        clean_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list,balance_coeff=balance_coeff)
+        folds_per_run=create_folds(clean_ds,n_folds,n_runs)
+
+        return clean_ds,folds_per_run
     else:
         
-        pos_ds_list, neg_ds_list, _ = loading_pipeline_from_raw()
+        pos_ds_list, neg_ds_list = loading_pipeline_from_raw()
         dataset_dict = {}
         data_type_list=["IAS","SUA","VA"]
         for i in range(len(pos_ds_list)):
@@ -325,17 +337,39 @@ def data_pipeline(multi_label=True):
         return dataset_dict
 
 
-#TODO : Double check that we indeed delete cases where you have a positive into negatives -> I think we did it with conflicts
+#TODO : Double/triple check that we indeed delete cases where you have a positive into negatives -> I think we did it with conflicts
+
 
 def main():
-    args = parse_args()
-    set_reproducibility(args.seed)
 
+    parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
+    parser.add_argument("-bc","--balance_coeff", type=int, default=None, help="Coefficient for balancing the dataset")
+    parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
+    parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
+
+
+    args = parser.parse_args()
+    set_reproducibility(CONFIG["seed"])
 
     logger.info(args)
-    
 
+    folds_per_run=data_pipeline(args.n_folds, n_runs=args.n_runs, balance_coeff=args.balance_coeff,multi_label=True)
+
+    for run_idx in range(len(folds_per_run)):
+        folds=folds_per_run[run_idx]
+        for fold_idx in range(args.n_folds):
+
+            train_indices, dev_indices,test_indices = folds[fold_idx]
+
+            logger.info(f"\nfold number {fold_idx+1} / {len(folds)}")
+            
+            logger.info(f"train split size : {len(train_indices)}")
+            logger.info(f"dev split size : {len(dev_indices)}")
+            logger.info(f"test split size : {len(test_indices)}")
+            
+            np.savetxt(f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/train{fold_idx}_run-{run_idx}.csv", train_indices, delimiter=',', fmt='%g')
+            np.savetxt(f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/dev{fold_idx}_run-{run_idx}.csv", dev_indices, delimiter=',', fmt='%g')
+            np.savetxt(f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/test{fold_idx}_run-{run_idx}.csv", test_indices, delimiter=',', fmt='%g')
 
 if __name__ == "__main__":
-
     main()
