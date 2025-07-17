@@ -9,6 +9,9 @@ import datasets
 from .create_ipbes_raw import loading_pipeline_from_raw
 import os
 import gc
+from sklearn.model_selection import StratifiedKFold, train_test_split
+import numpy as np
+from ...config import *
 from collections import defaultdict
 import random
 import argparse
@@ -28,12 +31,12 @@ logger = logging.getLogger(__name__)
 #TODO : Get the DOI of instances based on their abstract (I think) -> use Fetch APi
 
 """
-We need to rewrite everything on order to :
+We need to rewrite everything in order to :
 - First assign labels to each instance, since we already have the seperated data
 - Then unify all of them
 - Then clean the whole dataset ie. ->
-    - Check for conflicts ie. instances that are in both positives and negatives
-    - Check for duplicates across labels combination
+    - Check for conflicts ie. instances that are in both unified positives and negatives
+    - Check for duplicates across the same labels combinations
     - Check for None values
 - Split the dataset and create the folds so that we store each fold -> Is it memory efficient ? Look for a better way to do this
 In conclusion the pipeline should take as input the raw Datasets object built from the corpus, clean them, unify them, create and store the folds.
@@ -43,7 +46,7 @@ How can I use less memory ?
 This allows us to clear the cache at each fold and thus always having one fold data stored in the cache instead of 5
 Conclusion : 5 times more memory efficient then the classical approach of storing the folds
 
-This pipeline should also recreate a brand new dataset from the Fetch API with all the relevant informations we need
+This pipeline should also recreate a brand new dataset from the Fetch API (or not) with all the relevant informations we need
 """
 
 def parse_args():
@@ -62,12 +65,6 @@ def set_reproducibility(seed):
     torch.backends.cudnn.benchmark = False
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
-
-def add_labels(dataset,label):
-    # Mappign function to add labels to positives and negatives data
-    def add_labels(examples, label_value):
-        examples["labels"] = [label_value] * len(examples["title"])
-        return examples
 
 def merge_pos_neg(pos_ds, neg_ds, store=False):
     """
@@ -188,39 +185,81 @@ def clean_ipbes(dataset,label_cols=["labels"]):
     dataset = dataset.filter(clean_filter, batched=True, batch_size=1000, num_proc=os.cpu_count())
     return dataset
 
+def create_folds(dataset):
+    rng = np.random.RandomState(CONFIG["seed"])
+    derived_seeds = rng.randint(0, 1000000, size=n_runs)
+    folds_per_run = []
 
+    for seed in derived_seeds:
+        # Stratified K‐Fold on only the original (non‐optional) data
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
 
+        run_folds = []
+        for train_dev_pos_idx, test_pos_idx in skf.split(dataset['abstract'], clean_og_df['labels']):
+            # Convert positional indices back to the DataFrame's original index
+            train_dev_indices = clean_og_df.index[train_dev_pos_idx]
+            test_indices = clean_og_df.index[test_pos_idx].to_list()
+
+            # Split train_dev into train vs. dev
+            train_indices, dev_indices = train_test_split(
+                train_dev_indices,
+                stratify=clean_og_df.loc[train_dev_indices, "labels"],
+                shuffle=True,
+                random_state=seed
+            )
+
+            train_indices = train_indices.to_list()
+            dev_indices = dev_indices.to_list()
+
+            # Add all optional negatives to the train set
+            train_indices.extend(opt_neg_df.index.to_list())
+
+            run_folds.append([train_indices, dev_indices, test_indices])
+
+            # Log distributions
+            train_labels = clean_df.loc[train_indices, "labels"]
+            test_labels = clean_df.loc[test_indices, "labels"]
+            train_label_dist = train_labels.value_counts(normalize=True)
+            test_label_dist = test_labels.value_counts(normalize=True)
+            logger.info(f"Fold {len(run_folds)}:")
+            logger.info(f"  Train label distribution: {train_label_dist.to_dict()}")
+            logger.info(f"  Test label distribution: {test_label_dist.to_dict()}")
+
+            
+        folds_per_run.append(run_folds)
 
 def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
     """
     Unify all positives with the negative data and add a label for each positive type (3 in our case)
     """
     
-    # 1. Create sets of abstracts for each positive dataset
-    abstract_sets = [set(ds["abstract"]) for ds in pos_ds_list]
-
-    # 2. Unify all positives into one Dataset
+    #Merge the positives between each other
     pos_combined = concatenate_datasets(pos_ds_list)
+
+    pos_combined=pos_combined.filter(lambda batch : [batch['doi'][i] is not None for i in range(len(batch['doi']))],batched=True,batch_size=1000,num_proc=(os.cpu_count()-5))
+
+    doi_set = [set(ds["doi"]) for ds in pos_ds_list]
+
 
     pos_combined_df=pos_combined.to_pandas()
     pos_combined_df=pos_combined_df.drop_duplicates(ignore_index=True)
     pos_combined=Dataset.from_pandas(pos_combined_df)
 
+    pos_combined=pos_combined.filter(lambda batch : [batch['Item Type'][i]=='journalArticle' for i in range(len(batch['Item Type']))],batched=True,batch_size=1000,num_proc=30)
+
+
     print("pos_combined",pos_combined)
 
-    # 3. Concatenate positives with the negative dataset
+    #Merge the positives with the negatives
     gcombined = concatenate_datasets([pos_combined, neg_ds])
 
-    #We assign membership of each instance based on the abstract which is not a good idea
+    #For each batch, check if dois belongs to each labels dois set assigns 1 if so, 0 if not
     def assign_membership(batch):
-        abstracts = batch['abstract']
-        # for each example in the batch, check membership in each set
-        for i, s in enumerate(abstract_sets):
-            batch[label_cols[i]]=[int(a in s) for a in abstracts]
-        # return new columns; existing columns are kept by default
+        dois = batch['doi']
+        for i, s in enumerate(doi_set):
+            batch[label_cols[i]]=[int(a in s) for a in dois]
         return batch
 
-    # Use a reasonable batch size for efficiency
     unified_dataset = gcombined.map(
         assign_membership,
         batched=True,
@@ -292,9 +331,6 @@ def main():
     args = parse_args()
     set_reproducibility(args.seed)
 
-    dataset_dict=data_label()
-
-    logger.info(dataset_dict)
 
     logger.info(args)
     

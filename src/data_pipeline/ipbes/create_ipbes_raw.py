@@ -24,7 +24,7 @@ pyalex.config.retry_backoff_factor = 0.1
 #TODO : our data_types depends entirely on the reading order of the data directories, we should solve this by creating a dictionarry with the name of the data directory type
 #! solve the last comment
 
-def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/IPBES/Raw/Corpus'):
+def get_ipbes_negatives(directory='/home/leandre/Projects/BioMoQA_Playground/data/IPBES/Raw/Corpus'):
     # Create the corpus dataset
     logger.info(f"creating corpus dataset")
     dataset = load_dataset(
@@ -87,7 +87,6 @@ def get_ipbes_corpus(directory='/home/leandre/Projects/BioMoQA_Playground/data/I
     """
     return dataset
 
-
 def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/data/IPBES/Raw/Positives'):
     """
     Creates 3 positives datasets from a directory containing all the positives.
@@ -128,12 +127,13 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
                     "Abstract Note": Value(dtype="string"),
                     "Language": Value(dtype="string"),
                     "Item Type": Value(dtype="string"),
-                    "Publication Year": Value(dtype="int32")
+                    "Publication Year": Value(dtype="string")
                     #"ISBN":Value(dtype="string"),
                     #"ISSN":Value(dtype="string"),
                     #"Url":Value(dtype="string")
                 }),
             )
+            combined_dataset=combined_dataset.cast_column("Publication Year", Value(dtype="int32"))
             
             pos_datasets.append(combined_dataset)
             logger.info(f"Successfully loaded dataset from: {dir_path}")
@@ -142,14 +142,14 @@ def get_ipbes_positives(directory = '/home/leandre/Projects/BioMoQA_Playground/d
             logger.info(f"Error loading files from {dir_path}: {str(e)}")
     return pos_datasets
 
-def create_ipbes_negatives(pos_raw, corpus_ds):
+def delete_conflicts(unified_pos_raw, neg_ds_raw):
     "Deletes all instances from the corpus dataset that are in the positives dataset with respect to the the abstract,title and doi or that are None"
 
-    neg_ds=corpus_ds.remove_columns(['author','topics', 'author_abbr',"id"])
+    neg_ds=neg_ds_raw.remove_columns(['author','topics', 'author_abbr',"id"])
 
-    abs_set=set(e.strip() for e in pos_raw['Abstract Note'] if e is not None)
-    titles_set=set(e.strip() for e in pos_raw['Title'] if e is not None)
-    dois_set=set(e.strip() for e in pos_raw['DOI'] if e is not None)
+    abs_set=set(e.strip() for e in unified_pos_raw['Abstract Note'] if e is not None)
+    titles_set=set(e.strip() for e in unified_pos_raw['Title'] if e is not None)
+    dois_set=set(e.strip() for e in unified_pos_raw['DOI'] if e is not None)
     if None in dois_set : dois_set.remove(None) 
     if None in titles_set : titles_set.remove(None) 
     if None in abs_set : abs_set.remove(None) 
@@ -168,7 +168,7 @@ def create_ipbes_negatives(pos_raw, corpus_ds):
                 batch_bools.append(False)
             elif title is None or (title in titles_set):
                 batch_bools.append(False)
-            elif (doi is not None) and (any(doi.endswith(p_doi) for p_doi in dois_set)):
+            elif doi is None or ( (doi is not None) and (any(doi.endswith(p_doi) for p_doi in dois_set))):
                 batch_bools.append(False)
             else:
                 batch_bools.append(True)
@@ -194,7 +194,15 @@ def rename_positives(pos_raw):
             
     return pos_ds
 
-def loading_pipeline_from_raw(multi_label=False):
+def rename_negatives(neg_raw):
+    pos_ds = pos_raw.rename_column("DOI", "doi")
+    pos_ds = pos_ds.rename_column("display_name", "title")
+    pos_ds = pos_ds.rename_column("ab", "abstract")
+    pos_ds=pos_ds.remove_columns(["Language"])
+            
+    return pos_ds
+
+def loading_pipeline_from_raw(multi_label=True):
     """
     This function runs the entire loading pipeline of the IPBES dataset.
     """
@@ -204,29 +212,20 @@ def loading_pipeline_from_raw(multi_label=False):
         #Here we return the list of the 3 positves, the unified negataives dataset (which deducts instances of the three positives from the corpus)
 
         # Get the 3 positives from the raw directory
+        logger.info(f"load raw positive datasets")
         pos_ds_list = get_ipbes_positives()
         logger.info(f"pos_ds features for IAS : {pos_ds_list[0].features}")
 
-        # Get the corpus from the raw directory
-        corpus_ds = get_ipbes_corpus()
-
-        #Merge positives to create the unified negative dataset
-        logger.info(f"Concatenating positive datasets...")
-        unify_pos_ds=concatenate_datasets(pos_ds_list)
-        unify_pos_dataframe=unify_pos_ds.to_pandas()
-        unify_pos_dataframe=unify_pos_dataframe.drop_duplicates(ignore_index=True)
-        unify_pos_ds=Dataset.from_pandas(unify_pos_dataframe)
-
-        logger.info(f"creating raw negative dataset")
+        logger.info(f"load raw negative dataset")
         # Create a unified negative dataset that deducts instances from all positives types from the corpus
-        neg_ds = create_ipbes_negatives(unify_pos_ds, corpus_ds)
+        neg_ds = get_ipbes_negatives()
 
-        logger.info(f"creating raw positive dataset")
+        logger.info(f"renaming raw positive datasets")
         # Create 3 positives dataset for each data type
         final_pos_ds_list = [rename_positives(ds) for ds in pos_ds_list]
         logger.info(f"Finished positives and negatives creation pipeline")
 
-        return final_pos_ds_list, neg_ds, corpus_ds
+        return final_pos_ds_list, neg_ds
     else:
         # Get the 3 positives from the raw directory
         pos_ds_list = get_ipbes_positives()
