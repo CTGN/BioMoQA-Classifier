@@ -19,6 +19,9 @@ def fetch_crossref_metadata(doi: str, params:dict,filters:dict) -> dict | None:
     try:
         # Make request to CrossRef API
         url = f"{CROSSREF_BASE_URL}{doi}"
+        headers = {
+            'User-Agent': 'BioMoQA-Classifier/1.0 (mailto:leandre.catogni@hesge.ch)' 
+        }
         
         if len(list(filters.keys())) > 0:
             fval = ''
@@ -29,7 +32,7 @@ def fetch_crossref_metadata(doi: str, params:dict,filters:dict) -> dict | None:
             params['filter'] = fval
 
         # make the query
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params,headers=headers)
         response.raise_for_status()  # Raise an exception for bad status codes
         
         data = response.json()
@@ -47,31 +50,48 @@ def fetch_crossref_metadata(doi: str, params:dict,filters:dict) -> dict | None:
         return None
 
 
-def print_metadata(record: dict) -> None:
+def get_metadata(record: dict) -> None:
     """
     Print formatted metadata information from a CrossRef record.
     
     Args:
         record (dict): The metadata record from CrossRef API
     """
-    print("Record fetched successfully:")
-    print(json.dumps(record, indent=2))
+    abstract, journal_title, language,article_title=None,None,None,None
     
-    # Extract and print journal title
+    print("Record fetched successfully:")
+    record = record.get('message', {})
+    
+    if 'abstract' in record and len(record['abstract']) > 0 and record['abstract'] is not None :
+        abstract = record['abstract']
+        print(f"Abstract: {abstract}")
+    else:
+        print("Abstract : Not available")
+
     if 'container-title' in record and len(record['container-title']) > 0:
         journal_title = record['container-title'][0]
         print(f"Journal title: {journal_title}")
     else:
         print("Journal title: Not available")
+    
+    if 'language' in record and len(record['language']) > 0:
+        language = record['language']
+        print(f"Language: {language}")
+    else:
+        print("Language: Not available")
+
         
     # Print article title
     if 'title' in record and len(record['title']) > 0:
-        print(f"Article title: {record['title'][0]}")
+        article_title = record['title'][0]
+        print(f"Article title: {article_title}")
     
     # Print authors
     if 'author' in record:
         authors = [f"{author.get('given', '')} {author.get('family', '')}" for author in record['author']]
         print(f"Authors: {', '.join(authors)}")
+    
+    return abstract, journal_title, language,article_title
 
 
 if __name__ == "__main__":
@@ -80,15 +100,15 @@ if __name__ == "__main__":
 
     # enter query parameters and filters
     params = {
-        'mailto': 'demo@crossref.org'
+        'mailto': 'leandre.catogni@hesge.ch'
     }
     filters = {
     }
     
     # Fetch metadata
-    metadata = fetch_crossref_metadata(doi)
+    metadata = fetch_crossref_metadata(doi,params,filters)
     
     if metadata:
-        print_metadata(metadata)
+        get_metadata(metadata)
     else:
         print("Failed to fetch metadata")
