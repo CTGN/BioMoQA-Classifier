@@ -8,6 +8,7 @@ from datasets import Dataset
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import re
 
 # CrossRef REST API base URL
 CROSSREF_BASE_URL = "https://api.crossref.org/works/"
