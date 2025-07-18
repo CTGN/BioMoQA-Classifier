@@ -7,6 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from datasets import Dataset,concatenate_datasets,ClassLabel, Features, Value, Sequence,IterableDataset
 import datasets
 from .create_ipbes_raw import loading_pipeline_from_raw
+from .fetch import fill_missing_metadata
 import os
 import gc
 from sklearn.model_selection import StratifiedKFold, train_test_split
@@ -239,6 +240,60 @@ def create_folds(dataset,n_folds,n_runs):
 
         return folds_per_run
 
+def fill_missing_metadata_for_positives(pos_ds_list, output_dir="data/IPBES/modified_instances", max_workers=5):
+    """
+    Fill missing metadata (title/abstract) for positive datasets using CrossRef API.
+    
+    Args:
+        pos_ds_list (List[Dataset]): List of positive datasets
+        output_dir (str): Directory to save modified instances
+        max_workers (int): Maximum concurrent workers for API requests
+        
+    Returns:
+        List[Dataset]: List of updated positive datasets with filled metadata
+    """
+    logger.info("Starting metadata filling for positive datasets...")
+    
+    updated_pos_ds_list = []
+    all_modified_instances = []
+    
+    data_type_names = ["IAS", "SUA", "VA"]
+    
+    for i, pos_ds in enumerate(pos_ds_list):
+        data_type = data_type_names[i]
+        logger.info(f"Processing {data_type} dataset with {len(pos_ds)} instances...")
+        
+        # Create output file path for this dataset
+        output_file = os.path.join(output_dir, f"{data_type}_modified_instances.csv")
+        
+        # Fill missing metadata
+        updated_ds, modified_instances = fill_missing_metadata(
+            pos_ds, 
+            output_file=output_file, 
+            max_workers=max_workers
+        )
+        
+        updated_pos_ds_list.append(updated_ds)
+        
+        # Track modifications for this dataset
+        for instance in modified_instances:
+            instance['dataset_type'] = data_type
+        all_modified_instances.extend(modified_instances)
+        
+        logger.info(f"Completed {data_type}: Updated {len(modified_instances)} instances")
+    
+    # Save summary of all modifications
+    if all_modified_instances:
+        summary_file = os.path.join(output_dir, "all_modifications_summary.csv")
+        os.makedirs(output_dir, exist_ok=True)
+        summary_df = pd.DataFrame(all_modified_instances)
+        summary_df.to_csv(summary_file, index=False)
+        logger.info(f"Saved summary of {len(all_modified_instances)} total modifications to {summary_file}")
+    
+    logger.info(f"Metadata filling completed for all datasets. Total instances modified: {len(all_modified_instances)}")
+    return updated_pos_ds_list
+
+
 def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
     """
     Unify all positives with the negative data and add a label for each positive type (3 in our case)
@@ -309,14 +364,27 @@ def prereprocess_ipbes(pos_ds,neg_ds):
     return clean_ds
 
 
-def data_pipeline(n_folds,n_runs,balance_coeff=None,multi_label=True):
+def data_pipeline(n_folds,n_runs,balance_coeff=None,multi_label=True,fill_metadata=True,max_workers=5):
     """
     Load the data and preprocess it
+    
+    Args:
+        n_folds (int): Number of folds for cross-validation
+        n_runs (int): Number of runs for cross-validation
+        balance_coeff (int): Coefficient for balancing the dataset
+        multi_label (bool): Whether to use multi-label approach
+        fill_metadata (bool): Whether to fill missing metadata using CrossRef API
+        max_workers (int): Maximum concurrent workers for API requests
     """
     if multi_label:
         data_type_list=["IAS","SUA","VA"]
         pos_ds_list, neg_ds = loading_pipeline_from_raw(multi_label=multi_label)
 
+        # Fill missing metadata for positive datasets if requested
+        if fill_metadata:
+            logger.info("Filling missing metadata for positive datasets...")
+            pos_ds_list = fill_missing_metadata_for_positives(pos_ds_list, max_workers=max_workers)
+        
         clean_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list,balance_coeff=balance_coeff)
         folds_per_run=create_folds(clean_ds,n_folds,n_runs)
 
@@ -342,10 +410,12 @@ def data_pipeline(n_folds,n_runs,balance_coeff=None,multi_label=True):
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
+    parser = argparse.ArgumentParser(description="Preprocess IPBES dataset")
     parser.add_argument("-bc","--balance_coeff", type=int, default=None, help="Coefficient for balancing the dataset")
     parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
     parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
+    parser.add_argument("--fill_metadata", action="store_true", help="Fill missing metadata using CrossRef API")
+    parser.add_argument("--max_workers", type=int, default=5, help="Maximum concurrent workers for API requests")
 
 
     args = parser.parse_args()
@@ -353,7 +423,14 @@ def main():
 
     logger.info(args)
 
-    folds_per_run=data_pipeline(args.n_folds, n_runs=args.n_runs, balance_coeff=args.balance_coeff,multi_label=True)
+    clean_ds, folds_per_run=data_pipeline(
+        args.n_folds, 
+        n_runs=args.n_runs, 
+        balance_coeff=args.balance_coeff,
+        multi_label=True,
+        fill_metadata=args.fill_metadata,
+        max_workers=args.max_workers
+    )
 
     for run_idx in range(len(folds_per_run)):
         folds=folds_per_run[run_idx]
