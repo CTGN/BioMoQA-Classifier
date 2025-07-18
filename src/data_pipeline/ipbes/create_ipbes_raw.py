@@ -7,6 +7,7 @@ import pyarrow.parquet as pq
 from pyalex import Works
 import pyalex
 import logging
+import re
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -15,6 +16,29 @@ logger = logging.getLogger(__name__)
 pyalex.config.email="leandre.catogni@hesge.ch"
 pyalex.config.max_retries = 1
 pyalex.config.retry_backoff_factor = 0.1
+
+
+def clean_html_tags(text: str) -> str:
+    """
+    Remove HTML tags from text, particularly common formatting tags like <i>, <b>, <em>, etc.
+    
+    Args:
+        text (str): Text that may contain HTML tags
+        
+    Returns:
+        str: Cleaned text with HTML tags removed
+    """
+    if not text or not isinstance(text, str):
+        return text
+    
+    # Remove HTML tags using regex
+    # This pattern matches any tag <tag> or </tag>
+    clean_text = re.sub(r'<[^>]+>', '', text)
+    
+    # Clean up any extra whitespace that might result from tag removal
+    clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+    
+    return clean_text
 
 
 
@@ -178,6 +202,21 @@ def delete_conflicts(unified_pos_raw, neg_ds_raw):
     neg_ds=neg_ds.rename_column("display_name", "title")
     neg_ds=neg_ds.rename_column("ab", "abstract")
 
+    # Clean HTML tags from titles and abstracts in negative data
+    def clean_text_fields(batch):
+        # Clean titles
+        batch['title'] = [clean_html_tags(title) if title else title for title in batch['title']]
+        # Clean abstracts
+        batch['abstract'] = [clean_html_tags(abstract) if abstract else abstract for abstract in batch['abstract']]
+        return batch
+    
+    neg_ds = neg_ds.map(
+        clean_text_fields,
+        batched=True,
+        batch_size=1000,
+        num_proc=min(4, os.cpu_count() or 1)
+    )
+
     return neg_ds
 
 def rename_positives(pos_raw):
@@ -190,7 +229,22 @@ def rename_positives(pos_raw):
     pos_ds = pos_raw.rename_column("DOI", "doi")
     pos_ds = pos_ds.rename_column("Title", "title")
     pos_ds = pos_ds.rename_column("Abstract Note", "abstract")
-    pos_ds=pos_ds.remove_columns(["Language"])
+    pos_ds = pos_ds.remove_columns(["Language"])
+    
+    # Clean HTML tags from titles and abstracts
+    def clean_text_fields(batch):
+        # Clean titles
+        batch['title'] = [clean_html_tags(title) if title else title for title in batch['title']]
+        # Clean abstracts
+        batch['abstract'] = [clean_html_tags(abstract) if abstract else abstract for abstract in batch['abstract']]
+        return batch
+    
+    pos_ds = pos_ds.map(
+        clean_text_fields,
+        batched=True,
+        batch_size=1000,
+        num_proc=min(4, os.cpu_count() or 1)
+    )
             
     return pos_ds
 
