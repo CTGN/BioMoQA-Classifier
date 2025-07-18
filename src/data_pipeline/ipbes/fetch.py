@@ -105,6 +105,27 @@ def fetch_crossref_metadata(doi: str, params: dict = None, filters: dict = None)
         logger.warning(f"Error occurred for DOI {doi}: {e}")
         return None
 
+def clean_jats_tags(text: str) -> str:
+    """
+    Remove JATS XML tags from text, particularly <jats:p> and </jats:p> tags.
+    
+    Args:
+        text (str): Text that may contain JATS tags
+        
+    Returns:
+        str: Cleaned text with JATS tags removed
+    """
+    if not text:
+        return text
+    
+    # Remove <jats:p> and </jats:p> tags from beginning and end
+    text = text.strip()
+    if text.startswith('<jats:p>'):
+        text = text[8:]  # Remove '<jats:p>'
+    if text.endswith('</jats:p>'):
+        text = text[:-9]  # Remove '</jats:p>'
+    
+    return text.strip()
 
 def extract_metadata(record: dict) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     """
@@ -122,7 +143,7 @@ def extract_metadata(record: dict) -> Tuple[Optional[str], Optional[str], Option
     record = record.get('message', {})
     
     if 'abstract' in record and len(record['abstract']) > 0 and record['abstract'] is not None:
-        abstract = record['abstract']
+        abstract = clean_jats_tags(record['abstract'])
     
     if 'container-title' in record and len(record['container-title']) > 0:
         journal_title = record['container-title'][0]
