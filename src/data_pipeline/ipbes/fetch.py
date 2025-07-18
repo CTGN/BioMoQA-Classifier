@@ -175,17 +175,34 @@ def identify_missing_metadata(dataset: Dataset) -> List[Tuple[int, str]]:
     Returns:
         List[Tuple[int, str]]: List of (index, doi) pairs for instances with missing metadata
     """
-    missing_instances = []
+    # Add original indices to the dataset for tracking
+    dataset_with_indices = dataset.add_column("original_index", list(range(len(dataset))))
     
-    for idx in range(len(dataset)):
-        instance = dataset[idx]
-        doi = instance.get('doi')
-        title = instance.get('title')
-        abstract = instance.get('abstract')
+    def filter_condition_batch(batch):
+        """Filter condition to identify instances with missing metadata (batched version)."""
+        results = []
         
-        # Check if DOI exists and either title or abstract is missing
-        if doi and doi.strip() and (not title or not abstract):
-            missing_instances.append((idx, doi.strip()))
+        for i in range(len(batch['doi'])):
+            doi = batch['doi'][i] if batch['doi'][i] is not None else ''
+            title = batch['title'][i] if batch['title'][i] is not None else ''
+            abstract = batch['abstract'][i] if batch['abstract'][i] is not None else ''
+            
+            # Check if DOI exists and either title or abstract is missing
+            has_valid_doi = doi and doi.strip()
+            missing_title_or_abstract = not title or not abstract
+            
+            results.append(has_valid_doi and missing_title_or_abstract)
+        
+        return results
+    
+    # Filter the dataset using the Dataset's filter method with batched processing
+    filtered_dataset = dataset_with_indices.filter(filter_condition_batch, batched=True,batch_size=1000,num_proc=os.cpu_count()-5)
+    
+    # Extract the results as (index, doi) tuples
+    missing_instances = [
+        (row["original_index"], row["doi"].strip()) 
+        for row in filtered_dataset
+    ]
     
     logger.info(f"Found {len(missing_instances)} instances with missing title/abstract")
     return missing_instances

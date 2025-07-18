@@ -282,14 +282,6 @@ def fill_missing_metadata_for_positives(pos_ds_list, output_dir="data/IPBES/modi
         
         logger.info(f"Completed {data_type}: Updated {len(modified_instances)} instances")
     
-    # Save summary of all modifications
-    if all_modified_instances:
-        summary_file = os.path.join(output_dir, "all_modifications_summary.csv")
-        os.makedirs(output_dir, exist_ok=True)
-        summary_df = pd.DataFrame(all_modified_instances)
-        summary_df.to_csv(summary_file, index=False)
-        logger.info(f"Saved summary of {len(all_modified_instances)} total modifications to {summary_file}")
-    
     logger.info(f"Metadata filling completed for all datasets. Total instances modified: {len(all_modified_instances)}")
     return updated_pos_ds_list
 
