@@ -129,33 +129,33 @@ def clean_ipbes(dataset,label_cols=["labels"]):
     print("Filtering out rows with no abstracts or DOI...")
 
 
-    for label_name in label_cols:
-        # Process conflicts and duplicates using map
-        seen_texts = set()
-        # Initialize empty sets
-        pos_abstracts = set()
-        neg_abstracts = set()
-        # Process in batches using map
-        def collect_abstracts(examples):
-            for i, label_val in enumerate(examples[label_name]):
-                if label_val == 1:
+    # Process conflicts and duplicates using map
+    seen_texts = set()
+    seen_dois = set()
+    # Initialize empty sets
+    pos_abstracts = set()
+    neg_abstracts = set()
+    # Process in batches using map
+    
+    def collect_abstracts(examples):
+        for i in range(len(examples['abstract'])):
+                if any([bool(examples[label_name][i]) for label_name in label_cols]):
                     pos_abstracts.add(examples['abstract'][i])
                 else:
                     neg_abstracts.add(examples['abstract'][i])
-            return examples
-        
-        # Process in parallel with batching
-        dataset=dataset.map(collect_abstracts, 
-                    batched=True, 
-                    batch_size=1000, 
-                    num_proc=min(4, os.cpu_count() or 1))
+        return examples
+    
+    # Process in parallel with batching
+    dataset=dataset.map(collect_abstracts, 
+                batched=True, 
+                batch_size=1000, 
+                num_proc=min(4, os.cpu_count() or 1))
     
     conflicting_texts = set()
     print("Size of the dataset before cleaning:", len(dataset))
 
     #Check if, in a given batch, there is an instance for which the title or the abstract is None + check for conflicts and duplicates
     def clean_filter(examples):
-        # Initialize result array
         keep = [True] * len(examples['abstract'])
         
         for i in range(len(examples['abstract'])):
@@ -177,8 +177,13 @@ def clean_ipbes(dataset,label_cols=["labels"]):
             if text in seen_texts:
                 keep[i] = False
                 continue
+
+            if examples['doi'][i] is None or examples['doi'][i] in seen_dois:
+                keep[i] = False
+                continue
             
             seen_texts.add(text)
+            seen_dois.add(examples['doi'][i])
         
         return keep
 
@@ -324,10 +329,7 @@ def unify_multi_label(pos_ds_list,neg_ds,label_cols,balance_coeff=None):
         num_proc=os.cpu_count()
     )
     
-
-    clean_unified_dataset=clean_ipbes(unified_dataset,label_cols=label_cols)
-    
-    return clean_unified_dataset
+    return unified_dataset
 
 
 def prereprocess_ipbes(pos_ds,neg_ds):
@@ -368,33 +370,20 @@ def data_pipeline(n_folds,n_runs,balance_coeff=None,multi_label=True,fill_metada
         fill_metadata (bool): Whether to fill missing metadata using CrossRef API
         max_workers (int): Maximum concurrent workers for API requests
     """
-    if multi_label:
-        data_type_list=["IAS","SUA","VA"]
-        pos_ds_list, neg_ds = loading_pipeline_from_raw(multi_label=multi_label)
+    data_type_list=["IAS","SUA","VA"]
+    pos_ds_list, neg_ds = loading_pipeline_from_raw(multi_label=multi_label)
 
-        # Fill missing metadata for positive datasets if requested
-        if fill_metadata:
-            logger.info("Filling missing metadata for positive datasets...")
-            pos_ds_list = fill_missing_metadata_for_positives(pos_ds_list, max_workers=max_workers)
-        
-        clean_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list,balance_coeff=balance_coeff)
-        folds_per_run=create_folds(clean_ds,n_folds,n_runs)
+    # Fill missing metadata for positive datasets if requested
+    if fill_metadata:
+        logger.info("Filling missing metadata for positive datasets...")
+        pos_ds_list = fill_missing_metadata_for_positives(pos_ds_list, max_workers=max_workers)
+    
+    unified_ds = unify_multi_label(pos_ds_list,neg_ds,data_type_list,balance_coeff=balance_coeff)
+    clean_ds=clean_ipbes(unified_ds,label_cols=data_type_list)
+    folds_per_run=create_folds(clean_ds,n_folds,n_runs)
 
-        return clean_ds,folds_per_run
-    else:
-        
-        pos_ds_list, neg_ds_list = loading_pipeline_from_raw()
-        dataset_dict = {}
-        data_type_list=["IAS","SUA","VA"]
-        for i in range(len(pos_ds_list)):
-            print("Processing dataset for type:", data_type_list[i])
-            print("Positive dataset size:", len(pos_ds_list[i]))
-            print("Negative dataset size:", len(neg_ds_list[i]))
-            dataset_dict[data_type_list[i]]= prereprocess_ipbes(pos_ds_list[i],neg_ds_list[i])
-        
-        print("Completed processing all datasets.")
+    return clean_ds,folds_per_run
 
-        return dataset_dict
 
 
 #TODO : Double/triple check that we indeed delete cases where you have a positive into negatives -> I think we did it with conflicts

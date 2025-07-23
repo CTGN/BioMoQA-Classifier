@@ -205,9 +205,9 @@ def identify_missing_metadata(dataset: Dataset) -> List[Tuple[int, str]]:
         results = []
         
         for i in range(len(batch['doi'])):
-            doi = batch['doi'][i] if batch['doi'][i] is not None else ''
-            title = batch['title'][i] if batch['title'][i] is not None else ''
-            abstract = batch['abstract'][i] if batch['abstract'][i] is not None else ''
+            doi = batch['doi'][i] if batch['doi'][i] is not None else None
+            title = batch['title'][i] if batch['title'][i] is not None else None
+            abstract = batch['abstract'][i] if batch['abstract'][i] is not None else None
             
             # Check if DOI exists and either title or abstract is missing
             has_valid_doi = doi and doi.strip()
