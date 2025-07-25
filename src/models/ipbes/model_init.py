@@ -96,10 +96,11 @@ class CustomTrainingArguments(TrainingArguments):
         if loss_type == "BCE":
             if pos_weight is None:
                 # Calculate default pos_weight if not provided
-                self.pos_weight = 5.0
+                self.pos_weight = torch.tensor([5.0, 5.0, 5.0]) 
                 logger.info(f"Positive weight parameter set to default (in TrainingArguments) -> pos_weight={self.pos_weight}")
             else:
-                self.pos_weight =pos_weight
+                #TODO : Make this dynamic in case  we want to add labels
+                self.pos_weight =[pos_weight for _ in range(3)]
                 logger.info(f"pos_weight value in TrainingArguments : {self.pos_weight}")
         elif loss_type == "focal":
             self.alpha = alpha if alpha is not None else 0.25  # Default alpha
@@ -108,7 +109,6 @@ class CustomTrainingArguments(TrainingArguments):
         else:
             raise ValueError(f"Unsupported loss_type: {loss_type}")
         
-
 
 class CustomTrainer(Trainer):
     def __init__(

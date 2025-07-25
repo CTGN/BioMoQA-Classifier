@@ -83,25 +83,25 @@ def parse_args():
         "--run",
         type=int,
         default=0,
-        help="Which CV fold to run (overrides config)"
+        help="Which run to execute (overrides config)"
     )
     parser.add_argument(
         "-g",
         "--gpu",
         type=str,
-        help="CUDA_VISIBLE_DEVICES string (e.g. '0,1')"
+        help="GPU that can handle batches of 100"
     )
     parser.add_argument(
         "-m",
         "--model_name",
         type=str,
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Model name to use for training (overrides config.hpo.model_name)"
     )
     parser.add_argument(
         "-on",
         "--nb_opt_negs",
         type=int,
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Number of optional negatives to use (overrides config.hpo.nb_optional_negs, if None it will use the default value from the config)"
     )
     parser.add_argument(
         "-nt",
@@ -113,13 +113,13 @@ def parse_args():
         "-hpom",
         "--hpo_metric",
         type=str,
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Metric to optimize during HPO (overrides config.hpo.metric, e.g. 'accuracy', 'f1', 'roc_auc', etc.)"
     )
     parser.add_argument(
         "-d",
         "--direction",
         type=str,
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Direction of optimization for the metric (overrides config.hpo.direction, e.g. 'max' or 'min')"
     )
     parser.add_argument(
         "-l",
@@ -131,13 +131,13 @@ def parse_args():
         "-t",
         "--with_title",
         action="store_true",
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Whether to include the title in the input text (overrides config.hpo.with_title)"
     )
     parser.add_argument(
         "-k",
         "--with_keywords",
         action="store_true",
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        help="Whether to include the keywords in the input text (overrides config.hpo.with_keywords)"
     )
     
     return parser.parse_args()
@@ -158,7 +158,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     # We can use a larger batch size on the A100 GPU (device 2)
     gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
     if gpu_id == "2":
-        batch_size = 100
+        batch_size = 25
     else:
         batch_size = 25
     
@@ -302,7 +302,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         search_alg=HyperOptSearch(metric=cfg['hpo_metric'], mode="max", random_state_seed=CONFIG["seed"]),
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
-        resources_per_trial={"cpu": 10, "gpu": 1},
+        resources_per_trial={"cpu": 7, "gpu": 1},
         storage_path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/",
         callbacks=[CleanupCallback(cfg['hpo_metric'])]
     )

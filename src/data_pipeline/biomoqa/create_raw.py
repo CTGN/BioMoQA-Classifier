@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 import argparse
 
+
 Entrez.email = "leandre.catogni@hesge.ch" 
 big_slow_client = arxiv.Client(
     page_size=5000,
@@ -170,6 +171,12 @@ def loading_pipeline(fetch=False):
     return og_dataset, optional_negatives
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Preprocess BioMoQA dataset")
+    parser.add_argument("-f","--fetch", action="store_true", help="Whether to fetch optional negatives from PubMed")
+
+
+    args = parser.parse_args()
+
     logger.info("Starting BioMoQA data loading pipeline...")
-    og_dataset, optional_negatives = loading_pipeline()
+    og_dataset, optional_negatives = loading_pipeline(fetch=args.fetch)
     

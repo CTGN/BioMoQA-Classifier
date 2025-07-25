@@ -4,16 +4,19 @@ IFS=$'\n\t'
 
 # Models to iterate over
 MODELS=(
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
+  "FacebookAI/roberta-base"
   "dmis-lab/biobert-v1.1"
   "google-bert/bert-base-uncased"
 )
 
 # Optional negatives to try
-NUM_OPT_NEGS=(1000)
+NUM_OPT_NEGS=(500)
 
 # Number of HPO/train runs and folds
 NUM_RUNS=1
-NUM_FOLDS=4
+NUM_FOLDS=5
 
 for opt_negs in "${NUM_OPT_NEGS[@]}"; do
   echo "==> Adding ${opt_negs} optional negatives"
