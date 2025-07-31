@@ -13,10 +13,9 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Add src to path to import your modules
 project_root = Path(__file__).parent.parent.absolute()
-src_path = project_root / "src"
-sys.path.insert(0, str(src_path))
+sys.path.insert(0, str(project_root))
 
-from utils import get_example_texts, validate_model_path, format_confidence_score
+from web.utils import get_example_texts, validate_model_path, format_confidence_score
 
 # Page config
 st.set_page_config(
@@ -162,7 +161,6 @@ class CrossValidationPredictor:
 def main():
     # Header
     st.markdown('<h1 class="main-header">🧬 BioMoQA Cross-Validation Classifier</h1>', unsafe_allow_html=True)
-    st.markdown("**Ensemble classification using 5-fold cross-validation for enhanced reliability**")
     st.markdown("---")
     
     # Initialize session state
@@ -269,7 +267,7 @@ def render_sidebar():
 
 def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, device: str):
     """Load the ensemble of fold models"""
-    with st.sidebar.spinner("Loading ensemble models..."):
+    with st.spinner("Loading ensemble models..."):
         try:
             # Validate base path
             if not os.path.exists(base_path):
