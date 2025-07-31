@@ -28,6 +28,14 @@ import seaborn as sns
 import smtplib
 from email.mime.text import MIMEText
 from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score,cohen_kappa_score,roc_auc_score, f1_score, recall_score, precision_score, accuracy_score
+import sys
+
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
+
+# Add it to sys.path
+if src_dir not in sys.path:
+    sys.path.append(src_dir)
+
 from src.config import CONFIG
 
 
