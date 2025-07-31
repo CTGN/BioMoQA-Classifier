@@ -75,7 +75,6 @@ class SimpleBioMoQAPredictor:
 def main():
     # Header
     st.markdown('<h1 class="main-header">🧬 BioMoQA Classifier</h1>', unsafe_allow_html=True)
-    st.markdown("**Binary classification for Biodiversity research questions**")
     st.markdown("---")
     
     # Initialize session state
@@ -155,7 +154,7 @@ def render_sidebar():
 
 def load_model(model_path: str, threshold: float, device: str):
     """Load the model with given configuration"""
-    with st.sidebar.spinner("Loading model..."):
+    with st.spinner("Loading model..."):
         try:
             # Validate path
             if not os.path.exists(model_path):
