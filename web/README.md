@@ -1,15 +1,29 @@
-# BioMoQA Classifier Web Application
+# BioMoQA Cross-Validation Classifier Web Application
 
-A simple web interface for BioMoQA (Biodiversity Modeling with Question Answering) text classification using Streamlit and Hugging Face transformers.
+A web interface for BioMoQA (Biodiversity Modeling with Question Answering) ensemble classification using **5-fold cross-validation** for enhanced reliability and robust predictions.
 
 ## Features
 
-- **Single Text Classification**: Classify individual research abstracts
-- **Batch Processing**: Upload JSON or CSV files for bulk classification
+- **Ensemble Classification**: Uses all 5 fold models trained via cross-validation
+- **Consensus Validation**: Implements multi-model consensus for reliable predictions
+- **Single Text Classification**: Classify individual research abstracts with ensemble scoring
+- **Batch Processing**: Upload JSON or CSV files for bulk ensemble classification
 - **Example Texts**: Test with pre-loaded example texts
-- **Simple Interface**: Clean, intuitive web interface
+- **Detailed Analytics**: View individual fold results, consensus strength, and statistical analysis
 - **Multiple Formats**: Support for both JSON and CSV file uploads
-- **Results Download**: Download results in JSON or CSV format
+- **Enhanced Results**: Download ensemble results with consensus metrics
+
+## Cross-Validation Approach
+
+This application implements a **consensus validation framework** inspired by blockchain-style decentralized validation. Instead of relying on a single model, it:
+
+1. **Loads 5 fold models** trained during cross-validation
+2. **Queries each fold independently** for the same input
+3. **Calculates ensemble statistics** (mean, std, min, max scores)
+4. **Provides consensus metrics** showing agreement between folds
+5. **Delivers robust predictions** with confidence intervals
+
+This approach significantly improves reliability compared to single-model inference, similar to the [consensus validation patterns](https://discuss.huggingface.co/t/consensus-validation-for-llm-outputs-applying-blockchain-inspired-models-to-ai-reliability/158143) used in production AI systems.
 
 ## Requirements
 
@@ -19,12 +33,13 @@ A simple web interface for BioMoQA (Biodiversity Modeling with Question Answerin
 - transformers
 - pandas
 - plotly
+- numpy
 
 ## Installation
 
 1. Install dependencies:
 ```bash
-pip install streamlit torch transformers pandas plotly
+pip install streamlit torch transformers pandas plotly numpy
 ```
 
 2. Navigate to the web directory:
@@ -41,17 +56,34 @@ streamlit run app.py
 
 ### Model Setup
 
-1. **Load a Model**: In the sidebar, enter the path to your trained BioMoQA model checkpoint
-2. **Configure Settings**: Adjust the classification threshold if needed
-3. **Select Device**: Choose CPU or CUDA for inference
-4. **Click "Load Model"**: Load the model for inference
+1. **Select Model Type**: Choose from available architectures:
+   - `bert-base`
+   - `biobert-v1`
+   - `BiomedBERT-abs`
+   - `BiomedBERT-abs-ft`
+   - `roberta-base`
+
+2. **Select Loss Type**: Choose the loss function used during training:
+   - `BCE` (Binary Cross Entropy)
+   - `focal` (Focal Loss)
+
+3. **Configure Base Path**: Set the directory containing fold models (default: `results/biomoqa/final_model`)
+
+4. **Adjust Threshold**: Set classification threshold for ensemble mean score
+
+5. **Click "Load Ensemble Models"**: Load all 5 fold models for the selected configuration
 
 ### Single Text Classification
 
 1. Select "Single Text" mode
 2. Enter a research abstract in the text area
-3. Click "Classify Text"
-4. View the prediction results and confidence score
+3. Click "Classify with Ensemble"
+4. View comprehensive results including:
+   - **Ensemble prediction** and confidence score
+   - **Consensus strength** (agreement between folds)
+   - **Statistical metrics** (mean, std, min, max)
+   - **Individual fold results** with visualization
+   - **Fold agreement breakdown**
 
 ### Batch Processing
 
@@ -82,39 +114,76 @@ Sample files are provided in the `examples/` directory:
 - `sample_texts.json`: JSON format examples
 - `sample_texts.csv`: CSV format examples
 
-## Model Requirements
+## Model Directory Structure
 
-The application expects Hugging Face format models with:
+The application expects models organized as follows:
+```
+results/biomoqa/final_model/
+├── best_model_cross_val_BCE_bert-base_fold-1/
+├── best_model_cross_val_BCE_bert-base_fold-2/
+├── best_model_cross_val_BCE_bert-base_fold-3/
+├── best_model_cross_val_BCE_bert-base_fold-4/
+├── best_model_cross_val_BCE_bert-base_fold-5/
+├── best_model_cross_val_focal_bert-base_fold-1/
+└── ... (other model types and loss functions)
+```
+
+Each fold directory should contain:
 - `config.json`: Model configuration
 - `pytorch_model.bin` or `model.safetensors`: Model weights
-- `tokenizer.json` and related tokenizer files (optional, falls back to BERT tokenizer)
+- Tokenizer files (optional - falls back to BERT tokenizer)
 
-## Model Training
+## Ensemble Output
 
-This web app is designed to work with models trained **without titles**, using only abstracts for classification. The model should be a binary classifier for biodiversity-related research questions.
+The application provides comprehensive ensemble results:
 
-## Output
+### Single Text Results
+- **Ensemble Score**: Mean score across all 5 folds
+- **Ensemble Prediction**: Binary classification based on mean score
+- **Consensus Strength**: Percentage of folds agreeing with ensemble decision
+- **Statistical Analysis**: Mean, standard deviation, min/max scores
+- **Individual Fold Results**: Score and prediction for each fold
+- **Visualization**: Bar chart showing fold scores vs. threshold
 
-The application provides:
-- **Binary prediction**: 0 (not biodiversity-related) or 1 (biodiversity-related)
-- **Confidence score**: Probability score between 0 and 1
-- **Visual feedback**: Gauge chart showing confidence level
-- **Batch results**: Summary statistics and downloadable results
+### Batch Results
+- **Summary Statistics**: Total processed, positive/negative counts, average consensus
+- **Detailed Table**: Per-item ensemble scores, predictions, and consensus metrics
+- **Download Options**: JSON and CSV formats with full ensemble data
+
+## Consensus Validation Benefits
+
+1. **Error Tolerance**: Individual fold errors are mitigated by ensemble averaging
+2. **Reliability Metrics**: Consensus strength indicates prediction confidence
+3. **Variance Analysis**: Standard deviation reveals prediction stability
+4. **Auditable Results**: Complete fold-by-fold breakdown for transparency
+5. **Robust Predictions**: Less susceptible to single-model biases or failures
+
+## Example Model Configurations
+
+```
+Model Type: BiomedBERT-abs
+Loss Type: BCE
+Result: 5 fold models for biomedical BERT with binary cross-entropy loss
+
+Model Type: roberta-base  
+Loss Type: focal
+Result: 5 fold models for RoBERTa with focal loss
+```
 
 ## Troubleshooting
 
-- **Model loading errors**: Ensure the model path is correct and contains valid Hugging Face model files
-- **Memory issues**: Use CPU device for large models if GPU memory is limited
-- **File upload errors**: Check that JSON files contain valid arrays and CSV files have an "abstract" column
+- **Ensemble loading errors**: Ensure all 5 fold directories exist for the selected model/loss combination
+- **Memory issues**: Use CPU device for large model ensembles
+- **Missing folds**: Check that fold directories follow the exact naming convention
+- **File upload errors**: Verify JSON arrays and CSV columns as specified
 
-## Example Model Paths
+## Performance Considerations
 
-```
-results/biomoqa/best_model_fold_1/
-path/to/your/huggingface/model/
-models/biomoqa_bert_base/
-```
+- **Model Loading**: Initial loading takes longer as 5 models are loaded into memory
+- **Inference Time**: ~5x slower than single model inference (running 5 models)
+- **Memory Usage**: ~5x memory requirements (5 models in memory simultaneously)
+- **GPU Efficiency**: Benefits from GPU acceleration for faster ensemble processing
 
 ## Development
 
-The application uses a simplified inference pipeline built on top of Hugging Face transformers, focusing on ease of use and deployment rather than complex model configurations. 
+This application implements the [multi-model inference pattern](https://www.philschmid.de/multi-model-inference-endpoints) adapted for cross-validation ensembles, providing a practical "repair kit" for AI reliability through consensus validation. 
