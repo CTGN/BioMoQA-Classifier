@@ -11,7 +11,7 @@ import os
 import argparse
 import logging
 from typing import List, Dict, Any
-
+from transformers import AutoModel, AutoTokenizer
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 

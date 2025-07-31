@@ -3,9 +3,9 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Models to iterate over
+#"microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
+#"microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
 MODELS=(
-  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
-  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
   "FacebookAI/roberta-base"
   "dmis-lab/biobert-v1.1"
   "google-bert/bert-base-uncased"
@@ -23,16 +23,16 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
   uv run src/data_pipeline/biomoqa/preprocess_biomoqa.py \
     -nf "${NUM_FOLDS}" \
     -nr "${NUM_RUNS}" \
-    -on "${opt_negs}"
+    -on "${opt_negs}" 
 
   # repeat for each run
   for (( run=0; run<NUM_RUNS; run++ )); do
     echo "--> Run #${run}"
     # try both losses
     # each fold
-    for (( fold=0; fold<NUM_FOLDS; fold++ )); do
+    for (( fold=4; fold<NUM_FOLDS; fold++ )); do
     echo "------> Fold: ${fold}"
-      for loss in BCE focal; do
+      for loss in BCE; do
         echo "----> Loss function: ${loss}"
         # each model
         for model in "${MODELS[@]}"; do
@@ -46,7 +46,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             --n_trials 25 \
             --hpo_metric "eval_roc_auc" \
             -m "${model}" \
-            --loss "${loss}" 
+            --loss "${loss}" \
+            -t
 
           # Training with best HPO config
           uv run src/models/biomoqa/train.py \
@@ -58,7 +59,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
             --nb_opt_negs "${opt_negs}" \
             -bm "eval_roc_auc" \
             --gpu 2 \
-            --loss "${loss}" 
+            --loss "${loss}" \
+            -t
         done
 
         # Ensemble step for this fold/run
@@ -68,7 +70,8 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
           --fold "${fold}" \
           --run "${run}" \
           --nb_opt_negs "${opt_negs}" \
-          --loss "${loss}" 
+          --loss "${loss}" \
+          -t
       done
     done
   done

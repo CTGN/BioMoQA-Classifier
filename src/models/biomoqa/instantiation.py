@@ -9,6 +9,7 @@ from transformers import (
     DataCollatorWithPadding
 )
 from src.config import CONFIG
+from src.utils import map_name
 
 logger = logging.getLogger(__name__)
 
@@ -22,48 +23,55 @@ class BioMoQAPredictor:
     
     def __init__(
         self,
-        model_path: str,
+        model_name: str,
+        loss_type: str = "BCE",
         with_title: bool = False,
         with_keywords: bool = False,
         device: Optional[str] = None,
+        weights_parent_dir:str="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/final_model",
         threshold: float = 0.5
     ):
-        self.model_path = model_path
+        self.model_name=model_name
         self.with_title = with_title
+        self.loss_type=loss_type
         self.with_keywords = with_keywords
         self.threshold = threshold
+        self.weights_parent_dir=weights_parent_dir
         
-        if device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = torch.device(device)
-            
-        logger.info(f"Using device: {self.device}")
+        if not os.path.exists(self.weights_parent_dir):
+            raise FileNotFoundError(f"Checkpoints parent directory does not exist : {self.weights_parent_dir}")
+        
+        self.model_paths  = [
+            os.path.join(self.weights_parent_dir, dirname)
+            for dirname in os.listdir(self.weights_parent_dir)
+            if dirname.startswith( "best_model_cross_val_"+str(self.loss_type)+"_" +str(map_name(self.model_name))) and os.path.isdir(os.path.join(weights_parent_dir, dirname))
+        ]
         
         self._load_model()
         
     def _load_model(self):
-        if not os.path.exists(self.model_path):
-            raise FileNotFoundError(f"Model checkpoint not found at: {self.model_path}")
+        if not self.model_paths:
+            raise FileNotFoundError(f"No model checkpoints found in directory: {self.weights_parent_dir}")
             
         try:
             try:
-                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+                self.tokenizer_per_fold = [AutoTokenizer.from_pretrained(model_path) for model_path in self.model_paths]
             except:
                 logger.warning("Tokenizer not found in model path, using default BERT tokenizer")
-                self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+                self.tokenizer_per_fold = [AutoTokenizer.from_pretrained("google-bert/bert-base-uncased") for _ in range(len(self.model_paths)) ]
             
-            self.model = AutoModelForSequenceClassification.from_pretrained(
-                self.model_path,
+            self.models_per_fold = [AutoModelForSequenceClassification.from_pretrained(
+                model_path,
                 num_labels=CONFIG["num_labels"]
-            )
+            )for model_path in self.model_paths]
+
             self.model.to(self.device)
             self.model.eval()
             
-            self.data_collator = DataCollatorWithPadding(
-                tokenizer=self.tokenizer,
+            self.data_collators = [DataCollatorWithPadding(
+                tokenizer=tokenizer,
                 padding=True
-            )
+            ) for tokenizer in self.tokenizer_per_fold]
             
             logger.info(f"Successfully loaded model from: {self.model_path}")
             
