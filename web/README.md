@@ -1,29 +1,39 @@
-# BioMoQA Cross-Validation Classifier Web Application
+# BioMoQA Scoring & Ranking System
 
-A web interface for BioMoQA (Biodiversity Modeling with Question Answering) ensemble classification using **5-fold cross-validation** for enhanced reliability and robust predictions.
+A web interface for BioMoQA (Biodiversity Modeling with Question Answering) **ensemble scoring and ranking** using **5-fold cross-validation** for robust relevance assessment and research prioritization.
 
 ## Features
 
-- **Ensemble Classification**: Uses all 5 fold models trained via cross-validation
-- **Consensus Validation**: Implements multi-model consensus for reliable predictions
-- **Single Text Classification**: Classify individual research abstracts with ensemble scoring
-- **Batch Processing**: Upload JSON or CSV files for bulk ensemble classification
-- **Example Texts**: Test with pre-loaded example texts
-- **Detailed Analytics**: View individual fold results, consensus strength, and statistical analysis
-- **Multiple Formats**: Support for both JSON and CSV file uploads
-- **Enhanced Results**: Download ensemble results with consensus metrics
+- **Ensemble Scoring**: Uses all 5 fold models trained via cross-validation for robust scoring
+- **Intelligent Ranking**: Sort and rank research abstracts by relevance scores
+- **Score-Based Analysis**: Focus on raw scores rather than binary classification
+- **Batch Scoring & Ranking**: Upload JSON or CSV files for bulk scoring with ranking capabilities
+- **Interactive Filtering**: Filter results by score thresholds and sort in any order
+- **Detailed Score Analytics**: View individual fold scores, statistical analysis, and score distributions
+- **Score Interpretation**: Automatic relevance level assessment (High/Medium/Low)
+- **Enhanced Downloads**: Export ranked results with comprehensive score metadata
 
-## Cross-Validation Approach
+## Scoring Approach
 
-This application implements a **consensus validation framework** inspired by blockchain-style decentralized validation. Instead of relying on a single model, it:
+This application implements a **consensus scoring framework** for research relevance assessment. Instead of simple binary classification, it:
 
 1. **Loads 5 fold models** trained during cross-validation
-2. **Queries each fold independently** for the same input
-3. **Calculates ensemble statistics** (mean, std, min, max scores)
-4. **Provides consensus metrics** showing agreement between folds
-5. **Delivers robust predictions** with confidence intervals
+2. **Scores each text independently** with all fold models
+3. **Calculates ensemble statistics** (mean, median, std, min, max scores)
+4. **Provides ranking capabilities** to identify most relevant research
+5. **Delivers interpretable scores** with confidence intervals and stability metrics
 
-This approach significantly improves reliability compared to single-model inference, similar to the [consensus validation patterns](https://discuss.huggingface.co/t/consensus-validation-for-llm-outputs-applying-blockchain-inspired-models-to-ai-reliability/158143) used in production AI systems.
+This approach enables **research prioritization** and **relevance ranking**, similar to scoring systems used in [medical AI applications](https://github.com/wisdomml2020/brain-tumour-webapp) and follows [model interpretation best practices](https://walkwithfastai.com/interp) for transparency.
+
+## Score Interpretation
+
+| Score Range | Relevance Level | Description |
+|-------------|----------------|-------------|
+| 0.8 - 1.0   | 🟢 High Relevance | Strong biodiversity research content |
+| 0.6 - 0.8   | 🟡 Medium-High | Likely biodiversity-related research |
+| 0.4 - 0.6   | 🟠 Medium | Mixed or unclear biodiversity content |
+| 0.2 - 0.4   | 🔴 Low | Unlikely to be biodiversity-focused |
+| 0.0 - 0.2   | ⚫ Very Low | Not biodiversity research |
 
 ## Requirements
 
@@ -69,23 +79,24 @@ streamlit run app.py
 
 3. **Configure Base Path**: Set the directory containing fold models (default: `results/biomoqa/final_model`)
 
-4. **Adjust Threshold**: Set classification threshold for ensemble mean score
+4. **Set Reference Threshold**: Optional threshold for binary reference (scoring focuses on raw scores)
 
 5. **Click "Load Ensemble Models"**: Load all 5 fold models for the selected configuration
 
-### Single Text Classification
+### Single Text Scoring
 
-1. Select "Single Text" mode
+1. Select "Single Text Scoring" mode
 2. Enter a research abstract in the text area
-3. Click "Classify with Ensemble"
-4. View comprehensive results including:
-   - **Ensemble prediction** and confidence score
-   - **Consensus strength** (agreement between folds)
-   - **Statistical metrics** (mean, std, min, max)
-   - **Individual fold results** with visualization
-   - **Fold agreement breakdown**
+3. Click "Score Text"
+4. View comprehensive scoring results including:
+   - **Ensemble Score**: Mean score across all 5 folds (0.0-1.0)
+   - **Score Range**: Min-max range showing prediction stability
+   - **Score Stability**: Standard deviation indicating consistency
+   - **Relevance Interpretation**: Automatic categorization (High/Medium/Low)
+   - **Statistical Analysis**: Mean, median, std deviation, consensus metrics
+   - **Individual Fold Scores**: Ranked visualization of all fold predictions
 
-### Batch Processing
+### Batch Scoring & Ranking
 
 #### JSON Format
 Upload a JSON file with the following structure:
@@ -108,11 +119,18 @@ abstract,title,category
 "Research abstract 2...","Title 2","category2"
 ```
 
+#### Ranking Features
+- **Automatic Ranking**: Results sorted by ensemble score (highest first)
+- **Score Distribution**: Histogram showing score distribution across all texts
+- **Interactive Filtering**: Slider to filter by minimum score threshold
+- **Sort Controls**: Toggle between highest-to-lowest and lowest-to-highest ranking
+- **Summary Statistics**: Total scored, high relevance count, average score, highest score
+
 ### Example Files
 
 Sample files are provided in the `examples/` directory:
-- `sample_texts.json`: JSON format examples
-- `sample_texts.csv`: CSV format examples
+- `sample_texts.json`: JSON format examples with varying relevance levels
+- `sample_texts.csv`: CSV format examples with expected score ranges
 
 ## Model Directory Structure
 
@@ -133,42 +151,66 @@ Each fold directory should contain:
 - `pytorch_model.bin` or `model.safetensors`: Model weights
 - Tokenizer files (optional - falls back to BERT tokenizer)
 
-## Ensemble Output
+## Scoring Output
 
-The application provides comprehensive ensemble results:
+The application provides comprehensive scoring results:
 
 ### Single Text Results
-- **Ensemble Score**: Mean score across all 5 folds
-- **Ensemble Prediction**: Binary classification based on mean score
-- **Consensus Strength**: Percentage of folds agreeing with ensemble decision
-- **Statistical Analysis**: Mean, standard deviation, min/max scores
-- **Individual Fold Results**: Score and prediction for each fold
-- **Visualization**: Bar chart showing fold scores vs. threshold
+- **Ensemble Score**: Mean score across all 5 folds (primary ranking metric)
+- **Score Range**: Min-max scores showing prediction variability
+- **Score Stability**: Standard deviation indicating model consensus
+- **Relevance Level**: Automatic interpretation (High/Medium/Low/Very Low)
+- **Statistical Breakdown**: Mean, median, std deviation, quartiles
+- **Individual Fold Analysis**: Score from each fold with ranking visualization
+- **Reference Classification**: Optional binary prediction for comparison
 
 ### Batch Results
-- **Summary Statistics**: Total processed, positive/negative counts, average consensus
-- **Detailed Table**: Per-item ensemble scores, predictions, and consensus metrics
-- **Download Options**: JSON and CSV formats with full ensemble data
+- **Ranked Results Table**: All texts sorted by ensemble score with rank numbers
+- **Score Distribution**: Interactive histogram showing score patterns
+- **Summary Statistics**: Total count, relevance breakdowns, averages
+- **Interactive Controls**: Filtering, sorting, and display options
+- **Export Options**: JSON and CSV downloads with full ranking data
 
-## Consensus Validation Benefits
+## Scoring Benefits
 
-1. **Error Tolerance**: Individual fold errors are mitigated by ensemble averaging
-2. **Reliability Metrics**: Consensus strength indicates prediction confidence
-3. **Variance Analysis**: Standard deviation reveals prediction stability
-4. **Auditable Results**: Complete fold-by-fold breakdown for transparency
-5. **Robust Predictions**: Less susceptible to single-model biases or failures
+1. **Research Prioritization**: Rank papers by biodiversity relevance for efficient review
+2. **Quality Assessment**: Score stability indicates prediction confidence
+3. **Comparative Analysis**: Direct score comparison across multiple texts
+4. **Threshold Flexibility**: No fixed cutoffs - use scores for custom ranking
+5. **Transparency**: Complete fold-by-fold breakdown for interpretability
+6. **Batch Processing**: Efficient scoring and ranking of large document collections
 
-## Example Model Configurations
+## Use Cases
+
+- **Literature Review**: Rank papers by biodiversity relevance for systematic reviews
+- **Grant Evaluation**: Score research proposals for biodiversity content assessment
+- **Database Curation**: Identify and prioritize biodiversity-related research
+- **Content Discovery**: Find most relevant papers in large document collections
+- **Research Validation**: Assess consistency of biodiversity research classification
+
+## Example Scoring Results
 
 ```
-Model Type: BiomedBERT-abs
-Loss Type: BCE
-Result: 5 fold models for biomedical BERT with binary cross-entropy loss
+🎯 Ensemble Score: 0.8234
+📈 Score Range: 0.801 - 0.891
+📊 Score Stability: σ = 0.042
+🟢 High Relevance - Strong biodiversity research content
 
-Model Type: roberta-base  
-Loss Type: focal
-Result: 5 fold models for RoBERTa with focal loss
+Individual Fold Scores (Ranked):
+   Fold 3: 0.891
+   Fold 5: 0.887
+   Fold 1: 0.853
+   Fold 4: 0.834
+   Fold 2: 0.801
 ```
+
+## Performance Considerations
+
+- **Model Loading**: Initial loading takes longer as 5 models are loaded into memory
+- **Scoring Time**: ~5x slower than single model inference (running 5 models)
+- **Memory Usage**: ~5x memory requirements (5 models in memory simultaneously)
+- **Batch Efficiency**: Optimized for processing large collections with ranking
+- **GPU Acceleration**: Benefits significantly from GPU for faster ensemble scoring
 
 ## Troubleshooting
 
@@ -176,14 +218,8 @@ Result: 5 fold models for RoBERTa with focal loss
 - **Memory issues**: Use CPU device for large model ensembles
 - **Missing folds**: Check that fold directories follow the exact naming convention
 - **File upload errors**: Verify JSON arrays and CSV columns as specified
-
-## Performance Considerations
-
-- **Model Loading**: Initial loading takes longer as 5 models are loaded into memory
-- **Inference Time**: ~5x slower than single model inference (running 5 models)
-- **Memory Usage**: ~5x memory requirements (5 models in memory simultaneously)
-- **GPU Efficiency**: Benefits from GPU acceleration for faster ensemble processing
+- **Slow scoring**: Consider GPU acceleration for faster batch processing
 
 ## Development
 
-This application implements the [multi-model inference pattern](https://www.philschmid.de/multi-model-inference-endpoints) adapted for cross-validation ensembles, providing a practical "repair kit" for AI reliability through consensus validation. 
+This application implements ensemble scoring and ranking patterns adapted for research relevance assessment, providing a robust framework for biodiversity research prioritization and content discovery. 

@@ -19,14 +19,14 @@ from web.utils import get_example_texts, validate_model_path, format_confidence_
 
 # Page config
 st.set_page_config(
-    page_title="BioMoQA Classifier",
+    page_title="BioMoQA Scorer",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 class CrossValidationPredictor:
-    """Cross-validation predictor using ensemble of 5 fold models"""
+    """Cross-validation predictor using ensemble of 5 fold models for scoring"""
     
     def __init__(self, model_type: str, loss_type: str, base_path: str = "results/biomoqa/final_model", 
                  threshold: float = 0.5, device: str = None):
@@ -80,7 +80,7 @@ class CrossValidationPredictor:
         print(f"Successfully loaded all {self.num_folds} fold models!")
     
     def predict_single_fold(self, abstract: str, fold: int) -> dict:
-        """Predict using a single fold model"""
+        """Score using a single fold model"""
         tokenizer = self.fold_tokenizers[fold]
         model = self.fold_models[fold]
         
@@ -100,6 +100,7 @@ class CrossValidationPredictor:
             logits = outputs.logits
             score = torch.sigmoid(logits).squeeze().cpu().item()
         
+        # Optional binary prediction for reference
         prediction = int(score > self.threshold)
         return {
             "fold": fold,
@@ -107,12 +108,12 @@ class CrossValidationPredictor:
             "prediction": prediction
         }
     
-    def predict(self, abstract: str) -> dict:
-        """Predict using ensemble of all fold models"""
+    def score_text(self, abstract: str) -> dict:
+        """Score text using ensemble of all fold models"""
         fold_results = []
         scores = []
         
-        # Get predictions from all folds
+        # Get scores from all folds
         for fold in range(1, self.num_folds + 1):
             fold_result = self.predict_single_fold(abstract, fold)
             fold_results.append(fold_result)
@@ -123,11 +124,12 @@ class CrossValidationPredictor:
         std_score = np.std(scores)
         min_score = np.min(scores)
         max_score = np.max(scores)
+        median_score = np.median(scores)
         
-        # Ensemble prediction based on mean score
+        # Optional ensemble prediction for reference
         ensemble_prediction = int(mean_score > self.threshold)
         
-        # Count individual fold predictions
+        # Count individual fold predictions for consensus
         positive_folds = sum(1 for result in fold_results if result["prediction"] == 1)
         negative_folds = self.num_folds - positive_folds
         
@@ -141,6 +143,7 @@ class CrossValidationPredictor:
             "fold_results": fold_results,
             "statistics": {
                 "mean_score": mean_score,
+                "median_score": median_score,
                 "std_score": std_score,
                 "min_score": min_score,
                 "max_score": max_score,
@@ -150,17 +153,130 @@ class CrossValidationPredictor:
             }
         }
     
-    def predict_batch(self, abstracts: list) -> list:
-        """Predict on a batch of abstracts using ensemble"""
+    def score_batch(self, abstracts: list) -> list:
+        """Score a batch of abstracts using ensemble"""
         results = []
         for abstract in abstracts:
-            result = self.predict(abstract)
+            result = self.score_text(abstract)
             results.append(result)
         return results
 
+    def predict_batch_single_fold(self, abstracts: list, fold: int, batch_size: int = 16) -> list:
+        """Score a batch of abstracts using a single fold model with GPU optimization"""
+        tokenizer = self.fold_tokenizers[fold]
+        model = self.fold_models[fold]
+        
+        all_results = []
+        
+        # Process in batches to manage GPU memory
+        for i in range(0, len(abstracts), batch_size):
+            batch_abstracts = abstracts[i:i + batch_size]
+            
+            # Batch tokenization - much faster than individual tokenization
+            inputs = tokenizer(
+                batch_abstracts,
+                truncation=True,
+                max_length=512,
+                padding=True,
+                return_tensors="pt"
+            )
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            
+            # Batch inference
+            with torch.no_grad():
+                outputs = model(**inputs)
+                logits = outputs.logits
+                scores = torch.sigmoid(logits).squeeze().cpu().numpy()
+                
+                # Handle single item case
+                if len(batch_abstracts) == 1:
+                    scores = [scores.item()]
+                else:
+                    scores = scores.tolist()
+                
+                # Create results for this batch
+                for j, score in enumerate(scores):
+                    prediction = int(score > self.threshold)
+                    all_results.append({
+                        "fold": fold,
+                        "score": score,
+                        "prediction": prediction
+                    })
+        
+        return all_results
+
+    def score_batch_optimized(self, abstracts: list, batch_size: int = 16) -> list:
+        """Optimized batch scoring using ensemble of all fold models with GPU acceleration"""
+        num_texts = len(abstracts)
+        
+        # Initialize results structure
+        all_fold_results = {fold: [] for fold in range(1, self.num_folds + 1)}
+        
+        # Process each fold with batch inference
+        for fold in range(1, self.num_folds + 1):
+            fold_results = self.predict_batch_single_fold(abstracts, fold, batch_size)
+            all_fold_results[fold] = fold_results
+            
+            # Clear GPU cache between folds to prevent OOM
+            if self.device == "cuda" or (self.device is None and torch.cuda.is_available()):
+                torch.cuda.empty_cache()
+        
+        # Combine results for each text
+        final_results = []
+        for text_idx in range(num_texts):
+            # Collect scores from all folds for this text
+            fold_results = []
+            scores = []
+            
+            for fold in range(1, self.num_folds + 1):
+                fold_result = all_fold_results[fold][text_idx]
+                fold_results.append(fold_result)
+                scores.append(fold_result["score"])
+            
+            # Calculate ensemble statistics
+            mean_score = np.mean(scores)
+            std_score = np.std(scores)
+            min_score = np.min(scores)
+            max_score = np.max(scores)
+            median_score = np.median(scores)
+            
+            # Ensemble prediction
+            ensemble_prediction = int(mean_score > self.threshold)
+            
+            # Count individual fold predictions for consensus
+            positive_folds = sum(1 for result in fold_results if result["prediction"] == 1)
+            negative_folds = self.num_folds - positive_folds
+            
+            # Consensus strength
+            consensus_strength = max(positive_folds, negative_folds) / self.num_folds
+            
+            final_results.append({
+                "abstract": abstracts[text_idx],
+                "ensemble_score": mean_score,
+                "ensemble_prediction": ensemble_prediction,
+                "fold_results": fold_results,
+                "statistics": {
+                    "mean_score": mean_score,
+                    "median_score": median_score,
+                    "std_score": std_score,
+                    "min_score": min_score,
+                    "max_score": max_score,
+                    "positive_folds": positive_folds,
+                    "negative_folds": negative_folds,
+                    "consensus_strength": consensus_strength
+                }
+            })
+        
+        # Final GPU memory cleanup
+        if self.device == "cuda" or (self.device is None and torch.cuda.is_available()):
+            torch.cuda.empty_cache()
+        
+        return final_results
+
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🧬 BioMoQA Cross-Validation Classifier</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🧬 BioMoQA Scoring & Ranking System</h1>', unsafe_allow_html=True)
+    st.markdown("**Score and rank research abstracts using ensemble cross-validation models**")
     st.markdown("---")
     
     # Initialize session state
@@ -168,6 +284,8 @@ def main():
         st.session_state.predictor = None
     if 'model_loaded' not in st.session_state:
         st.session_state.model_loaded = False
+    if 'batch_size' not in st.session_state:
+        st.session_state.batch_size = 16
     
     # Sidebar for model configuration
     render_sidebar()
@@ -181,13 +299,13 @@ def main():
         # Input mode selection
         input_mode = st.radio(
             "Select input mode:",
-            ["Single Text", "Batch Upload (JSON/CSV)", "Example Texts"],
+            ["Single Text Scoring", "Batch Scoring & Ranking", "Example Texts"],
             horizontal=True
         )
         
-        if input_mode == "Single Text":
+        if input_mode == "Single Text Scoring":
             render_single_text_input()
-        elif input_mode == "Batch Upload (JSON/CSV)":
+        elif input_mode == "Batch Scoring & Ranking":
             render_batch_upload()
         else:
             render_example_texts()
@@ -232,14 +350,14 @@ def render_sidebar():
         help="Base directory containing the fold model checkpoints"
     )
     
-    # Threshold
+    # Threshold (less important for scoring, but kept for reference)
     threshold = st.sidebar.slider(
-        "Classification Threshold",
+        "Reference Threshold",
         min_value=0.0,
         max_value=1.0,
         value=0.5,
         step=0.01,
-        help="Threshold for binary classification (applied to ensemble mean)"
+        help="Reference threshold for binary classification (scoring focuses on raw scores)"
     )
     
     # Device selection
@@ -250,11 +368,37 @@ def render_sidebar():
     )
     device = None if device_option == "auto" else device_option
     
+    # GPU Optimization Settings
+    st.sidebar.subheader("🚀 GPU Optimization")
+    batch_size = st.sidebar.slider(
+        "Batch Size",
+        min_value=1,
+        max_value=64,
+        value=16,
+        step=1,
+        help="Number of texts to process together (increase for A100 GPU, decrease if OOM)"
+    )
+    
+    # Store batch size in session state
+    st.session_state.batch_size = batch_size
+    
+    # GPU memory info
+    if device_option in ["auto", "cuda"] and torch.cuda.is_available():
+        gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
+        st.sidebar.info(f"🔥 GPU Memory: {gpu_memory:.1f} GB")
+        if gpu_memory >= 15:  # A100 or similar
+            st.sidebar.success("🚀 High-end GPU detected! Consider batch_size=32-64")
+        elif gpu_memory >= 8:
+            st.sidebar.info("💡 Mid-range GPU: batch_size=16-32 recommended")
+        else:
+            st.sidebar.warning("⚠️ Low GPU memory: use batch_size=8 or less")
+    
     # Show model info
     st.sidebar.subheader("📋 Model Configuration")
     st.sidebar.info(f"**Model:** {model_type}")
     st.sidebar.info(f"**Loss:** {loss_type}")
     st.sidebar.info(f"**Folds:** 5 models")
+    st.sidebar.info(f"**Batch Size:** {batch_size}")
     
     # Load model button
     if st.sidebar.button("🚀 Load Ensemble Models", type="primary", use_container_width=True):
@@ -300,20 +444,20 @@ def render_single_text_input():
         "Abstract*",
         height=200,
         placeholder="Enter the research abstract here...",
-        help="The abstract text to classify using cross-validation ensemble"
+        help="The abstract text to score using cross-validation ensemble"
     )
     
-    # Prediction button
+    # Scoring button
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        predict_button = st.button(
-            "🔍 Classify with Ensemble",
+        score_button = st.button(
+            "📊 Score Text",
             type="primary",
             use_container_width=True
         )
     
-    # Validation and prediction
-    if predict_button:
+    # Validation and scoring
+    if score_button:
         if not abstract.strip():
             st.error("Please enter an abstract.")
             return
@@ -323,17 +467,18 @@ def render_single_text_input():
             return
         
         # Make prediction
-        with st.spinner("Running ensemble classification..."):
+        with st.spinner("Scoring with ensemble..."):
             try:
-                result = st.session_state.predictor.predict(abstract)
-                render_ensemble_results(result)
+                result = st.session_state.predictor.score_text(abstract)
+                render_scoring_results(result)
                 
             except Exception as e:
-                st.error(f"Prediction failed: {str(e)}")
+                st.error(f"Scoring failed: {str(e)}")
 
 def render_batch_upload():
     """Render the batch upload interface"""
-    st.info("Upload a JSON or CSV file with multiple texts for batch ensemble classification.")
+    st.info("🚀 Upload a JSON or CSV file with multiple texts for GPU-accelerated batch scoring and ranking.")
+    st.success("⚡ Optimized for A100 GPU: Process hundreds of texts in seconds with batch inference!")
     
     # File upload
     uploaded_file = st.file_uploader(
@@ -359,7 +504,7 @@ def render_batch_upload():
                 abstracts = df['abstract'].fillna('').tolist()
                 texts_data = df.to_dict('records')
             
-            st.success(f"Loaded {len(abstracts)} texts for ensemble classification.")
+            st.success(f"Loaded {len(abstracts)} texts for ensemble scoring.")
             
             # Show preview
             with st.expander("Preview uploaded data"):
@@ -369,19 +514,19 @@ def render_batch_upload():
                     st.dataframe(df.head(3))
             
             # Batch processing
-            if st.button("🚀 Process Batch with Ensemble", type="primary"):
+            if st.button("🚀 Score & Rank Batch", type="primary"):
                 if not st.session_state.model_loaded:
                     st.error("Please load ensemble models first.")
                     return
                 
-                process_batch_ensemble(abstracts)
+                process_batch_scoring(abstracts)
                 
         except Exception as e:
             st.error(f"Error processing file: {str(e)}")
 
 def render_example_texts():
     """Render the example texts interface"""
-    st.info("Try the ensemble classifier with pre-loaded example texts.")
+    st.info("Try the ensemble scorer with pre-loaded example texts.")
     
     examples = get_example_texts()
     
@@ -398,19 +543,19 @@ def render_example_texts():
     st.markdown("**Keywords:** " + example['keywords'])
     st.markdown("**Abstract:** " + example['abstract'][:200] + "...")
     
-    # Classify example
-    if st.button("🔍 Classify with Ensemble", type="primary"):
+    # Score example
+    if st.button("📊 Score This Example", type="primary"):
         if not st.session_state.model_loaded:
             st.error("Please load ensemble models first.")
             return
         
-        with st.spinner("Running ensemble classification..."):
+        with st.spinner("Scoring example..."):
             try:
-                result = st.session_state.predictor.predict(example['abstract'])
-                render_ensemble_results(result)
+                result = st.session_state.predictor.score_text(example['abstract'])
+                render_scoring_results(result)
                 
             except Exception as e:
-                st.error(f"Classification failed: {str(e)}")
+                st.error(f"Scoring failed: {str(e)}")
 
 def render_model_status():
     """Render model loading status"""
@@ -420,93 +565,125 @@ def render_model_status():
         st.info(f"**Loss Type:** {st.session_state.predictor.loss_type}")
         st.info(f"**Folds:** {st.session_state.predictor.num_folds}")
         st.info(f"**Device:** {st.session_state.predictor.device}")
-        st.info(f"**Threshold:** {st.session_state.predictor.threshold}")
+        st.info(f"**Reference Threshold:** {st.session_state.predictor.threshold}")
+        st.info(f"**Current Batch Size:** {st.session_state.batch_size}")
     else:
         st.warning("⚠️ No ensemble models loaded")
         st.info("Please configure and load ensemble models in the sidebar.")
 
-def render_ensemble_results(result):
-    """Render ensemble prediction results with detailed analysis"""
+def render_scoring_results(result):
+    """Render ensemble scoring results with detailed analysis"""
     st.markdown("---")
-    st.header("🎯 Ensemble Classification Results")
+    st.header("📊 Ensemble Scoring Results")
     
     ensemble_score = result['ensemble_score']
     ensemble_prediction = result['ensemble_prediction']
     stats = result['statistics']
     
-    # Main ensemble result
-    col1, col2 = st.columns(2)
+    # Main score display
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        if ensemble_prediction == 1:
-            st.success("🎯 **POSITIVE** - Biomedical Research Question")
-        else:
-            st.info("❌ **NEGATIVE** - Not a Biomedical Research Question")
+        st.metric(
+            "🎯 Ensemble Score", 
+            f"{ensemble_score:.4f}",
+            help="Mean score across all 5 folds (0.0 = Low relevance, 1.0 = High relevance)"
+        )
     
     with col2:
-        st.metric("Ensemble Confidence", f"{ensemble_score:.1%}")
+        st.metric(
+            "📈 Score Range", 
+            f"{stats['min_score']:.3f} - {stats['max_score']:.3f}",
+            help="Minimum and maximum scores across folds"
+        )
     
-    # Consensus strength indicator
-    consensus_strength = stats['consensus_strength']
-    if consensus_strength >= 0.8:
-        consensus_color = "🟢 Strong"
-    elif consensus_strength >= 0.6:
-        consensus_color = "🟡 Moderate"
+    with col3:
+        st.metric(
+            "📊 Score Stability", 
+            f"σ = {stats['std_score']:.4f}",
+            help="Standard deviation - lower values indicate more stable predictions"
+        )
+    
+    # Score interpretation
+    st.subheader("🔍 Score Interpretation")
+    
+    if ensemble_score >= 0.8:
+        score_interpretation = "🟢 **High Relevance** - Strong biodiversity research content"
+        score_color = "success"
+    elif ensemble_score >= 0.6:
+        score_interpretation = "🟡 **Medium-High Relevance** - Likely biodiversity-related"
+        score_color = "warning"
+    elif ensemble_score >= 0.4:
+        score_interpretation = "🟠 **Medium Relevance** - Mixed or unclear biodiversity content"
+        score_color = "warning"
+    elif ensemble_score >= 0.2:
+        score_interpretation = "🔴 **Low Relevance** - Unlikely to be biodiversity-focused"
+        score_color = "error"
     else:
-        consensus_color = "🔴 Weak"
+        score_interpretation = "⚫ **Very Low Relevance** - Not biodiversity research"
+        score_color = "error"
     
-    st.metric("Consensus Strength", f"{consensus_strength:.1%}", help="Percentage of folds agreeing with ensemble decision")
-    st.markdown(f"**Consensus Level:** {consensus_color}")
+    if score_color == "success":
+        st.success(score_interpretation)
+    elif score_color == "warning":
+        st.warning(score_interpretation)
+    else:
+        st.error(score_interpretation)
     
-    # Ensemble statistics
+    # Detailed statistics
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Mean Score", f"{stats['mean_score']:.3f}")
+        st.metric("Mean Score", f"{stats['mean_score']:.4f}")
     with col2:
-        st.metric("Std Deviation", f"{stats['std_score']:.3f}")
+        st.metric("Median Score", f"{stats['median_score']:.4f}")
     with col3:
-        st.metric("Min Score", f"{stats['min_score']:.3f}")
+        st.metric("Std Deviation", f"{stats['std_score']:.4f}")
     with col4:
-        st.metric("Max Score", f"{stats['max_score']:.3f}")
+        consensus_strength = stats['consensus_strength']
+        st.metric("Consensus", f"{consensus_strength:.1%}")
     
-    # Fold agreement breakdown
-    st.subheader("📊 Fold Agreement")
+    # Reference binary prediction
+    st.subheader("📋 Reference Classification")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Positive Folds", f"{stats['positive_folds']}/5")
+        if ensemble_prediction == 1:
+            st.success("✅ Above threshold → Biodiversity-related")
+        else:
+            st.info("❌ Below threshold → Not biodiversity-related")
     with col2:
-        st.metric("Negative Folds", f"{stats['negative_folds']}/5")
+        st.info(f"Reference threshold: {st.session_state.predictor.threshold}")
     
-    # Individual fold results
-    with st.expander("🔍 Individual Fold Results"):
+    # Individual fold scores
+    with st.expander("🔍 Individual Fold Scores"):
         fold_df = pd.DataFrame(result['fold_results'])
-        fold_df['prediction_label'] = fold_df['prediction'].map({0: 'Negative', 1: 'Positive'})
         fold_df['score'] = fold_df['score'].round(4)
+        fold_df = fold_df.sort_values('score', ascending=False)  # Sort by score
         
-        st.dataframe(fold_df[['fold', 'score', 'prediction_label']], use_container_width=True)
+        st.dataframe(fold_df[['fold', 'score']], use_container_width=True)
         
         # Fold scores visualization
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            x=[f"Fold {i}" for i in range(1, 6)],
-            y=[result['fold_results'][i-1]['score'] for i in range(1, 6)],
+            x=[f"Fold {row['fold']}" for _, row in fold_df.iterrows()],
+            y=[row['score'] for _, row in fold_df.iterrows()],
             name="Fold Scores",
-            marker_color=['red' if score < st.session_state.predictor.threshold else 'green' 
-                         for score in [result['fold_results'][i-1]['score'] for i in range(1, 6)]]
+            text=[f"{row['score']:.3f}" for _, row in fold_df.iterrows()],
+            textposition='auto',
+            marker_color=['#1f77b4' for _ in range(len(fold_df))]  # Consistent color for scoring
         ))
         
-        # Add threshold line
+        # Add threshold line for reference
         fig.add_hline(y=st.session_state.predictor.threshold, 
-                     line_dash="dash", line_color="blue",
-                     annotation_text="Threshold")
+                     line_dash="dash", line_color="red",
+                     annotation_text="Reference Threshold")
         
         # Add ensemble mean line
         fig.add_hline(y=ensemble_score, 
-                     line_dash="dot", line_color="purple",
+                     line_dash="dot", line_color="green",
                      annotation_text="Ensemble Mean")
         
         fig.update_layout(
-            title="Individual Fold Scores",
+            title="Individual Fold Scores (Ranked)",
             xaxis_title="Fold",
             yaxis_title="Score",
             showlegend=False,
@@ -515,62 +692,131 @@ def render_ensemble_results(result):
         
         st.plotly_chart(fig, use_container_width=True)
 
-def process_batch_ensemble(abstracts):
-    """Process batch of abstracts using ensemble"""
-    results = []
+def process_batch_scoring(abstracts):
+    """Process batch of abstracts using optimized ensemble scoring"""
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    for i, abstract in enumerate(abstracts):
-        status_text.text(f"Processing {i+1}/{len(abstracts)} with ensemble...")
+    # Get batch size from session state (default to 16)
+    batch_size = getattr(st.session_state, 'batch_size', 16)
+    
+    status_text.text(f"🚀 Processing {len(abstracts)} texts with optimized batch scoring (batch_size={batch_size})...")
+    
+    try:
+        # Start timing
+        start_time = time.time()
         
-        try:
-            result = st.session_state.predictor.predict(abstract)
-            # Simplify result for batch display
+        # Use optimized batch scoring - much faster!
+        full_results = st.session_state.predictor.score_batch_optimized(abstracts, batch_size=batch_size)
+        
+        # End timing
+        end_time = time.time()
+        processing_time = end_time - start_time
+        
+        # Simplify results for batch display
+        results = []
+        for result in full_results:
             simplified_result = {
-                "abstract": abstract,
+                "abstract": result["abstract"],
                 "ensemble_score": result["ensemble_score"],
-                "ensemble_prediction": result["ensemble_prediction"],
+                "std_score": result["statistics"]["std_score"],
+                "min_score": result["statistics"]["min_score"],
+                "max_score": result["statistics"]["max_score"],
                 "consensus_strength": result["statistics"]["consensus_strength"],
                 "positive_folds": result["statistics"]["positive_folds"]
             }
             results.append(simplified_result)
-        except Exception as e:
-            st.warning(f"Failed to process item {i+1}: {str(e)}")
-            
-        progress_bar.progress((i + 1) / len(abstracts))
-    
-    status_text.text("Ensemble processing complete!")
+        
+        progress_bar.progress(1.0)
+        
+        # Show performance metrics
+        texts_per_second = len(abstracts) / processing_time
+        status_text.text(f"✅ Batch scoring complete! Processed {len(abstracts)} texts in {processing_time:.2f}s ({texts_per_second:.1f} texts/sec)")
+        
+        # Performance info box
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.success(f"⚡ Processing Time: {processing_time:.2f}s")
+        with col2:
+            st.success(f"🚀 Speed: {texts_per_second:.1f} texts/sec")
+        with col3:
+            st.success(f"🎯 Batch Size: {batch_size}")
+        
+    except Exception as e:
+        st.error(f"Batch scoring failed: {str(e)}")
+        return []
     
     # Display batch results
-    st.header("📊 Batch Ensemble Results")
+    st.header("📊 Batch Scoring & Ranking Results")
+    
+    # Sort by ensemble score (highest first)
+    results.sort(key=lambda x: x['ensemble_score'], reverse=True)
     
     # Summary stats
-    positive_count = sum(1 for r in results if r.get('ensemble_prediction') == 1)
-    avg_consensus = np.mean([r['consensus_strength'] for r in results])
+    all_scores = [r['ensemble_score'] for r in results]
+    high_relevance = sum(1 for score in all_scores if score >= 0.6)
+    avg_score = np.mean(all_scores)
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Processed", len(results))
+        st.metric("Total Scored", len(results))
     with col2:
-        st.metric("Positive Classifications", positive_count)
+        st.metric("High Relevance (≥0.6)", high_relevance)
     with col3:
-        st.metric("Negative Classifications", len(results) - positive_count)
+        st.metric("Average Score", f"{avg_score:.3f}")
     with col4:
-        st.metric("Avg Consensus", f"{avg_consensus:.1%}")
+        highest_score = max(all_scores) if all_scores else 0
+        st.metric("Highest Score", f"{highest_score:.3f}")
     
-    # Results table
+    # Scoring distribution
+    st.subheader("📈 Score Distribution")
+    fig = px.histogram(
+        x=all_scores,
+        nbins=20,
+        title="Distribution of Ensemble Scores",
+        labels={"x": "Ensemble Score", "y": "Count"}
+    )
+    fig.add_vline(x=avg_score, line_dash="dash", line_color="red", 
+                  annotation_text="Average")
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Ranking controls
+    st.subheader("🏆 Ranked Results")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        sort_order = st.selectbox(
+            "Sort Order",
+            ["Highest to Lowest Score", "Lowest to Highest Score"],
+            help="Choose ranking order"
+        )
+    with col2:
+        score_filter = st.slider(
+            "Minimum Score Filter",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.0,
+            step=0.1,
+            help="Show only results above this score"
+        )
+    
+    # Apply filters and sorting
+    filtered_results = [r for r in results if r['ensemble_score'] >= score_filter]
+    if sort_order == "Lowest to Highest Score":
+        filtered_results.sort(key=lambda x: x['ensemble_score'])
+    
+    # Results table with ranking
     df_results = pd.DataFrame([
         {
-            "Index": i,
-            "Abstract": r['abstract'][:100] + "..." if len(r['abstract']) > 100 else r['abstract'],
-            "Ensemble Score": f"{r['ensemble_score']:.3f}",
-            "Prediction": "Positive" if r['ensemble_prediction'] == 1 else "Negative",
-            "Consensus": f"{r['consensus_strength']:.1%}",
-            "Positive Folds": f"{r['positive_folds']}/5"
+            "Rank": i + 1,
+            "Abstract": r['abstract'][:150] + "..." if len(r['abstract']) > 150 else r['abstract'],
+            "Ensemble Score": f"{r['ensemble_score']:.4f}",
+            "Score Range": f"{r['min_score']:.3f}-{r['max_score']:.3f}",
+            "Stability (σ)": f"{r['std_score']:.3f}",
+            "Consensus": f"{r['consensus_strength']:.1%}"
         }
-        for i, r in enumerate(results)
+        for i, r in enumerate(filtered_results)
     ])
     
     st.dataframe(df_results, use_container_width=True)
@@ -578,19 +824,31 @@ def process_batch_ensemble(abstracts):
     # Download results
     results_json = json.dumps(results, indent=2)
     st.download_button(
-        label="📥 Download Ensemble Results (JSON)",
+        label="📥 Download Scoring Results (JSON)",
         data=results_json,
-        file_name="biomoqa_ensemble_results.json",
+        file_name="biomoqa_scoring_results.json",
         mime="application/json"
     )
     
-    # Download as CSV
-    df_download = pd.DataFrame(results)
+    # Download as CSV with ranking
+    df_download = pd.DataFrame([
+        {
+            "rank": i + 1,
+            "abstract": r['abstract'],
+            "ensemble_score": r['ensemble_score'],
+            "std_score": r['std_score'],
+            "min_score": r['min_score'],
+            "max_score": r['max_score'],
+            "consensus_strength": r['consensus_strength'],
+            "positive_folds": r['positive_folds']
+        }
+        for i, r in enumerate(results)
+    ])
     csv = df_download.to_csv(index=False)
     st.download_button(
-        label="📥 Download Ensemble Results (CSV)",
+        label="📥 Download Ranked Results (CSV)",
         data=csv,
-        file_name="biomoqa_ensemble_results.csv",
+        file_name="biomoqa_ranked_results.csv",
         mime="text/csv"
     )
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test script for the BioMoQA Cross-Validation Ensemble inference pipeline.
-This script tests the ensemble functionality with 5-fold models.
+Test script for the BioMoQA Cross-Validation Ensemble scoring pipeline.
+This script tests the ensemble scoring and ranking functionality.
 """
 
 import sys
@@ -16,7 +16,7 @@ project_root = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
 class CrossValidationPredictor:
-    """Cross-validation predictor using ensemble of 5 fold models"""
+    """Cross-validation predictor using ensemble of 5 fold models for scoring"""
     
     def __init__(self, model_type: str, loss_type: str, base_path: str = "results/biomoqa/final_model", 
                  threshold: float = 0.5, device: str = None):
@@ -70,7 +70,7 @@ class CrossValidationPredictor:
         print(f"Successfully loaded all {self.num_folds} fold models!")
     
     def predict_single_fold(self, abstract: str, fold: int) -> dict:
-        """Predict using a single fold model"""
+        """Score using a single fold model"""
         tokenizer = self.fold_tokenizers[fold]
         model = self.fold_models[fold]
         
@@ -97,12 +97,12 @@ class CrossValidationPredictor:
             "prediction": prediction
         }
     
-    def predict(self, abstract: str) -> dict:
-        """Predict using ensemble of all fold models"""
+    def score_text(self, abstract: str) -> dict:
+        """Score text using ensemble of all fold models"""
         fold_results = []
         scores = []
         
-        # Get predictions from all folds
+        # Get scores from all folds
         for fold in range(1, self.num_folds + 1):
             fold_result = self.predict_single_fold(abstract, fold)
             fold_results.append(fold_result)
@@ -113,11 +113,12 @@ class CrossValidationPredictor:
         std_score = np.std(scores)
         min_score = np.min(scores)
         max_score = np.max(scores)
+        median_score = np.median(scores)
         
-        # Ensemble prediction based on mean score
+        # Optional ensemble prediction for reference
         ensemble_prediction = int(mean_score > self.threshold)
         
-        # Count individual fold predictions
+        # Count individual fold predictions for consensus
         positive_folds = sum(1 for result in fold_results if result["prediction"] == 1)
         negative_folds = self.num_folds - positive_folds
         
@@ -131,6 +132,7 @@ class CrossValidationPredictor:
             "fold_results": fold_results,
             "statistics": {
                 "mean_score": mean_score,
+                "median_score": median_score,
                 "std_score": std_score,
                 "min_score": min_score,
                 "max_score": max_score,
@@ -140,40 +142,84 @@ class CrossValidationPredictor:
             }
         }
 
-def test_ensemble_inference():
-    """Test the ensemble inference pipeline with sample texts"""
+def get_score_interpretation(score: float) -> dict:
+    """Get interpretation for a given score"""
+    if score >= 0.8:
+        return {
+            "level": "High Relevance",
+            "icon": "🟢",
+            "description": "Strong biodiversity research content"
+        }
+    elif score >= 0.6:
+        return {
+            "level": "Medium-High Relevance", 
+            "icon": "🟡",
+            "description": "Likely biodiversity-related research"
+        }
+    elif score >= 0.4:
+        return {
+            "level": "Medium Relevance",
+            "icon": "🟠", 
+            "description": "Mixed or unclear biodiversity content"
+        }
+    elif score >= 0.2:
+        return {
+            "level": "Low Relevance",
+            "icon": "🔴",
+            "description": "Unlikely to be biodiversity-focused"
+        }
+    else:
+        return {
+            "level": "Very Low Relevance",
+            "icon": "⚫",
+            "description": "Not biodiversity research"
+        }
+
+def test_ensemble_scoring():
+    """Test the ensemble scoring pipeline with sample texts"""
     
-    # Sample test abstracts
+    # Sample test abstracts with expected score ranges
     test_abstracts = [
         {
             "text": """This study investigates the effects of climate change on biodiversity patterns 
             in marine ecosystems. We analyzed species composition data from coral reefs 
             across multiple geographical locations over a 10-year period. Our findings 
             show significant shifts in species distribution correlating with temperature 
-            increases and ocean acidification levels.""",
-            "expected": "Positive (Biodiversity-related)"
+            increases and ocean acidification levels. Conservation implications are discussed.""",
+            "expected_range": "High (>0.8)",
+            "category": "Core biodiversity research"
+        },
+        {
+            "text": """We conducted a comprehensive analysis of endemic bird species on tropical islands
+            to understand patterns of species richness and endemism. Using field surveys and
+            molecular phylogenetic analysis, we documented the evolutionary relationships
+            among island bird communities. Results reveal critical conservation priorities.""",
+            "expected_range": "High (>0.8)",
+            "category": "Biodiversity conservation"
         },
         {
             "text": """A novel machine learning approach for protein structure prediction is presented.
             The method combines deep learning architectures with evolutionary information
             to achieve state-of-the-art accuracy. We tested our approach on multiple
             benchmark datasets and compared it with existing methods.""",
-            "expected": "Negative (Not biodiversity-focused)"
+            "expected_range": "Low-Medium (0.2-0.4)",
+            "category": "Computational biology"
         },
         {
             "text": """Forest fragmentation poses significant threats to tropical biodiversity. We
             examined the effects of habitat fragmentation on mammalian communities in
             the Amazon rainforest using camera trap surveys across fragmented and
-            continuous forest areas. Our study reveals that fragment size and connectivity
-            are critical factors determining species persistence.""",
-            "expected": "Positive (Biodiversity-related)"
+            continuous forest areas. Fragment connectivity is critical for species persistence.""",
+            "expected_range": "High (>0.8)",
+            "category": "Habitat fragmentation"
         },
         {
             "text": """The economic impact of tourism on small island states has been extensively studied.
             This research examines the relationship between tourism revenue and local economic 
-            development indicators across Caribbean nations over the past decade. We found 
-            significant correlations between tourism growth and GDP increases.""",
-            "expected": "Negative (Economic, not biodiversity)"
+            development indicators across Caribbean nations over the past decade. GDP correlations
+            are analyzed with respect to seasonal tourism patterns.""",
+            "expected_range": "Very Low (<0.2)",
+            "category": "Economic research"
         }
     ]
     
@@ -227,7 +273,7 @@ def test_ensemble_inference():
         return
     
     try:
-        print(f"\n🚀 Testing ensemble with {selected_config['model_type']} ({selected_config['loss_type']} loss)")
+        print(f"\n🚀 Testing ensemble scoring with {selected_config['model_type']} ({selected_config['loss_type']} loss)")
         print("="*80)
         
         # Load ensemble predictor
@@ -237,41 +283,91 @@ def test_ensemble_inference():
             base_path=base_path
         )
         
-        print(f"\n🔬 ENSEMBLE INFERENCE TESTING")
+        print(f"\n🔬 ENSEMBLE SCORING TESTING")
         print("="*80)
         
+        results = []
+        
         for i, test_case in enumerate(test_abstracts, 1):
-            print(f"\n📝 Test {i}: {test_case['expected']}")
+            print(f"\n📝 Test {i}: {test_case['category']} (Expected: {test_case['expected_range']})")
             print(f"Abstract: {test_case['text'][:100]}...")
             print("-" * 60)
             
-            # Get ensemble prediction
-            result = predictor.predict(test_case['text'])
+            # Get ensemble score
+            result = predictor.score_text(test_case['text'])
             
             # Display results
             ensemble_score = result['ensemble_score']
-            ensemble_prediction = result['ensemble_prediction']
             stats = result['statistics']
             
-            prediction_label = "Positive (Biodiversity)" if ensemble_prediction == 1 else "Negative (Not Biodiversity)"
-            print(f"🎯 Ensemble Prediction: {prediction_label}")
-            print(f"📊 Ensemble Score: {ensemble_score:.4f}")
-            print(f"🤝 Consensus Strength: {stats['consensus_strength']:.1%}")
-            print(f"📈 Score Statistics: μ={stats['mean_score']:.3f}, σ={stats['std_score']:.3f}")
-            print(f"📋 Fold Agreement: {stats['positive_folds']}/5 positive, {stats['negative_folds']}/5 negative")
+            # Get score interpretation
+            interpretation = get_score_interpretation(ensemble_score)
             
-            # Show individual fold results
-            print(f"🔍 Individual Fold Scores:")
-            for fold_result in result['fold_results']:
-                fold_pred = "Pos" if fold_result['prediction'] == 1 else "Neg"
-                print(f"   Fold {fold_result['fold']}: {fold_result['score']:.3f} → {fold_pred}")
+            print(f"🎯 Ensemble Score: {ensemble_score:.4f}")
+            print(f"{interpretation['icon']} {interpretation['level']}: {interpretation['description']}")
+            print(f"📊 Score Statistics: μ={stats['mean_score']:.3f}, σ={stats['std_score']:.3f}, range=[{stats['min_score']:.3f}, {stats['max_score']:.3f}]")
+            print(f"🤝 Consensus: {stats['consensus_strength']:.1%}")
+            
+            # Show individual fold scores (sorted)
+            fold_scores = [(r['fold'], r['score']) for r in result['fold_results']]
+            fold_scores.sort(key=lambda x: x[1], reverse=True)
+            print(f"🔍 Fold Scores (ranked): {', '.join([f'F{fold}:{score:.3f}' for fold, score in fold_scores])}")
+            
+            results.append({
+                "test_case": test_case,
+                "score": ensemble_score,
+                "interpretation": interpretation
+            })
             
             print("=" * 60)
         
-        print(f"\n✅ Ensemble inference test completed successfully!")
+        # Ranking demonstration
+        print(f"\n🏆 RANKING DEMONSTRATION")
+        print("="*80)
+        
+        # Sort by score (highest first)
+        results.sort(key=lambda x: x['score'], reverse=True)
+        
+        print("Research abstracts ranked by biodiversity relevance score:")
+        for rank, result in enumerate(results, 1):
+            score = result['score']
+            interp = result['interpretation']
+            category = result['test_case']['category']
+            print(f"{rank}. {interp['icon']} {score:.4f} - {category} ({interp['level']})")
+        
+        # Summary statistics
+        all_scores = [r['score'] for r in results]
+        print(f"\n📊 SCORING SUMMARY")
+        print("="*80)
+        print(f"Total texts scored: {len(all_scores)}")
+        print(f"Score range: {min(all_scores):.3f} - {max(all_scores):.3f}")
+        print(f"Average score: {np.mean(all_scores):.3f}")
+        print(f"Score std deviation: {np.std(all_scores):.3f}")
+        print(f"High relevance (≥0.6): {sum(1 for s in all_scores if s >= 0.6)}/{len(all_scores)}")
+        print(f"Low relevance (<0.4): {sum(1 for s in all_scores if s < 0.4)}/{len(all_scores)}")
+        
+        print(f"\n✅ Ensemble scoring test completed successfully!")
         print(f"📊 Model Configuration: {selected_config['model_type']} with {selected_config['loss_type']} loss")
         print(f"🎯 Ensemble Size: {predictor.num_folds} fold models")
         print(f"💻 Device: {predictor.device}")
+        
+        # Ranking validation
+        print(f"\n🎯 RANKING VALIDATION")
+        print("="*40)
+        biodiversity_papers = [r for r in results if 'biodiversity' in r['test_case']['category'].lower() 
+                              or 'conservation' in r['test_case']['category'].lower()
+                              or 'fragmentation' in r['test_case']['category'].lower()]
+        non_biodiversity_papers = [r for r in results if r not in biodiversity_papers]
+        
+        if biodiversity_papers and non_biodiversity_papers:
+            avg_bio_score = np.mean([r['score'] for r in biodiversity_papers])
+            avg_non_bio_score = np.mean([r['score'] for r in non_biodiversity_papers])
+            print(f"✅ Biodiversity papers average score: {avg_bio_score:.3f}")
+            print(f"✅ Non-biodiversity papers average score: {avg_non_bio_score:.3f}")
+            if avg_bio_score > avg_non_bio_score:
+                print("✅ Ranking validation PASSED: Biodiversity papers scored higher on average")
+            else:
+                print("⚠️ Ranking validation: Unexpected score distribution")
         
     except Exception as e:
         print(f"❌ Test failed: {e}")
@@ -326,7 +422,7 @@ def check_model_availability():
     print(f"📊 Summary: {available_count}/{len(model_types) * len(loss_types)} complete configurations available")
 
 if __name__ == "__main__":
-    print("🧬 BioMoQA Cross-Validation Ensemble Test Script")
+    print("🧬 BioMoQA Cross-Validation Ensemble Scoring Test Script")
     print("="*60)
     
     # Check model availability first
@@ -334,5 +430,5 @@ if __name__ == "__main__":
     
     print("\n" + "="*60)
     
-    # Run ensemble inference test
-    test_ensemble_inference() 
+    # Run ensemble scoring test
+    test_ensemble_scoring() 
