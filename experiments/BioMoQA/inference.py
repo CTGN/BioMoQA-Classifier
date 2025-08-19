@@ -12,8 +12,11 @@ import argparse
 import logging
 from typing import List, Dict, Any
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
+
+# Add it to sys.path
+if src_dir not in sys.path:
+    sys.path.append(src_dir)
 
 from src.models.biomoqa.instantiation import load_predictor, BioMoQAPredictor
 

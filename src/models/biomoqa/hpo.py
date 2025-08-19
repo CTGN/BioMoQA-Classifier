@@ -145,17 +145,11 @@ def parse_args():
 @staticmethod
 def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
     
-    # Clear CUDA cache at the start of each trial
     clear_cuda_cache()
     
     #ray.tune.utils.wait_for_gpu(target_util=0.15)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
-    # Use a consistent, conservative batch size on every GPU.
-    # Dynamically inflating the batch size on a specific GPU can
-    # silently push memory utilisation over the fragmentation
-    # threshold and provoke "unspecified launch failure" errors.
-    # We can use a larger batch size on the A100 GPU (device 2)
     gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
     if gpu_id == "2":
         batch_size = 25
@@ -163,8 +157,6 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
         batch_size = 25
     
     logger.info(f"Trial on GPU {gpu_id} using batch size {batch_size}")
-    
-    # Set up training arguments
     
     # Set up training arguments
     training_args = CustomTrainingArguments(
@@ -229,7 +221,7 @@ def train_hpo(cfg,fold_idx,run_idx):
     """
 
     #? When should we tokenize ? 
-    #TODO : See how tokenizing is done to check if it alrgiht like this -> ask julien if that's ok
+    #TODO : See how tokenizing is done to check if it is alrgiht like this -> ask julien if that's ok
     #It can be a problem since we are truncating
     tokenizer = AutoTokenizer.from_pretrained(cfg['model_name'])
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer,padding=True)
@@ -281,7 +273,7 @@ def train_hpo(cfg,fold_idx,run_idx):
     else:
         raise ValueError(f"Unsupported loss_type: {cfg['loss_type']}")
 
-    # Set up scheduler for early stopping
+    # Set up scheduler for early stopping during hyperparameter search
     scheduler = ASHAScheduler(
         metric=cfg['hpo_metric'], #When set to objective, it takes the sum of the compute-metric output. if compute-metric isnt defined, it takes the loss.
         mode=cfg['direction']

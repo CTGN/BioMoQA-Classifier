@@ -15,6 +15,13 @@ import pandas as pd
 from tqdm import tqdm
 from time import sleep
 
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+
 # ------------- CONFIGURATION -------------
 EMAIL = "leandre.catogni@hesge.ch"
 USER_AGENT = f"mailto:{EMAIL}"
@@ -28,7 +35,7 @@ RETRY_STRATEGY = Retry(
     total=5,
     backoff_factor=1,
     status_forcelist=[429, 500, 502, 503, 504],
-    allowed_methods=["GET"],       # <- updated parameter name
+    allowed_methods=["GET"],
     raise_on_status=False
 )
 # -----------------------------------------
@@ -40,7 +47,7 @@ session.mount("https://", adapter)
 session.headers.update({"User-Agent": USER_AGENT})
 
 datasets = loading_pipeline_from_raw(multi_label=True)
-neg_ds=datasets[1]
+neg_ds=datasets[1][:1000]
 
 # 2) Clean IDs
 ids = [i.replace("https://openalex.org/", "") for i in neg_ds['id'] if isinstance(i, str) and i]
@@ -71,13 +78,14 @@ with tqdm(total=total, desc="OpenAlex works fetched") as pbar:
             else:
                 # log partial failure and retry individually
                 failures += len(batch)
+                logger.warning(f"Batch failed: {resp.status_code} - {resp.text}")
                 pbar.update(len(batch))
                 for single in batch:
                     try:
                         single_resp = session.get(
                             f"https://api.openalex.org/works/{single}",
                             timeout=TIMEOUT,
-                            params={"select": "id,doi,title,publication_year"}
+                            params={"select": "id,doi,title,publication_year,language"}
                         )
                         single_data = single_resp.json()
                         if single_resp.status_code == 200:
@@ -99,5 +107,7 @@ with tqdm(total=total, desc="OpenAlex works fetched") as pbar:
 # 5) Summary & Export
 print(f"\n✅ Done! Fetched {len(results)} works; {failures} failures.")
 if EXPORT_CSV and results:
-    pd.DataFrame(results).to_csv(CSV_PATH, index=False)
+    res_df=pd.DataFrame(results)
+    res_df["old_title"]=neg_ds['display_name']
+    res_df.to_csv(CSV_PATH, index=False)
     print(f"📁 Saved results to {CSV_PATH}")

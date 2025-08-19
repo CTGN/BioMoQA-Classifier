@@ -304,10 +304,8 @@ def update_dataset_with_metadata(dataset: Dataset, metadata_results: Dict[str, D
             modified_instance = {
                 'index': idx,
                 'doi': doi,
-                'original_title': original_title,
-                'original_abstract': original_abstract,
-                'new_title': dataset_dict['title'][idx],
-                'new_abstract': dataset_dict['abstract'][idx],
+                'title': dataset_dict['title'][idx],
+                'abstract': dataset_dict['abstract'][idx],
                 'journal_title': journal_title,
                 'language': language,
                 'updated_fields': []

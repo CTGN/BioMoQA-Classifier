@@ -23,9 +23,9 @@ from transformers import (
 )
 from sklearn.metrics import make_scorer,f1_score,accuracy_score,recall_score,precision_score
 from torchvision.ops import sigmoid_focal_loss
-from utils import *
+from src.utils import *
 import logging
-from config import *
+from src.config import *
 
 logger = logging.getLogger(__name__)
 

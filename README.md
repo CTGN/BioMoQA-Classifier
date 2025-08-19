@@ -72,7 +72,7 @@ uv run src/models/biomoqa/train.py \
 Use the provided script to train multiple models automatically:
 ```bash
 # Runs full pipeline: preprocessing → HPO → training → ensemble
-./scripts/launch_final.sh
+./scripts/biomoqa/launch_final.sh
 ```
 
 This script will:

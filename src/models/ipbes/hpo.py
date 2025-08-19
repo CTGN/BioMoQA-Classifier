@@ -158,11 +158,8 @@ def trainable(config,cfg,tokenized_train,tokenized_dev,data_collator,tokenizer):
     
     logger.info(f"Trial on GPU {gpu_id} using batch size {batch_size}")
     
-    # Set up training arguments
-    
-    # Set up training arguments
     training_args = CustomTrainingArguments(
-        output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
+        output_dir="/home/leandre/Projects/BioMoQA_Playground/results/ipbes/models",
         seed=CONFIG["seed"],
         data_seed=CONFIG["seed"],
         **CONFIG["default_training_args"],
@@ -182,7 +179,6 @@ def trainable(config,cfg,tokenized_train,tokenized_dev,data_collator,tokenizer):
     training_args.learning_rate=config["learning_rate"]
     training_args.num_train_epochs=7
 
-    # Initialize trainer for hyperparameter search
     trainer = CustomTrainer(
         model=model,
         args=training_args,
@@ -234,29 +230,34 @@ def train_hpo(cfg,fold_idx,run_idx):
 
     clear_cuda_cache()
     logger.info(f"\nfold number {fold_idx+1} | run no. {run_idx+1}")
-    
-    train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
-    dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
-    test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+    clean_ds = load_dataset("csv", data_files="/home/leandre/Projects/BioMoQA_Playground/data/IPBES/cleaned_dataset.csv", split="train")
+    train_indices = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
+    dev_indices = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
+    test_indices = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/IPBES/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
 
+    train_split= clean_ds.select(train_indices['index'])
+    dev_split= clean_ds.select(dev_indices['index'])
+    test_split= clean_ds.select(test_indices['index'])
+    
     logger.info(f"train split size : {len(train_split)}")
     logger.info(f"dev split size : {len(dev_split)}")
     logger.info(f"test split size : {len(test_split)}")
+    
     def preprocess(batch):
         # join title & text, tokenize
         if cfg['with_title']:
-            enc = tokenizer(batch["title"], batch["text"], truncation=True, max_length=512)
+            enc = tokenizer(batch["title"],batch["abstract"], truncation=True, max_length=512)
         else:
-            enc = tokenizer(batch["text"], truncation=True, max_length=512)
+            enc = tokenizer(batch["abstract"], truncation=True, max_length=512)
         # stack the 3 label columns into a single multi-hot vector
         enc["labels"] = [
             [i, s, v] for i, s, v in zip(batch["IAS"], batch["SUA"], batch["VA"]) #TODO: use self.labels
         ]
         return enc
 
-    tokenized_train = train_split.map(preprocess, batched=True, remove_columns=train_split.column_names)
-    tokenized_dev = dev_split.map(preprocess, batched=True, remove_columns=dev_split.column_names)
-    tokenized_test = test_split.map(preprocess, batched=True, remove_columns=test_split.column_names)
+    tokenized_train = train_split.map(preprocess, batched=True, remove_columns=train_split.column_names,num_proc=30,batch_size=100)
+    tokenized_dev = dev_split.map(preprocess, batched=True, remove_columns=dev_split.column_names, num_proc=30, batch_size=100)
+    tokenized_test = test_split.map(preprocess, batched=True, remove_columns=test_split.column_names, num_proc=30, batch_size=100)
 
     max_len = max(len(batch) for batch in tokenized_train["input_ids"])
     logger.info(f"Fold {fold_idx+1} max seq len = {max_len}")
@@ -309,7 +310,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
         resources_per_trial={"cpu": 7, "gpu": 1},
-        storage_path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/",
+        storage_path="/home/leandre/Projects/BioMoQA_Playground/results/ipbes/ray_results/",
         callbacks=[CleanupCallback(cfg['hpo_metric'])]
     )
     logger.info(f"Analysis results: {analysis}")
@@ -334,7 +335,6 @@ def train_hpo(cfg,fold_idx,run_idx):
     best_config['run_idx'] = run_idx
     best_config['hpo_metric'] = cfg['hpo_metric']
     best_config['direction'] = cfg['direction']
-    best_config['nb_optional_negs'] = cfg['nb_optional_negs']
     best_config['num_trials'] = cfg['num_trials']
 
     plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=cfg['hpo_metric'],file_name=f"metrics_evol_{map_name(cfg['model_name'])}_fold-{fold_idx}_title-{cfg['with_title']}_run_{run_idx}.png")
@@ -361,8 +361,6 @@ def main():
         cfg["hpo_metric"] = args.hpo_metric
     if args.direction is not None:
         cfg["direction"] = args.direction
-    if args.nb_opt_negs is not None:
-        cfg["nb_optional_negs"] = args.nb_opt_negs
     if args.model_name is not None:
         cfg["model_name"] = args.model_name
     if args.with_title is not None:

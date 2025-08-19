@@ -6,13 +6,22 @@ from imblearn.over_sampling import SMOTE
 from sklearn.feature_extraction.text import TfidfVectorizer
 from datasets import Dataset,concatenate_datasets,ClassLabel, Features, Value, Sequence,IterableDataset
 import datasets
-from .create_ipbes_raw import loading_pipeline_from_raw
-from .fetch import fill_missing_metadata
 import os
+import sys
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground"))  # Adjust ".." based on your structure
+
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+from src.data_pipeline.ipbes.create_ipbes_raw import loading_pipeline_from_raw
+from src.data_pipeline.ipbes.fetch import fill_missing_metadata
+
 import gc
 from sklearn.model_selection import StratifiedKFold, train_test_split
 import numpy as np
-from ...config import *
+from src.config import *
+from src.utils import *
 from collections import defaultdict
 import random
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStratifiedShuffleSplit
@@ -268,13 +277,10 @@ def fill_missing_metadata_for_positives(pos_ds_list, output_dir="data/IPBES/modi
         data_type = data_type_names[i]
         logger.info(f"Processing {data_type} dataset with {len(pos_ds)} instances...")
         
-        # Create output file path for this dataset
-        output_file = os.path.join(output_dir, f"{data_type}_modified_instances.csv")
-        
         # Fill missing metadata
         updated_ds, modified_instances = fill_missing_metadata(
-            pos_ds, 
-            output_file=output_file, 
+            pos_ds,
+            output_file=output_dir+ f"/{data_type}_modified_instances.csv",
             max_workers=max_workers
         )
         
@@ -395,7 +401,7 @@ def main():
     parser.add_argument("-bc","--balance_coeff", type=int, default=None, help="Coefficient for balancing the dataset")
     parser.add_argument("-nf","--n_folds", type=int, default=5, help="Number of folds for cross-validation")
     parser.add_argument("-nr","--n_runs", type=int, default=2, help="Number of runs for cross-validation")
-    parser.add_argument("--fill_metadata", action="store_true", help="Fill missing metadata using CrossRef API")
+    parser.add_argument("-fm","--fill_metadata", action="store_true", help="Fill missing metadata using CrossRef API")
     parser.add_argument("--max_workers", type=int, default=5, help="Maximum concurrent workers for API requests")
 
 
@@ -412,6 +418,7 @@ def main():
         fill_metadata=args.fill_metadata,
         max_workers=args.max_workers
     )
+    clean_ds.to_pandas().to_csv("/home/leandre/Projects/BioMoQA_Playground/data/IPBES/cleaned_dataset.csv", index=False)
 
     for run_idx in range(len(folds_per_run)):
         folds=folds_per_run[run_idx]
