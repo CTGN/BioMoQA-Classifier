@@ -280,9 +280,9 @@ def main():
             logger.info(f"dev split size : {len(dev_split)}")
             logger.info(f"test split size : {len(test_split)}")
 
-            test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv")
-            train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv")
-            dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv")
+            test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/test{fold_idx}_run-{run_idx}.csv")
+            train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/train{fold_idx}_run-{run_idx}.csv")
+            dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/dev{fold_idx}_run-{run_idx}.csv")
 
 
 if __name__ == "__main__":

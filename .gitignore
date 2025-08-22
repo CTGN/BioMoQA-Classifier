@@ -16,15 +16,10 @@ src/models/biomoqa/__pycache__
 src/models/ipbes/__pycache__
 src/utils/__pycache__
 
-results/biomoqa/models
-results/biomoqa/ray_results
-results/biomoqa/final_model
-results/biomoqa/test preds
-
-results/ipbes/models
-results/ipbes/ray_results
-results/ipbes/final_model
-results/ipbes/test preds
+results/models
+results/ray_results
+results/final_model
+results/test preds
 
 plots/
 

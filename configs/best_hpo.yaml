@@ -1,13 +1,13 @@
 direction: max
 fold: 4
 hpo_metric: eval_roc_auc
-learning_rate: 8.325639381650426e-05
+learning_rate: 1.374366882919501e-06
 loss_type: BCE
-model_name: google-bert/bert-base-uncased
+model_name: FacebookAI/roberta-base
 nb_optional_negs: 500
 num_trials: 25
-pos_weight: 1.536290819443697
+pos_weight: 4.163160161574798
 run_idx: 0
-weight_decay: 0.02555006963805325
+weight_decay: 0.00018771771586358846
 with_keywords: false
 with_title: true

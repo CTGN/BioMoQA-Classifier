@@ -80,10 +80,9 @@ def test_inference():
         the Amazon rainforest using camera trap surveys."""
     ]
     
-    # Test with mock model (for demonstration - replace with actual model path)
+    
     try:
-        # Replace this with your actual model path
-        model_path = "path/to/your/biomoqa/model"
+        model_path = os.listdir("results/biomoqa/")[0]
         
         if not os.path.exists(model_path):
             print(f"Model path {model_path} does not exist.")

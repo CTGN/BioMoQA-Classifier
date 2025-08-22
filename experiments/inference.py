@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-Inference script for BioMoQA models using the instantiation module.
-
-This script demonstrates how to use trained BioMoQA models to make predictions
-on new texts using the instantiation.py module.
-"""
 
 import sys
 import os
@@ -12,12 +5,12 @@ import argparse
 import logging
 from typing import List, Dict, Any
 from transformers import AutoModel, AutoTokenizer
-# Add src to path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from src.models.biomoqa.instantiation import load_predictor, BioMoQAPredictor
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

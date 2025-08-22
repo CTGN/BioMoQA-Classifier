@@ -28,7 +28,7 @@ st.set_page_config(
 class CrossValidationPredictor:
     """Cross-validation predictor using ensemble of 5 fold models for scoring"""
     
-    def __init__(self, model_type: str, loss_type: str, base_path: str = "results/biomoqa/final_model", 
+    def __init__(self, model_type: str, loss_type: str, base_path: str = "results/final_model", 
                  threshold: float = 0.5, device: str = None):
         self.model_type = model_type
         self.loss_type = loss_type

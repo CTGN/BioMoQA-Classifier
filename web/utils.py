@@ -6,7 +6,7 @@ def validate_model_path(model_path):
     if not os.path.exists(model_path):
         return False
     
-    # Check if it's a valid Hugging Face model directory
+    
     required_files = ['config.json']
     has_model_file = any(
         os.path.exists(os.path.join(model_path, f))

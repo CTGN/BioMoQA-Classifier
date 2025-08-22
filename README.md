@@ -68,8 +68,21 @@ uv run src/models/biomoqa/train.py \
   -t
 ```
 
+### Model Evaluation
+Ensemble evaluation across all trained models:
+```bash
+# Generate ensemble predictions
+uv run src/models/biomoqa/ensemble.py \
+  --config configs/ensemble.yaml \
+  --fold 0 \
+  --run 0 \
+  --nb_opt_negs 500 \
+  --loss "BCE" \
+  -t
+```
+
 ### Automated Training Pipeline
-Use the provided script to train multiple models automatically:
+Use the provided script to train multiple models automatically (with ensemble learning):
 ```bash
 # Runs full pipeline: preprocessing → HPO → training → ensemble
 ./scripts/biomoqa/launch_final.sh
@@ -93,19 +106,6 @@ uv run src/models/biomoqa/baselines.py \
 
 # Or use the launch script
 ./scripts/launch_baselines.sh
-```
-
-### Model Evaluation
-Ensemble evaluation across all trained models:
-```bash
-# Generate ensemble predictions
-uv run src/models/biomoqa/ensemble.py \
-  --config configs/ensemble.yaml \
-  --fold 0 \
-  --run 0 \
-  --nb_opt_negs 500 \
-  --loss "BCE" \
-  -t
 ```
 
 ## Inference
@@ -141,7 +141,7 @@ uv run experiments/inference.py \
 Launch the interactive web application:
 ```bash
 cd web
-uv run streamlit run app.py
+uv run streamlit run web/app.py
 ```
 
 The web interface provides:
@@ -159,6 +159,7 @@ Supported model architectures:
 - `dmis-lab/biobert-v1.1`
 - `FacebookAI/roberta-base`
 - `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract`
+- `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract+full-text`
 
 ### Input Formats
 **JSON format** (`examples/sample_texts.json`):
@@ -205,8 +206,8 @@ abstract,title,keywords
 ## Results
 
 Trained models and evaluation metrics are saved in:
-- `results/biomoqa/final_model/` - Final trained models
-- `results/biomoqa/metrics/` - Performance metrics
+- `results/final_model/` - Final trained models
+- `results/metrics/` - Performance metrics
 - Model checkpoints follow the pattern: `best_model_cross_val_{loss}_{model}_{fold}/`
 
 ## Requirements

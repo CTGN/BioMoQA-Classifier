@@ -160,7 +160,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     
     # Set up training arguments
     training_args = CustomTrainingArguments(
-        output_dir="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/models",
+        output_dir="/home/leandre/Projects/BioMoQA_Playground/results/models",
         seed=CONFIG["seed"],
         data_seed=CONFIG["seed"],
         **CONFIG["default_training_args"],
@@ -233,9 +233,9 @@ def train_hpo(cfg,fold_idx,run_idx):
     clear_cuda_cache()
     logger.info(f"\nfold number {fold_idx+1} | run no. {run_idx+1}")
     
-    train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
-    dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
-    test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+    train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
+    dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
+    test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
 
     logger.info(f"train split size : {len(train_split)}")
     logger.info(f"dev split size : {len(dev_split)}")
@@ -295,7 +295,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
         resources_per_trial={"cpu": 7, "gpu": 1},
-        storage_path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/ray_results/",
+        storage_path="/home/leandre/Projects/BioMoQA_Playground/results/ray_results/",
         callbacks=[CleanupCallback(cfg['hpo_metric'])]
     )
     logger.info(f"Analysis results: {analysis}")
