@@ -16,35 +16,41 @@ logger = logging.getLogger(__name__)
 
 
 def run_single_prediction(
-    model_path: str,
+    model_name: str,
     abstract: str,
+    loss_type: str = "BCE",
     title: str = None,
     keywords: str = None,
     with_title: bool = False,
     with_keywords: bool = False,
-    threshold: float = 0.5
+    threshold: float = 0.5,
+    weights_parent_dir: str = "results/biomoqa/final_model"
 ) -> Dict[str, Any]:
     """
     Run prediction on a single text.
     
     Args:
-        model_path: Path to the trained model
+        model_name: Model name (e.g., BiomedBERT-abs)
+        loss_type: Loss type used during training
         abstract: Abstract text
         title: Title text (optional)
         keywords: Keywords (optional)
         with_title: Whether model was trained with titles
         with_keywords: Whether model was trained with keywords
         threshold: Classification threshold
+        weights_parent_dir: Directory containing model checkpoints
         
     Returns:
         Dictionary with prediction results
     """
     logger.info("Loading BioMoQA predictor...")
     predictor = load_predictor(
-        model_path=model_path,
+        model_name=model_name,
+        loss_type=loss_type,
         with_title=with_title,
         with_keywords=with_keywords,
-        threshold=threshold
+        threshold=threshold,
+        weights_parent_dir=weights_parent_dir
     )
     
     logger.info("Making prediction...")
@@ -59,31 +65,37 @@ def run_single_prediction(
 
 
 def run_batch_predictions(
-    model_path: str,
+    model_name: str,
     texts: List[Dict[str, str]],
+    loss_type: str = "BCE",
     with_title: bool = False,
     with_keywords: bool = False,
-    threshold: float = 0.5
+    threshold: float = 0.5,
+    weights_parent_dir: str = "results/biomoqa/final_model"
 ) -> List[Dict[str, Any]]:
     """
     Run predictions on a batch of texts.
     
     Args:
-        model_path: Path to the trained model
+        model_name: Model name (e.g., BiomedBERT-abs)
+        loss_type: Loss type used during training
         texts: List of dictionaries containing text data
         with_title: Whether model was trained with titles
         with_keywords: Whether model was trained with keywords
         threshold: Classification threshold
+        weights_parent_dir: Directory containing model checkpoints
         
     Returns:
         List of prediction results
     """
     logger.info("Loading BioMoQA predictor...")
     predictor = load_predictor(
-        model_path=model_path,
+        model_name=model_name,
+        loss_type=loss_type,
         with_title=with_title,
         with_keywords=with_keywords,
-        threshold=threshold
+        threshold=threshold,
+        weights_parent_dir=weights_parent_dir
     )
     
     results = []
@@ -104,10 +116,22 @@ def run_batch_predictions(
 def main():
     parser = argparse.ArgumentParser(description="Run inference with BioMoQA models")
     parser.add_argument(
-        "--model_path",
+        "--model_name",
         type=str,
         required=True,
-        help="Path to the trained model checkpoint"
+        help="Model name (e.g., BiomedBERT-abs)"
+    )
+    parser.add_argument(
+        "--loss_type",
+        type=str,
+        default="BCE",
+        help="Loss type used during training (default: BCE)"
+    )
+    parser.add_argument(
+        "--weights_parent_dir",
+        type=str,
+        default="results/biomoqa/final_model",
+        help="Directory containing model checkpoints"
     )
     parser.add_argument(
         "--abstract",
@@ -187,11 +211,13 @@ def main():
         ]
         
         results = run_batch_predictions(
-            model_path=args.model_path,
+            model_name=args.model_name,
             texts=example_texts,
+            loss_type=args.loss_type,
             with_title=args.with_title,
             with_keywords=args.with_keywords,
-            threshold=args.threshold
+            threshold=args.threshold,
+            weights_parent_dir=args.weights_parent_dir
         )
         
         logger.info("\n" + "="*50)
@@ -209,13 +235,15 @@ def main():
     elif args.abstract:
         # Single prediction
         result = run_single_prediction(
-            model_path=args.model_path,
+            model_name=args.model_name,
             abstract=args.abstract,
+            loss_type=args.loss_type,
             title=args.title,
             keywords=args.keywords,
             with_title=args.with_title,
             with_keywords=args.with_keywords,
-            threshold=args.threshold
+            threshold=args.threshold,
+            weights_parent_dir=args.weights_parent_dir
         )
         
         logger.info("\n" + "="*50)

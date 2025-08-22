@@ -28,7 +28,7 @@ class BioMoQAPredictor:
         with_title: bool = False,
         with_keywords: bool = False,
         device: Optional[str] = None,
-        weights_parent_dir:str="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/final_model",
+        weights_parent_dir: str = "results/biomoqa/final_model",
         threshold: float = 0.5
     ):
         self.model_name=model_name
@@ -36,7 +36,8 @@ class BioMoQAPredictor:
         self.loss_type=loss_type
         self.with_keywords = with_keywords
         self.threshold = threshold
-        self.weights_parent_dir=weights_parent_dir
+        self.weights_parent_dir = weights_parent_dir
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         
         if not os.path.exists(self.weights_parent_dir):
             raise FileNotFoundError(f"Checkpoints parent directory does not exist : {self.weights_parent_dir}")
@@ -44,7 +45,7 @@ class BioMoQAPredictor:
         self.model_paths  = [
             os.path.join(self.weights_parent_dir, dirname)
             for dirname in os.listdir(self.weights_parent_dir)
-            if dirname.startswith( "best_model_cross_val_"+str(self.loss_type)+"_" +str(map_name(self.model_name))) and os.path.isdir(os.path.join(weights_parent_dir, dirname))
+            if dirname.startswith( "best_model_cross_val_"+str(self.loss_type)+"_" +str(map_name(self.model_name))) and os.path.isdir(os.path.join(self.weights_parent_dir, dirname))
         ]
         
         self._load_model()
@@ -63,17 +64,19 @@ class BioMoQAPredictor:
             self.models_per_fold = [AutoModelForSequenceClassification.from_pretrained(
                 model_path,
                 num_labels=CONFIG["num_labels"]
-            )for model_path in self.model_paths]
+            ) for model_path in self.model_paths]
 
-            self.model.to(self.device)
-            self.model.eval()
+            # Move models to device and set to eval mode
+            for model in self.models_per_fold:
+                model.to(self.device)
+                model.eval()
             
             self.data_collators = [DataCollatorWithPadding(
                 tokenizer=tokenizer,
                 padding=True
             ) for tokenizer in self.tokenizer_per_fold]
             
-            logger.info(f"Successfully loaded model from: {self.model_path}")
+            logger.info(f"Successfully loaded {len(self.model_paths)} models from: {self.weights_parent_dir}")
             
         except Exception as e:
             logger.error(f"Error loading model: {e}")
@@ -89,10 +92,10 @@ class BioMoQAPredictor:
             if title is None or keywords is None:
                 raise ValueError("Model requires both title and keywords, but one or both are missing")
             
-            sep_tok = self.tokenizer.sep_token or "[SEP]"
+            sep_tok = self.tokenizer_per_fold[0].sep_token or "[SEP]"
             combined = title + sep_tok + keywords
             
-            tokens = self.tokenizer(
+            tokens = self.tokenizer_per_fold[0](
                 combined,
                 abstract,
                 truncation=True,
@@ -105,7 +108,7 @@ class BioMoQAPredictor:
             if title is None:
                 raise ValueError("Model requires title, but it's missing")
                 
-            tokens = self.tokenizer(
+            tokens = self.tokenizer_per_fold[0](
                 title,
                 abstract,
                 truncation=True,
@@ -118,7 +121,7 @@ class BioMoQAPredictor:
             if keywords is None:
                 raise ValueError("Model requires keywords, but they're missing")
                 
-            tokens = self.tokenizer(
+            tokens = self.tokenizer_per_fold[0](
                 abstract,
                 keywords,
                 truncation=True,
@@ -128,7 +131,7 @@ class BioMoQAPredictor:
             )
             
         else:
-            tokens = self.tokenizer(
+            tokens = self.tokenizer_per_fold[0](
                 abstract,
                 truncation=True,
                 max_length=512,
@@ -146,15 +149,87 @@ class BioMoQAPredictor:
         title: Optional[str] = None,
         keywords: Optional[str] = None
     ) -> float:
-        tokens = self._tokenize_text(abstract, title, keywords)
+        """Predict score using ensemble of all fold models"""
+        fold_scores = []
         
-        with torch.no_grad():
-            outputs = self.model(**tokens)
-            logits = outputs.logits.squeeze()
+        for i, (model, tokenizer) in enumerate(zip(self.models_per_fold, self.tokenizer_per_fold)):
+            # Tokenize with specific fold tokenizer
+            tokens = self._tokenize_text_with_tokenizer(abstract, title, keywords, tokenizer)
             
-            score = torch.sigmoid(logits).cpu().item()
+            with torch.no_grad():
+                outputs = model(**tokens)
+                logits = outputs.logits.squeeze()
+                score = torch.sigmoid(logits).cpu().item()
+                fold_scores.append(score)
+        
+        # Return ensemble average
+        return np.mean(fold_scores)
+    
+    def _tokenize_text_with_tokenizer(
+        self,
+        abstract: str,
+        title: Optional[str] = None,
+        keywords: Optional[str] = None,
+        tokenizer: AutoTokenizer = None
+    ) -> Dict[str, torch.Tensor]:
+        """Tokenize text with specific tokenizer"""
+        if tokenizer is None:
+            tokenizer = self.tokenizer_per_fold[0]
             
-        return score
+        if self.with_title and self.with_keywords:
+            if title is None or keywords is None:
+                raise ValueError("Model requires both title and keywords, but one or both are missing")
+            
+            sep_tok = tokenizer.sep_token or "[SEP]"
+            combined = title + sep_tok + keywords
+            
+            tokens = tokenizer(
+                combined,
+                abstract,
+                truncation=True,
+                max_length=512,
+                return_attention_mask=True,
+                return_tensors="pt"
+            )
+            
+        elif self.with_title:
+            if title is None:
+                raise ValueError("Model requires title, but it's missing")
+                
+            tokens = tokenizer(
+                title,
+                abstract,
+                truncation=True,
+                max_length=512,
+                return_attention_mask=True,
+                return_tensors="pt"
+            )
+            
+        elif self.with_keywords:
+            if keywords is None:
+                raise ValueError("Model requires keywords, but they're missing")
+                
+            tokens = tokenizer(
+                abstract,
+                keywords,
+                truncation=True,
+                max_length=512,
+                return_attention_mask=True,
+                return_tensors="pt"
+            )
+            
+        else:
+            tokens = tokenizer(
+                abstract,
+                truncation=True,
+                max_length=512,
+                return_attention_mask=True,
+                return_tensors="pt"
+            )
+        
+        tokens = {k: v.to(self.device) for k, v in tokens.items()}
+        
+        return tokens
     
     def predict_batch(
         self,
@@ -212,26 +287,29 @@ class BioMoQAPredictor:
 
 
 def load_predictor(
-    model_path: str,
+    model_name: str,
+    loss_type: str = "BCE",
     with_title: bool = False,
     with_keywords: bool = False,
     device: Optional[str] = None,
+    weights_parent_dir: str = "results/biomoqa/final_model",
     threshold: float = 0.5
 ) -> BioMoQAPredictor:
     return BioMoQAPredictor(
-        model_path=model_path,
+        model_name=model_name,
+        loss_type=loss_type,
         with_title=with_title,
         with_keywords=with_keywords,
         device=device,
+        weights_parent_dir=weights_parent_dir,
         threshold=threshold
     )
 
 
 def example_usage():
-    model_path = "/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/final_model/best_model_cross_val_BCE_BiomedBERT-abs_fold-1"
-    
     predictor = load_predictor(
-        model_path=model_path,
+        model_name="BiomedBERT-abs",
+        loss_type="BCE",
         with_title=False,
         with_keywords=False,
         threshold=0.5
@@ -261,26 +339,38 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run with default example
-  python instantiation.py --model_path /path/to/model --example
+    # Run with default example
+  python instantiation.py --model_name BiomedBERT-abs --example
   
   # Single prediction
-  python instantiation.py --model_path /path/to/model --abstract "Your abstract text"
+  python instantiation.py --model_name BiomedBERT-abs --abstract "Your abstract text"
   
   # With title and keywords
-  python instantiation.py --model_path /path/to/model --with_title --with_keywords \\
-    --abstract "Your abstract" --title "Your title" --keywords "keyword1, keyword2"
+  python instantiation.py --model_name BiomedBERT-abs --with_title --with_keywords \\
+  --abstract "Your abstract" --title "Your title" --keywords "keyword1, keyword2"
   
   # Batch prediction from file
-  python instantiation.py --model_path /path/to/model --input_file texts.txt
+  python instantiation.py --model_name BiomedBERT-abs --input_file texts.txt
         """
     )
     
     parser.add_argument(
-        "--model_path",
+        "--model_name",
         type=str,
         required=True,
-        help="Path to the trained model checkpoint"
+        help="Model name (e.g., BiomedBERT-abs)"
+    )
+    parser.add_argument(
+        "--loss_type",
+        type=str,
+        default="BCE",
+        help="Loss type used during training (default: BCE)"
+    )
+    parser.add_argument(
+        "--weights_parent_dir",
+        type=str,
+        default="results/biomoqa/final_model",
+        help="Directory containing model checkpoints"
     )
     
     parser.add_argument(
@@ -359,12 +449,14 @@ Examples:
             example_usage()
             return
             
-        logger.info(f"Loading model from: {args.model_path}")
+        logger.info(f"Loading model: {args.model_name} with {args.loss_type} loss")
         predictor = load_predictor(
-            model_path=args.model_path,
+            model_name=args.model_name,
+            loss_type=args.loss_type,
             with_title=args.with_title,
             with_keywords=args.with_keywords,
             device=device,
+            weights_parent_dir=args.weights_parent_dir,
             threshold=args.threshold
         )
         logger.info("Model loaded successfully!")

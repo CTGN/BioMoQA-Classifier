@@ -1,22 +1,7 @@
 import os
 from pathlib import Path
 
-def validate_model_path(model_path):
-    """Validate that the model path exists and contains model files"""
-    if not os.path.exists(model_path):
-        return False
-    
-    
-    required_files = ['config.json']
-    has_model_file = any(
-        os.path.exists(os.path.join(model_path, f))
-        for f in ['pytorch_model.bin', 'model.safetensors']
-    )
-    
-    return (
-        all(os.path.exists(os.path.join(model_path, f)) for f in required_files) and
-        has_model_file
-    )
+
 
 def get_example_texts():
     """Get example texts for demonstration - focused on biodiversity research with varying relevance scores"""
