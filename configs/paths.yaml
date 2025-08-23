@@ -10,8 +10,8 @@ configs_dir: "configs"
 
 # Data subdirectories
 data:
-  biomoqa_dir: "${data_dir}/biomoqa"
-  folds_dir: "${data_dir}/biomoqa/folds"
+  biomoqa_dir: "${data_dir}"
+  folds_dir: "${data_dir}/folds"
   raw_data:
     positives: "${data_dir}/positives.csv"
     negatives: "${data_dir}/negatives.csv"
