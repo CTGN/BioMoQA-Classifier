@@ -8,7 +8,7 @@ A machine learning pipeline for biodiversity research classification using trans
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/CTGN/BioMoQA-Classifier.git
 cd BioMoQA-Classifier
 ```
 
@@ -102,32 +102,6 @@ This script will:
 - Train final models with best parameters
 - Generate ensemble predictions
 
-## Testing
-
-### Baseline Models
-Run traditional ML baselines (Random, SVM, Random Forest):
-```bash
-# Run all baseline models
-uv run src/models/biomoqa/baselines.py \
-  -on 500 -nf 5 -nr 1 -t
-
-# Or use the launch script
-./scripts/launch_baselines.sh
-```
-
-### Ensemble Testing
-Test the ensemble inference pipeline:
-```bash
-# Test ensemble scoring with sample texts
-uv run web/test_ensemble.py
-
-# This will test:
-# - Single text ensemble scoring
-# - Batch processing with GPU acceleration  
-# - Model validation
-# - Score interpretation
-```
-
 ## Inference
 
 The inference system provides multiple interfaces for classifying research abstracts:
@@ -138,6 +112,7 @@ The inference system provides multiple interfaces for classifying research abstr
 uv run experiments/inference.py \
   --model_name "BiomedBERT-abs" \
   --abstract "Your research abstract text here..." \
+  --title "Your title here..." \
   --loss_type "BCE" \
   --with_title \
   --threshold 0.5
@@ -218,7 +193,7 @@ Supported model architectures:
 - `dmis-lab/biobert-v1.1`
 - `FacebookAI/roberta-base`
 - `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract`
-- `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract+full-text`
+- `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext`
 
 ### Input Formats
 **JSON format** (`examples/sample_texts.json`):
@@ -282,47 +257,9 @@ abstract,title,keywords
     └── final_model/  # Cross-validation model checkpoints
 ```
 
-**Key Changes in v2.0:**
-- ✅ Unified inference pipeline with shared ensemble logic
-- ✅ Eliminated code duplication (~400 lines removed)
-- ✅ Consistent API across CLI, web, and programmatic interfaces
-- ✅ Enhanced error handling and parameter validation
-- ✅ GPU-accelerated batch processing
-
 ## Results
 
 Trained models and evaluation metrics are saved in:
 - `results/final_model/` - Final trained models
 - `results/metrics/` - Performance metrics
 - Model checkpoints follow the pattern: `best_model_cross_val_{loss}_{model}_{fold}/`
-
-## Requirements
-
-- Python ≥3.11
-- CUDA-compatible GPU
-
-## Troubleshooting
-
-**Common Issues:**
-
-1. **Out of memory errors**: 
-   - Reduce batch size in configs or web interface
-   - Use smaller batch sizes in `score_batch_optimized()`
-
-2. **Missing models**: 
-   - Check model paths: `results/final_model/best_model_cross_val_{loss}_{model}_fold-{N}/`
-   - Ensure models are trained before inference
-   - Verify `--model_name` matches trained model directory names
-
-3. **Import errors**:
-   - Run from project root directory
-   - Ensure dependencies installed with `uv sync`
-
-4. **CLI parameter errors**:
-   - Use `--model_name` instead of `--model_path` (old interface)
-   - Required parameters: `--model_name` and either `--abstract` or `--demo`
-
-5. **Web interface issues**:
-   - Launch with `uv run streamlit run web/app.py` from project root
-   - Check model paths in sidebar configuration
-

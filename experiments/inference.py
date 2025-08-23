@@ -5,8 +5,11 @@ import argparse
 import logging
 from typing import List, Dict, Any
 from transformers import AutoModel, AutoTokenizer
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
 from src.models.biomoqa.instantiation import load_predictor, BioMoQAPredictor
 
@@ -24,7 +27,7 @@ def run_single_prediction(
     with_title: bool = False,
     with_keywords: bool = False,
     threshold: float = 0.5,
-    weights_parent_dir: str = "results/biomoqa/final_model"
+    weights_parent_dir: str = "results/final_model"
 ) -> Dict[str, Any]:
     """
     Run prediction on a single text.
@@ -71,7 +74,7 @@ def run_batch_predictions(
     with_title: bool = False,
     with_keywords: bool = False,
     threshold: float = 0.5,
-    weights_parent_dir: str = "results/biomoqa/final_model"
+    weights_parent_dir: str = "results/final_model"
 ) -> List[Dict[str, Any]]:
     """
     Run predictions on a batch of texts.
@@ -130,7 +133,7 @@ def main():
     parser.add_argument(
         "--weights_parent_dir",
         type=str,
-        default="results/biomoqa/final_model",
+        default="results/final_model",
         help="Directory containing model checkpoints"
     )
     parser.add_argument(

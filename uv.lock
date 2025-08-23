@@ -410,6 +410,7 @@ dependencies = [
     { name = "openai" },
     { name = "orange3" },
     { name = "pandas" },
+    { name = "plotly" },
     { name = "protobuf" },
     { name = "pyalex" },
     { name = "pyyaml" },
@@ -469,6 +470,7 @@ requires-dist = [
     { name = "openai", specifier = ">=1.68.2" },
     { name = "orange3", specifier = ">=3.38.1" },
     { name = "pandas", specifier = ">=2.2.3" },
+    { name = "plotly", specifier = ">=6.3.0" },
     { name = "protobuf", specifier = ">=6.30.2" },
     { name = "pyalex", specifier = ">=0.18" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -4134,6 +4136,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/fe/8b/3c73abc9c759ecd3f1f7ceff6685840859e8070c4d947c93fae71f6a0bf2/platformdirs-4.3.8.tar.gz", hash = "sha256:3d512d96e16bcb959a814c9f348431070822a6496326a4be0911c40b5a74c2bc", size = 21362 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/39/979e8e21520d4e47a0bbe349e2713c0aac6f3d853d0e5b34d76206c439aa/platformdirs-4.3.8-py3-none-any.whl", hash = "sha256:ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4", size = 18567 },
+]
+
+[[package]]
+name = "plotly"
+version = "6.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "narwhals" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a0/64/850de5076f4436410e1ce4f6a69f4313ef6215dfea155f3f6559335cad29/plotly-6.3.0.tar.gz", hash = "sha256:8840a184d18ccae0f9189c2b9a2943923fd5cae7717b723f36eef78f444e5a73", size = 6923926 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/a9/12e2dc726ba1ba775a2c6922d5d5b4488ad60bdab0888c337c194c8e6de8/plotly-6.3.0-py3-none-any.whl", hash = "sha256:7ad806edce9d3cdd882eaebaf97c0c9e252043ed1ed3d382c3e3520ec07806d4", size = 9791257 },
 ]
 
 [[package]]

@@ -3,12 +3,12 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Models to iterate over
-#"microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
-#"microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
 MODELS=(
   "FacebookAI/roberta-base"
   "dmis-lab/biobert-v1.1"
   "google-bert/bert-base-uncased"
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
 )
 
 # Optional negatives to try

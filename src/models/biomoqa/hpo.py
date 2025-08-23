@@ -218,6 +218,10 @@ def train_hpo(cfg,fold_idx,run_idx):
     Returns:
         Dictionary with evaluation results of the best model.
     """
+    
+    ray.init(runtime_env={
+        'excludes': os.listdir('/home/leandre/Projects/BioMoQA_Playground/.git/objects')
+    })
 
     #? When should we tokenize ? 
     #TODO : See how tokenizing is done to check if it is alrgiht like this -> ask julien if that's ok

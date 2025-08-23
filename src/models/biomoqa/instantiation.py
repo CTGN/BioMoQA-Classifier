@@ -28,7 +28,7 @@ class BioMoQAPredictor:
         with_title: bool = False,
         with_keywords: bool = False,
         device: Optional[str] = None,
-        weights_parent_dir: str = "results/biomoqa/final_model",
+        weights_parent_dir: str = "results/final_model",
         threshold: float = 0.5
     ):
         self.model_name=model_name
@@ -292,7 +292,7 @@ def load_predictor(
     with_title: bool = False,
     with_keywords: bool = False,
     device: Optional[str] = None,
-    weights_parent_dir: str = "results/biomoqa/final_model",
+    weights_parent_dir: str = "results/final_model",
     threshold: float = 0.5
 ) -> BioMoQAPredictor:
     return BioMoQAPredictor(
@@ -369,7 +369,7 @@ Examples:
     parser.add_argument(
         "--weights_parent_dir",
         type=str,
-        default="results/biomoqa/final_model",
+        default="results/final_model",
         help="Directory containing model checkpoints"
     )
     
