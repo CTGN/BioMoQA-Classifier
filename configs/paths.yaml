@@ -1,0 +1,46 @@
+# Path Configuration for BioMoQA-Classifier
+# All paths are relative to project root unless otherwise specified
+
+# Project structure
+project_root: "."
+data_dir: "data"
+results_dir: "results"
+plots_dir: "plots"
+configs_dir: "configs"
+
+# Data subdirectories
+data:
+  biomoqa_dir: "${data_dir}/biomoqa"
+  folds_dir: "${data_dir}/biomoqa/folds"
+  raw_data:
+    positives: "${data_dir}/positives.csv"
+    negatives: "${data_dir}/negatives.csv"
+    optional_negatives: "${data_dir}/optional_negatives.csv"
+
+# Results subdirectories
+results:
+  models_dir: "${results_dir}/models"
+  final_model_dir: "${results_dir}/final_model"
+  metrics_dir: "${results_dir}/metrics"
+  test_preds_dir: "${results_dir}/test preds"
+  ray_results_dir: "${results_dir}/ray_results"
+
+# Plot directories
+plots:
+  data_plots: "${plots_dir}/data"
+  hyperparams_plots: "${plots_dir}/hyperparams"
+
+# Model configuration
+models:
+  checkpoint_pattern: "best_model_cross_val_{loss}_{model}_fold-{fold}"
+  
+# Environment settings
+environment:
+  seed: 42
+  cuda_available: true
+  
+# Default training parameters
+training:
+  num_folds: 5
+  num_runs: 1
+  default_optional_negatives: 500

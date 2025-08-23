@@ -29,14 +29,14 @@ import smtplib
 from email.mime.text import MIMEText
 from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score,cohen_kappa_score,roc_auc_score, f1_score, recall_score, precision_score, accuracy_score
 import sys
+from pathlib import Path
 
-src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
+# Add project root to sys.path for imports
+project_root = Path(__file__).resolve().parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
-# Add it to sys.path
-if src_dir not in sys.path:
-    sys.path.append(src_dir)
-
-from src.config import CONFIG
+from src.config import CONFIG, get_config
 
 
 logger = logging.getLogger(__name__)
@@ -55,12 +55,22 @@ def map_name(model_name):
     else:
         return model_name
 
-def save_dataframe(metric_df,path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics",file_name="binary_metrics.csv"):
-        if metric_df is not None:
-            metric_df.to_csv(os.path.join(path, file_name),index=False)
-            logger.info(f"Metrics stored successfully at {os.path.join(path, file_name)}")
-        else:
-            raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
+def save_dataframe(metric_df, path=None, file_name="binary_metrics.csv"):
+    """Save dataframe to CSV with proper path resolution"""
+    if metric_df is not None:
+        if path is None:
+            config = get_config()
+            path = config.get_path("results", "metrics_dir")
+        
+        # Ensure path is a Path object
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+        
+        full_path = path / file_name
+        metric_df.to_csv(full_path, index=False)
+        logger.info(f"Metrics stored successfully at {full_path}")
+    else:
+        raise ValueError("result_metrics is None. Consider running the model before storing metrics.")
 
 def detailed_metrics(predictions: np.ndarray, labels: np.ndarray,scores =None) -> Dict[str, float]:
     """Compute and display detailed metrics including confusion matrix."""
@@ -70,7 +80,11 @@ def detailed_metrics(predictions: np.ndarray, labels: np.ndarray,scores =None) -
 
     disp = ConfusionMatrixDisplay(cm, display_labels=[0, 1])
     disp.plot()
-    plt.savefig(os.path.join(CONFIG["plot_dir"], "confusion_matrix.png"))
+    
+    config = get_config()
+    plot_dir = config.get("plots_dir")
+    Path(plot_dir).mkdir(parents=True, exist_ok=True)
+    plt.savefig(Path(plot_dir) / "confusion_matrix.png")
     plt.close()
 
     metrics = {
@@ -217,15 +231,24 @@ def plot_precision_recall_curve(y_true, y_scores,logger,plot_dir,data_type=None)
         logger.info(f"Precision-Recall curve saved to {plot_dir}/precision_recall_curve.png")
     return avg_precision
 
-def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/BioMoQA_Playground/plots', metric="eval_recall", mode="max"):
+def visualize_ray_tune_results(analysis, logger, plot_dir=None, metric="eval_recall", mode="max"):
     """
     Create visualizations of Ray Tune hyperparameter search results.
     
     Args:
-        experiment_path: Path to the Ray Tune experiment directory
-        metric: Metric to optimize (default: "eval_f1")
+        analysis: Ray Tune analysis object
+        logger: Logger instance
+        plot_dir: Directory for plots (if None, uses config)
+        metric: Metric to optimize (default: "eval_recall")
         mode: Optimization mode ("max" or "min")
     """
+    
+    if plot_dir is None:
+        config = get_config()
+        plot_dir = config.get("plots_dir")
+    
+    # Ensure plot_dir is a Path object
+    plot_dir = Path(plot_dir)
     
     # Load experiment data
     df = analysis.dataframe()
@@ -235,7 +258,8 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
     best_config = best_trial.config
     
     # Create plots directory
-    os.makedirs(os.path.join(plot_dir, "hyperparams"), exist_ok=True)
+    hyperparams_dir = plot_dir / "hyperparams"
+    hyperparams_dir.mkdir(parents=True, exist_ok=True)
     
     # For BCE loss (pos_weight parameter)
     if "pos_weight" in df.columns:
@@ -249,7 +273,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
         plt.title(f"Effect of pos_weight on {metric}")
         plt.grid(True)
         plt.legend()
-        plt.savefig(os.path.join(plot_dir, "hyperparams", "pos_weight_effect.png"))
+        plt.savefig(hyperparams_dir / "pos_weight_effect.png")
         plt.close()
         logger.info(f"Pos weight effect plot saved")
     
@@ -271,7 +295,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
         plt.title(f"Effect of Focal Loss Parameters on {metric}")
         plt.grid(True)
         plt.legend()
-        plt.savefig(os.path.join(plot_dir, "hyperparams", "focal_params_effect.png"))
+        plt.savefig(hyperparams_dir / "focal_params_effect.png")
         plt.close()
         logger.info(f"Focal loss parameters effect plot saved")
         
@@ -312,7 +336,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
             ax.set_zlabel(metric)
             ax.set_title(f"3D Surface of Focal Loss Parameters vs {metric}")
             fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5, label=metric)
-            plt.savefig(os.path.join(plot_dir, "hyperparams", "focal_params_surface.png"))
+            plt.savefig(hyperparams_dir / "focal_params_surface.png")
             plt.close()
             logger.info(f"3D surface plot for focal loss parameters saved")
     
@@ -327,7 +351,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
             plt.ylabel(metric)
             plt.title(f"{metric} Progress for Best Trial")
             plt.grid(True)
-            plt.savefig(os.path.join(plot_dir, "hyperparams", "best_trial_progress.png"))
+            plt.savefig(hyperparams_dir / "best_trial_progress.png")
             plt.close()
             logger.info(f"Best trial progress plot saved")
     
@@ -359,7 +383,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
                         plt.xlabel("Parameters")
                         plt.ylabel("Normalized Metric")
                         plt.grid(True)
-                        plt.savefig(os.path.join(plot_dir, "hyperparams", "parallel_coordinates.png"))
+                        plt.savefig(hyperparams_dir / "parallel_coordinates.png")
                         plt.close()
                         logger.info(f"Parallel coordinates plot saved")
                     else:
@@ -368,7 +392,7 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
                     logger.warning("Analysis dataframe is empty, cannot create parallel coordinates plot")
                 if ax:
                     plt.title(f"Parallel Coordinates Plot for {metric}")
-                    plt.savefig(os.path.join(plot_dir, "hyperparams", "parallel_coordinates.png"))
+                    plt.savefig(hyperparams_dir / "parallel_coordinates.png")
                     plt.close()
                     logger.info(f"Parallel coordinates plot saved")
             except Exception as e:
@@ -376,14 +400,26 @@ def visualize_ray_tune_results(analysis,logger,plot_dir='/home/leandre/Projects/
     except ImportError:
         logger.warning("Could not import ExperimentAnalysis for parallel coordinates plot")
 
-def plot_trial_performance(analysis,logger,plot_dir, metric="eval_recall",file_name="trials_comparison.png"):
+def plot_trial_performance(analysis, logger, plot_dir=None, metric="eval_recall", file_name="trials_comparison.png"):
     """
     Plot performance across different trials.
     
     Args:
-        experiment_path: Path to the Ray Tune experiment directory
+        analysis: Ray Tune analysis object
+        logger: Logger instance
+        plot_dir: Directory for plots (if None, uses config)
         metric: Metric to visualize
+        file_name: Output filename
     """
+    
+    if plot_dir is None:
+        config = get_config()
+        plot_dir = config.get("plots_dir")
+    
+    # Ensure plot_dir is a Path object
+    plot_dir = Path(plot_dir)
+    hyperparams_dir = plot_dir / "hyperparams"
+    hyperparams_dir.mkdir(parents=True, exist_ok=True)
     
     # Load experiment data
     df = analysis.dataframe()
@@ -400,7 +436,7 @@ def plot_trial_performance(analysis,logger,plot_dir, metric="eval_recall",file_n
         plt.ylabel(metric)
         plt.title(f"Final {metric} Score by Trial")
         plt.grid(True, axis='y')
-        plt.savefig(os.path.join(plot_dir, "hyperparams", file_name))
+        plt.savefig(hyperparams_dir / file_name)
         plt.close()
         logger.info(f"Trial comparison plot saved")
 

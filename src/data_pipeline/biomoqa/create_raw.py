@@ -134,7 +134,12 @@ def fetch_negatives(include_arxiv=False):
     else:
         optional_negatives = pubmed_neg_df
 
-    optional_negatives.to_csv("/home/leandre/Projects/BioMoQA_Playground/data/optional_negatives.csv", index=False)
+    # Save to project data directory
+    from pathlib import Path
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+    data_dir = project_root / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    optional_negatives.to_csv(data_dir / "optional_negatives.csv", index=False)
     logger.info(f"Optional negatives saved to CSV with {len(optional_negatives)} entries.")
 
     return optional_negatives
@@ -143,17 +148,20 @@ def loading_pipeline(fetch=False):
     if fetch:
         optional_negatives=fetch_negatives()
     else:
-        optional_negatives = pd.read_csv("/home/leandre/Projects/BioMoQA_Playground/data/optional_negatives.csv")
+        from pathlib import Path
+        project_root = Path(__file__).resolve().parent.parent.parent.parent
+        data_dir = project_root / "data"
+        optional_negatives = pd.read_csv(data_dir / "optional_negatives.csv")
         logger.info(f"Optional negatives loaded from CSV with {len(optional_negatives)} entries.")
 
     logger.info(f"Loading original negatives...")
-    negatives_df = pd.read_csv("/home/leandre/Projects/BioMoQA_Playground/data/negatives.csv")
+    negatives_df = pd.read_csv(data_dir / "negatives.csv")
     negatives_df["labels"] = 0
     negatives_df["Keywords"]=""
     logger.info(f"Negatives column names: {negatives_df.columns.tolist()}")
 
     logger.info(f"Loading original positives...")
-    positive_df = pd.read_csv("/home/leandre/Projects/BioMoQA_Playground/data/positives.csv")
+    positive_df = pd.read_csv(data_dir / "positives.csv")
     positive_df["labels"] = 1
     logger.info(f"Positives column names: {positive_df.columns.tolist()}")
 

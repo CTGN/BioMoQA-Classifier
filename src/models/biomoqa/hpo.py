@@ -39,17 +39,16 @@ from iterstrat.ml_stratifiers import MultilabelStratifiedKFold, MultilabelStrati
 import yaml
 import pandas as pd
 
-src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
-
-# Add it to sys.path
-if src_dir not in sys.path:
-    sys.path.append(src_dir)
+# Add project root to sys.path for imports
+from pathlib import Path
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
 from src.models.biomoqa.model_init import *
-
-from src.config import *
+from src.config import CONFIG, get_config
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +159,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     
     # Set up training arguments
     training_args = CustomTrainingArguments(
-        output_dir="/home/leandre/Projects/BioMoQA_Playground/results/models",
+        output_dir=str(get_config().get_path("results", "models_dir")),
         seed=CONFIG["seed"],
         data_seed=CONFIG["seed"],
         **CONFIG["default_training_args"],
@@ -233,9 +232,10 @@ def train_hpo(cfg,fold_idx,run_idx):
     clear_cuda_cache()
     logger.info(f"\nfold number {fold_idx+1} | run no. {run_idx+1}")
     
-    train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
-    dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
-    test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+    config_mgr = get_config()
+    train_split = load_dataset("csv", data_files=str(config_mgr.get_fold_path("train", fold_idx, run_idx)), split="train")
+    dev_split = load_dataset("csv", data_files=str(config_mgr.get_fold_path("dev", fold_idx, run_idx)), split="train")
+    test_split = load_dataset("csv", data_files=str(config_mgr.get_fold_path("test", fold_idx, run_idx)), split="train")
 
     logger.info(f"train split size : {len(train_split)}")
     logger.info(f"dev split size : {len(dev_split)}")
@@ -295,7 +295,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
         resources_per_trial={"cpu": 7, "gpu": 1},
-        storage_path="/home/leandre/Projects/BioMoQA_Playground/results/ray_results/",
+        storage_path=str(get_config().get_path("results", "ray_results_dir")),
         callbacks=[CleanupCallback(cfg['hpo_metric'])]
     )
     logger.info(f"Analysis results: {analysis}")

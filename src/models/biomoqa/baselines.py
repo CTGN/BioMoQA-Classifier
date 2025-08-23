@@ -28,16 +28,15 @@ from transformers import (
 import transformers
 import sys
 
-src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground/src/.."))
-
-# Add it to sys.path
-if src_dir not in sys.path:
-    sys.path.append(src_dir)
+# Add project root to sys.path for imports
+from pathlib import Path
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
 from src.utils import *
 from src.models.biomoqa.model_init import *
-
-from src.config import *
+from src.config import CONFIG, get_config
 import pandas as pd
 
 logger = logging.getLogger(__name__)

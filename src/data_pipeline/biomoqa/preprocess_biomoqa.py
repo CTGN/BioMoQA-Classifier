@@ -10,13 +10,14 @@ import torch
 from transformers import set_seed
 import matplotlib.pyplot as plt
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "/home/leandre/Projects/BioMoQA_Playground"))  # Adjust ".." based on your structure
-
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+# Add project root to sys.path for imports
+from pathlib import Path
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
 from src.data_pipeline.biomoqa.create_raw import *
-from src.config import CONFIG
+from src.config import CONFIG, get_config
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +161,11 @@ def biomoqa_data_pipeline(
     plt.tight_layout()
     # Add the title lower, below the pie chart
     plt.gcf().text(0.5, 0.8, 'Dataset Distribution', ha='center', fontsize=14)
-    plt.savefig('/home/leandre/Projects/BioMoQA_Playground/plots/data/dataset_distribution.png')
+    config = get_config()
+    plots_dir = Path(config.get("plots_dir"))
+    data_plots_dir = plots_dir / "data"
+    data_plots_dir.mkdir(parents=True, exist_ok=True)
+    plt.savefig(data_plots_dir / "dataset_distribution.png")
     plt.show()
 
     rng = np.random.RandomState(CONFIG["seed"])
@@ -280,9 +285,10 @@ def main():
             logger.info(f"dev split size : {len(dev_split)}")
             logger.info(f"test split size : {len(test_split)}")
 
-            test_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/test{fold_idx}_run-{run_idx}.csv")
-            train_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/train{fold_idx}_run-{run_idx}.csv")
-            dev_split.to_pandas().to_csv(f"/home/leandre/Projects/BioMoQA_Playground/data/folds/dev{fold_idx}_run-{run_idx}.csv")
+            config = get_config()
+            test_split.to_pandas().to_csv(config.get_fold_path("test", fold_idx, run_idx))
+            train_split.to_pandas().to_csv(config.get_fold_path("train", fold_idx, run_idx))
+            dev_split.to_pandas().to_csv(config.get_fold_path("dev", fold_idx, run_idx))
 
 
 if __name__ == "__main__":

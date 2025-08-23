@@ -78,5 +78,5 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
 
   # clean up folds
   echo "==> Cleaning up folds directory"
-  rm -r "/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/"*
+  rm -r "data/biomoqa/folds/"*
 done
