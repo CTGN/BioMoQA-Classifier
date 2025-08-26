@@ -161,7 +161,7 @@ def train(cfg,hp_cfg):
     model=AutoModelForSequenceClassification.from_pretrained(cfg['model_name'], num_labels=CONFIG["num_labels"])
     #model.gradient_checkpointing_enable()
 
-    batch_size=25
+    batch_size=100
 
     # Set up training arguments
     training_args = CustomTrainingArguments(
@@ -284,8 +284,6 @@ def train(cfg,hp_cfg):
     logger.info(f"Unique values in predictions: {np.unique(preds)}")
     logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
     logger.info(f"Confusion matrix:\n{confusion_matrix(test_split['labels'], preds)}")
-    res1=detailed_metrics(preds, test_split["labels"],scores=scores)
-
 
     plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
     plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
@@ -328,9 +326,8 @@ def train(cfg,hp_cfg):
     save_dataframe(result_metrics)
 
     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':scores,"fold":[cfg['fold'] for _ in range(len(preds))],"title":test_split['title'] })
-    test_preds_dir = config.get_path("results", "test_preds_dir") / "bert"
-    test_preds_dir.mkdir(parents=True, exist_ok=True)
-    test_preds_path = test_preds_dir / f"fold_{cfg['fold']}_{map_name(os.path.basename(cfg['model_name']))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv"
+    test_preds_dir = os.path.join(project_root, "results", "test preds", "bert")
+    test_preds_path = os.path.join(test_preds_dir,f"fold_{cfg['fold']}_{map_name(os.path.basename(cfg['model_name']))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
     
     fold_preds_df.to_csv(test_preds_path)
 

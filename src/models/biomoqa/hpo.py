@@ -150,10 +150,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
 
     gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
-    if gpu_id == "2":
-        batch_size = 25
-    else:
-        batch_size = 25
+    batch_size = 100
     
     logger.info(f"Trial on GPU {gpu_id} using batch size {batch_size}")
     
@@ -220,7 +217,8 @@ def train_hpo(cfg,fold_idx,run_idx):
     """
     
     ray.init(runtime_env={
-        'excludes': os.listdir('/home/leandre/Projects/BioMoQA_Playground/.git/objects')
+        'excludes': os.listdir(os.path.join(project_root,'.git/objects'))
+        ,"env_vars": {"VIRTUAL_ENV": os.path.join(project_root,".venv")}
     })
 
     #? When should we tokenize ? 
@@ -299,7 +297,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
         resources_per_trial={"cpu": 7, "gpu": 1},
-        storage_path=str(get_config().get_path("results", "ray_results_dir")),
+        storage_path=str(os.path.join(project_root, "results/ray_results")),
         callbacks=[CleanupCallback(cfg['hpo_metric'])]
     )
     logger.info(f"Analysis results: {analysis}")

@@ -19,7 +19,7 @@ Use curl to download the script and execute it with sh:
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-If your system doesn't have curl, you can use wget:
+If your system does not have curl, you can use wget:
 
 wget -qO- https://astral.sh/uv/install.sh | sh
 
@@ -75,7 +75,7 @@ uv run src/models/biomoqa/train.py \
   -t
 ```
 
-### Model Evaluation
+### Ensemble Learning
 Ensemble evaluation across all trained models:
 ```bash
 # Generate ensemble predictions
@@ -240,15 +240,15 @@ abstract,title,keywords
 │   ├── data_pipeline/ # Data preprocessing
 │   ├── models/
 │   │   └── biomoqa/
-│   │       ├── ensemble.py      # 🆕 Shared ensemble predictor
+│   │       ├── ensemble.py      # Shared ensemble predictor
 │   │       ├── instantiation.py # Individual model predictor  
 │   │       ├── train.py         # Model training
 │   │       ├── hpo.py          # Hyperparameter optimization
 │   │       └── baselines.py    # Traditional ML baselines
 │   └── utils/         # Utility functions
 ├── experiments/
-│   └── inference.py   # 🔄 Updated CLI interface
-├── web/              # 🔄 Streamlit ensemble interface
+│   └── inference.py   # Updated CLI interface
+├── web/              # Streamlit ensemble interface
 │   ├── app.py        # Main web application
 │   ├── test_ensemble.py # Testing utilities
 │   └── utils.py      # Web utilities

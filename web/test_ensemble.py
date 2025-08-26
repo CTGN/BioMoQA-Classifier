@@ -12,7 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
-from src.models.biomoqa.ensemble import CrossValidationPredictor, load_ensemble_predictor
+from src.models.biomoqa.folds_ensemble_predictor import CrossValidationPredictor, load_ensemble_predictor
 
 
 def get_score_interpretation(score: float) -> dict:
@@ -221,7 +221,7 @@ def test_model_validation():
     print("🔍 Testing Model Validation")
     print("=" * 40)
     
-    from src.models.biomoqa.ensemble import validate_model_path
+    from src.models.biomoqa.folds_ensemble_predictor import validate_model_path
     
     # Test valid and invalid paths
     test_paths = [

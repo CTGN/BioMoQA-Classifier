@@ -32,7 +32,7 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     """Compute evaluation metrics from model predictions."""
     #TODO : print the size of logits to be sure that we compute the metrics in the right way
     logits, labels = eval_pred
-    scores = 1 / (1 + np.exp(-logits.squeeze()))  # Sigmoid
+    scores = 1 / (1 + np.exp(-logits.squeeze()))
     optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val",metric="f1")
     predictions = (scores > optimal_threshold).astype(int)
     f1 = evaluate.load("f1").compute(predictions=predictions, references=labels) or {}

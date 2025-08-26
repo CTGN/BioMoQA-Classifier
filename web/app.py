@@ -16,7 +16,7 @@ project_root = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
 from web.utils import get_example_texts, format_confidence_score
-from src.models.biomoqa.ensemble import CrossValidationPredictor, validate_model_path
+from src.models.biomoqa.folds_ensemble_predictor import CrossValidationPredictor, validate_model_path
 
 # Page config
 st.set_page_config(

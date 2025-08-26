@@ -93,7 +93,6 @@ class ConfigManager:
         }
         context.update(self.config)
         
-        # Resolve all paths
         self.config = resolve_dict(self.config, context)
         
         # Ensure critical directories exist
@@ -172,6 +171,12 @@ def reload_config(project_root: Path = None):
 # Legacy CONFIG for backward compatibility
 CONFIG = {
     "seed": 42,
+    "plot_dir": "/home/leandre/Projects/BioMoQA_Playground/plots",
+    "results_dir": get_config().get("results_dir"),
+    "data_dir": get_config().get("data_dir"),
+    "num_folds": 5,
+    "num_runs": 1,
+    "default_optional_negatives": 500,
     "num_labels": 1,
     "default_training_args": {
         "save_total_limit": 1,

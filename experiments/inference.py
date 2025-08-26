@@ -176,7 +176,6 @@ def main():
     args = parser.parse_args()
     
     if args.demo:
-        # Demo with example texts
         logger.info("Running demo with example texts...")
         
         example_texts = [
@@ -236,7 +235,6 @@ def main():
             logger.info(f"Prediction: {'Positive' if result['prediction'] == 1 else 'Negative'}")
             
     elif args.abstract:
-        # Single prediction
         result = run_single_prediction(
             model_name=args.model_name,
             abstract=args.abstract,

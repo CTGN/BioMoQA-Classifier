@@ -4,11 +4,11 @@ IFS=$'\n\t'
 
 # Models to iterate over
 MODELS=(
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
+  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
   "FacebookAI/roberta-base"
   "dmis-lab/biobert-v1.1"
   "google-bert/bert-base-uncased"
-  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
-  "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
 )
 
 # Optional negatives to try
@@ -30,9 +30,9 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
     echo "--> Run #${run}"
     # try both losses
     # each fold
-    for (( fold=4; fold<NUM_FOLDS; fold++ )); do
+    for (( fold=0; fold<NUM_FOLDS; fold++ )); do
     echo "------> Fold: ${fold}"
-      for loss in BCE; do
+      for loss in focal; do
         echo "----> Loss function: ${loss}"
         # each model
         for model in "${MODELS[@]}"; do
@@ -78,5 +78,5 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
 
   # clean up folds
   echo "==> Cleaning up folds directory"
-  rm -r "data/biomoqa/folds/"*
+  rm -r "data/folds/"*
 done
