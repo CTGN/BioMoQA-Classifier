@@ -1,0 +1,231 @@
+,label,prediction,score,fold,title
+0,1,0,0.0027503187,4,Cross-scale responses of biodiversity to hurricane and anthropogenic disturbance in a tropical forest
+1,1,1,0.99754757,4,Can land surface phenology from Sentinel-2 time-series be used as an indicator of Macaronesian ecosystem dynamics?
+2,0,0,0.0022449105,4,Unravelling migratory connectivity in marine turtles using multiple methods
+3,1,1,0.9974305,4,"Factors associated with alien plant richness, cover and composition differ in tropical island forests"
+4,1,1,0.9954906,4,Influence of glaciers and snow cover on terrestrial and marine ecosystems as revealed by remotely-sensed data
+5,1,0,0.00639601,4,Landscape features and sea ice influence nesting common eider abundance and dispersion
+6,1,1,0.9975006,4,"The terrestrial herpetofauna of Torres and Banks Groups (northern Vanuatu), with report of a new species for Vanuatu"
+7,0,0,0.0014721957,4,"Effects of seagrass landscape structure, structural complexity and hydrodynamic regime on macrofaunal densities in North Carolina seagrass beds"
+8,0,0,0.0018668587,4,Edge-mediated compositional and functional decay of tree assemblages in Amazonian forest islands after 26 years of isolation
+9,1,1,0.9974039,4,"Composition and structure of Caribbean bat (Chiroptera) assemblages: Effects of inter-island distance, area, elevation and hurricane-induced disturbance"
+10,0,0,0.0018191403,4,Extensive cryptic species diversity and fine-scale endemism in the marine red alga <i>Portieria</i> in the Philippines
+11,1,1,0.89388704,4,Spiders in Fauna Europaea: dual use of the database
+12,1,1,0.99710673,4,Rapid commencement of ecosystem recovery following aerial baiting on sub-Antarctic Macquarie Island
+13,1,1,0.9975783,4,"Description of plant communities on Half Moon Island, Antarctica"
+14,0,1,0.8402729,4,Beyond isolation by distance: What best explains functional connectivity among populations of three sympatric plant species in an ancient terrestrial island system?
+15,1,1,0.99679935,4,"Small-Scale Soil Microbial Community Heterogeneity Linked to Landform Historical Events on King George Island, Maritime Antarctica"
+16,1,1,0.99746007,4,"Habitat preferences dictate amphibian assemblage and diversity in langkawi island, kedah, peninsular malaysia"
+17,1,1,0.9963871,4,Conservation Implications of Changes in Endemic Hawaiian Drosophilidae Diversity across Land Use Gradients
+18,0,0,0.0014128191,4,Understorey environments influence functional diversity in tank‐bromeliad ecosystems
+19,0,0,0.0029996047,4,"Age and Paleoenvironmental Significance of the Frazer Beach Member—A New Lithostratigraphic Unit Overlying the End-Permian Extinction Horizon in the Sydney Basin, Australia"
+20,1,1,0.9933622,4,"Cold-Hardiness in the Antarctic Tick, Ixodes uriae"
+21,1,1,0.99756694,4,SLAM Project - Long Term Ecological Study of the Impacts of Climate Change in the natural forests of Azores: V - New records of terrestrial arthropods after ten years of SLAM sampling
+22,1,1,0.99728894,4,Beyond “Hotspots”: How to Prioritize Investments to Conserve Biodiversity in the Indo‐Pacific Region
+23,0,0,0.0017321414,4,"A marine fish follows Wallace's Line: the phylogeography of the three‐spot seahorse (<i>Hippocampus trimaculatus</i>, Syngnathidae, Teleostei) in Southeast Asia"
+24,1,1,0.9975852,4,Meta‐ and subpopulation estimation with disparate data: coconut crabs in the Western Indian Ocean
+25,1,1,0.99676883,4,Arthropod community structure in pastures of an island archipelago (Azores): Looking for local-regional species richness patterns at fine-scales
+26,1,1,0.99661356,4,Understanding landscape and plot-scale habitat utilisation by Malayan sun bear (Helarctos malayanus) in degraded lowland forest
+27,0,1,0.99553996,4,Fire and slice: palaeogeography for biogeography at New Zealand's North Island/South Island juncture
+28,1,1,0.9975803,4,Habitat filtering and inferred dispersal ability condition across-scale species turnover and rarity in Macaronesian island spider assemblages
+29,1,1,0.99656975,4,Tropical rainforest conversion and land use intensification reduce understorey plant phylogenetic diversity
+30,1,1,0.9975442,4,Our Planet Reviewed in Corsica 2019-2021: a large-scale survey of neglected biodiversity on a Mediterranean island
+31,1,1,0.9973424,4,Island biogeography and the species richness of introduced mammals on New Zealand offshore islands
+32,1,1,0.9965327,4,Reptiles on the brink: identifying the Australian terrestrial snake and lizard species most at risk of extinction
+33,1,1,0.9965238,4,"Spatial and Temporal Patterns of Carbon Storage in Forest Ecosystems on Hainan Island, Southern China"
+34,1,1,0.32038915,4,Catchment‐ and site‐scale influences of forest cover and longitudinal forest position on the distribution of a diadromous fish
+35,1,1,0.99689746,4,Patterns of endangerment in the Hawaiian flora
+36,1,0,0.0016524948,4,Long-term isolation of a highly mobile seabird on the Galapagos
+37,1,1,0.9976174,4,"Data on New Intermediate and Accidental Hosts Naturally Infected with Angiostrongylus cantonensis in La Gomera and Gran Canaria (Canary Islands, Spain)"
+38,0,0,0.0031617514,4,"Temporal variations in abundance and species richness of phytoplankton with emphasis on diatoms in the subtidal waters of Umm Al-Namil Island, north-western Arabian Gulf of the ROPME Sea Area"
+39,0,0,0.0022814611,4,Fish fauna and environmental factors in river estuaries of small and medium‐sized rivers on islands significantly influenced by warm currents
+40,1,1,0.94054204,4,Scientific literature on invasive alien species in a megadiverse country: advances and challenges in Mexico
+41,0,1,0.99450135,4,"Reinvestigation of Kuumbi Cave, Zanzibar, reveals Later Stone Age coastal habitation, early Holocene abandonment and Iron Age reoccupation"
+42,1,1,0.99715143,4,A global comparison of plant invasions on oceanic islands
+43,1,1,0.99658775,4,Physiological tolerances account for range limits and abundance structure in an invasive slug
+44,1,1,0.99686486,4,"Diversity, biogeography and the global flows of alien amphibians and reptiles"
+45,1,1,0.997115,4,Plant community dynamics of a tropical semi-arid system following experimental removals of an exotic grass
+46,0,1,0.99739647,4,"Lapita Diet in Remote Oceania: New Stable Isotope Evidence from the 3000-Year-Old Teouma Site, Efate Island, Vanuatu"
+47,1,1,0.99714464,4,"Refugia in Glacial Ages Led to the Current Discontinuous Distribution Patterns of the Dark Red-backed Vole<i>Myodes rex</i>on Hokkaido, Japan"
+48,1,1,0.9969879,4,Marine and terrestrial scavenging on fish and gull carcasses on a Mediterranean island
+49,1,0,0.012305897,4,"Impact of habitat alteration on amphibian diversity and species composition in a lowland tropical rainforest in Northeastern Leyte, Philippines"
+50,1,1,0.99674416,4,The role of olive groves in the conservation of Mediterranean orchids
+51,0,0,0.0014775645,4,Functional vulnerability and biogeography of reef fish assemblages in the Galapagos Archipelago
+52,0,0,0.0019671952,4,Predicting local extinctions of Amazonian vertebrates in forest islands created by a mega dam
+53,1,1,0.99756384,4,Threats from Climate Change to Terrestrial Vertebrate Hotspots in Europe
+54,1,1,0.9950406,4,Patterns of bacterial diversity across a range of Antarctic terrestrial habitats
+55,1,1,0.9965295,4,A functional trait‐based approach to assess the impact of an alien palm invasion on plant and soil communities on a South Pacific island
+56,1,1,0.9968336,4,Impacts on food web properties of island invertebrate communities vary between different human land uses
+57,1,1,0.9970091,4,A comparison of three trap designs for capturing brown treesnakes on Guam
+58,0,0,0.005470087,4,"Description of Pseudocalidococcus azoricus gen. sp. nov. (Thermosynechococcaceae, Cyanobacteria), a Rare but Widely Distributed Coccoid Cyanobacteria"
+59,0,0,0.0015464011,4,Biogeography of Hanging Gardens of the Colorado Plateau
+60,1,1,0.8982795,4,The Muskox Lost a Substantial Part of Its Genetic Diversity on Its Long Road to Greenland
+61,0,0,0.0014694884,4,Camera traps as sensor networks for monitoring animal communities
+62,1,1,0.9965327,4,Ecological Biogeography of Southern Ocean Islands: The Importance of Considering Spatial Issues
+63,1,1,0.9975822,4,Ancient DNA and high-resolution chronometry reveal a long-term human role in the historical diversity and biogeography of the Bahamian hutia
+64,0,0,0.001564327,4,Darwin's fishes: phylogeography of Galapagos Islands reef fishes
+65,1,1,0.996974,4,"The distribution of ants on the Wessel and English Company Islands, in the seasonal tropics of Australia's Northern Territory"
+66,0,0,0.002018692,4,"DISPERSAL AND COLONIZATION THROUGH OPEN FIELDS BY A TERRESTRIAL, WOODLAND SALAMANDER"
+67,1,1,0.997563,4,The Distribution and Spread of Alien Vascular Plants on Prince Edward Island
+68,1,0,0.046181314,4,Diet of a threatened endemic fox reveals variation in sandy beach resource use on California Channel Islands
+69,1,1,0.9969529,4,Contested Spatial Coincidence of Conservation and Mining Efforts in Madagascar
+70,1,1,0.9952335,4,First report on the occurrence of Avicennia marina (Forssk.) Vierh. (Acanthaceae) in the Nicobar archipelago
+71,0,0,0.0014061702,4,Similar trait structure and vulnerability in pelagic fish faunas on two remote island systems
+72,1,1,0.9974412,4,"Assessment of contamination by heavy metals and petroleum hydrocarbons at Atlas Cove Station, Heard Island"
+73,1,1,0.99759126,4,Riding the Kuroshio Current: Stepping stone dispersal of the Okinawa tree lizard across the East Asian Island Arc
+74,0,1,0.13103148,4,Does Litter Size Variation Affect Models of Terrestrial Carnivore Extinction Risk and Management?
+75,1,1,0.98547435,4,Fauna Europaea: Diptera – Brachycera
+76,1,1,0.9962997,4,Nearby large islands diminish biodiversity of the focal island by a negative target effect
+77,1,1,0.99752754,4,"Invertebrate survey of coastal habitats and podocarp forest on Ulva Island, Rakiura National Park, New Zealand"
+78,0,0,0.0015308857,4,Reef fish antipredator behavior in remote islands does not reflect patterns seen in coastal areas
+79,1,0,0.002025044,4,Environmental drivers of seasonal shifts in abundance of wild pigs (Sus scrofa) in a tropical island environment
+80,1,1,0.99728155,4,Similar yet distinct distributional patterns characterize native and exotic plant species richness across northern New Zealand islands
+81,1,1,0.99725926,4,"The mammal fauna of the Sir Edward Pellew island group, Northern Territory, Australia: Refuge and death-trap"
+82,1,1,0.9974964,4,"Mid- to Late Prehistoric Landscape Change, Settlement Histories, and Agricultural Practices on Maupiti, Society Islands (Central Eastern Polynesia)"
+83,0,1,0.8417978,4,New water bear records (Phylum Tardigrada) from the Pacific Northwest of North America
+84,1,1,0.9973043,4,"Impact of Non-Native Terrestrial Mammals on the Structure of the Terrestrial Mammal Food Web of Newfoundland, Canada"
+85,0,0,0.0027979254,4,"Biogeographic diversification in<i>Nolana</i>(Solanaceae), a ubiquitous member of the Atacama and Peruvian Deserts along the western coast of South America"
+86,1,1,0.99463344,4,"Dogs, humans and island ecosystems: the distribution, antiquity and ecology of domestic dogs (Canis familiaris) on California's Channel Islands, USA"
+87,1,1,0.9952062,4,Insights into the evolutionary history of Indo-Pacific bloodfeeding terrestrial leeches (Hirudinida:Arhynchobdellida:Haemadipisdae)
+88,1,1,0.99764246,4,Species Traits and Island Biogeography: Wing Metrics Linked to Avian Dispersal Ability Predict Species Occurrence on Remote Islands Worldwide
+89,1,1,0.9964059,4,Conservation problems and research needs for Bristle-thighed Curlews <i>Numenius tahitiensis</i> on their wintering grounds
+90,1,1,0.99735355,4,A strong decline of the endangered Apollo butterfly over 20 years in the archipelago of southern Finland
+91,1,1,0.8377104,4,Deriving Rich Coastal Morphology and Shore Zone Classification from LIDAR Terrain Models
+92,0,0,0.001846394,4,"Nucleopolyhedrovirus Detection and Distribution in Terrestrial, Freshwater, and Marine Habitats of Appledore Island, Gulf of Maine"
+93,1,1,0.9972842,4,An Updated Account of the Vascular Flora of the Iles Eparses (Southwest Indian Ocean)
+94,1,1,0.9969897,4,Patterns in the diversity and distribution of epiphytes and vines in a New Zealand forest
+95,1,1,0.99121046,4,Effects of dispersal strategy and migration history on genetic diversity and population structure of Antarctic lichens
+96,1,1,0.9971259,4,"Exploration and Inventory of Araceae Genera in Silui Mountain and Uluisimbone Forest, Kolaka Regency, South-East Sulawesi"
+97,1,1,0.9976,4,"Colonization history of the Canary Islands endemic Lavatera acerifolia, (Malvaceae) unveiled with genotyping-by-sequencing data and niche modelling"
+98,1,1,0.99503714,4,"Precipitation Constrains Amphibian Chytrid Fungus Infection Rates in a Terrestrial Frog Assemblage in Jamaica, West Indies"
+99,1,1,0.99618995,4,Habitat suitability and requirements for a threatened New Zealand amphibian
+100,0,0,0.0050822916,4,Survivors and colonizers: Contrasting biogeographic histories reconciled in the Antarctic freshwater copepod Boeckella poppei
+101,1,1,0.9972677,4,Determinants of plant species richness on small Bahamian islands
+102,1,1,0.9970118,4,"Factors affecting the distribution of vascular plants, springtails, butterflies and birds on small tropical islands"
+103,1,1,0.9974922,4,A working list of breeding bird species of the New Zealand region at first human contact
+104,1,1,0.9971814,4,"Microsatellite Variability of Sardinian Pine Martens, Martes martes"
+105,1,1,0.9970392,4,Parallel responses of bees to Pleistocene climate change in three isolated archipelagos of the southwestern Pacific
+106,1,1,0.99642533,4,A case study of the coconut crab <i>Birgus latro</i> on Zanzibar highlights global threats and conservation solutions
+107,1,1,0.99653506,4,The antiquity of Madagascar's grasslands and the rise of C4 grassy biomes
+108,1,1,0.9956929,4,Breakdown in seasonal dynamics of subtropical ant communities with land-cover change
+109,0,0,0.0032249328,4,Multiple mountain‐hopping colonization of sky‐islands on the two sides of Tropical Africa during the Pleistocene: The afroalpine <i>Festuca</i> grasses
+110,0,0,0.0014729039,4,"Effects of the Exxon Valdez oil spill on habitat use by birds in Prince William Sound, Alaska"
+111,1,1,0.9967602,4,Ecology of moss banks on Signy Island (maritime Antarctic)
+112,1,1,0.9975376,4,New Cricket Species from the Fiji Islands (Orthoptera: Grylloidea)
+113,0,0,0.004410666,4,Determinants of population persistence and abundance of terrestrial and arboreal vertebrates stranded in tropical forest land-bridge islands
+114,1,1,0.9974341,4,Inverted patterns of genetic diversity in continental and island populations of the heather Erica scoparia s.l.
+115,0,1,0.32259175,4,Habitat Partitioning in Sympatric Delphinids Around the Falkland Islands: Predicting Distributions Based on a Limited Data Set
+116,1,1,0.7271577,4,Evaluation and Prediction of Ecosystem Service Value in the Zhoushan Islands Based on LUCC
+117,1,1,0.99723583,4,"Welcome back New Zealand: Regional biogeography and Gondwanan origin of three endemic genera of mite harvestmen (Arachnida, Opiliones, Cyphophthalmi)"
+118,1,1,0.9975012,4,Mammals of the northern Philippines: Tolerance for habitat disturbance and resistance to invasive species in an endemic insular fauna
+119,1,1,0.99756396,4,Birds as a tool for island habitat conservation and management
+120,1,1,0.7462895,4,A way to reduce interference with Elliott traps
+121,0,0,0.04977426,4,Ecological indices from environmental DNA to contrast coastal reefs under different anthropogenic pressures
+122,1,1,0.99626863,4,The earliest record of Caribbean frogs: a fossil coquí from Puerto Rico
+123,1,1,0.9971487,4,"Extinction risk of the endemic vascular flora of Kauai, Hawaii, based on IUCN assessments"
+124,1,1,0.993471,4,Absence of mammals and the evolution of New Zealand grasses
+125,0,1,0.99643266,4,Not all free‐living microorganisms have cosmopolitan distributions – the case of<i>Nebela (Apodera) vas</i>Certes (Protozoa: Amoebozoa: Arcellinida)
+126,1,1,0.9964005,4,Trapping strategies for deterring the spread of Brown Tree Snakes from Guam
+127,1,1,0.9969361,4,"Distribution, behavioral dominance and potential impacts on endemic fauna of tropical fire ant<i>Solenopsis geminata</i>(Fabricius, 1804) (Hymenoptera: Formicidae: Myrmicinae) in the Galápagos archipelago"
+128,0,0,0.0066874037,4,"ECOLOGY OF GASTROPOD AND BIGHORN SHEEP HOSTS OF LUNGWORM ON ISOLATED, SEMIARID MOUNTAIN RANGES IN UTAH, USA"
+129,1,1,0.96730375,4,Genetic diversity of endangered orchid Phaius australis across a fragmented Australian landscape
+130,0,0,0.01219001,4,Functional diversity and trait filtering of insectivorous bats on forest islands created by an Amazonian mega dam
+131,0,0,0.0039935107,4,Variation of atmospheric volatile organic compounds over the Southern Indian Ocean (30 - 49°S)
+132,1,1,0.99682057,4,ORIGINAL ARTICLE: Diversity and biogeography of the Antarctic flora
+133,1,1,0.9966838,4,Host Specialization and Geographic Localization of Avian Malaria Parasites: A Regional Analysis in the Lesser Antilles
+134,1,1,0.9972609,4,"Vegetation cover, gross photosynthesis and remotely sensed vegetation indices in different aged sub-arctic volcanic islands in the Vestmannaeyjar archipelago"
+135,1,1,0.99766636,4,"The status of mammals in the North Kimberley, Western Australia"
+136,1,1,0.9973712,4,"Population sizes and the status of endemic and restricted-range bird species on Sangihe island, Indonesia"
+137,0,1,0.3470068,4,"Species richness and conservation status of medium and large terrestrial mammals from four Sky Islands in Sonora, northwestern Mexico"
+138,1,1,0.9948344,4,"Birds of isla mocha national reserve, southern chile: Species richness, abundance and diversity"
+139,1,1,0.99636793,4,"Species composition, diversity and coverage pattern of associated communities of mosses-lichens along a pedoenvironmental gradient in Maritime Antarctica"
+140,0,0,0.0016931767,4,Experimental Studies of Seedling Recruitment from Contrasting Seed Distributions
+141,0,1,0.9976355,4,The general dynamic model of island biogeography revisited at the level of major flowering plant families
+142,0,0,0.0019764707,4,The human microbiome: eliminating the biomedical/environmental dichotomy in microbial ecology
+143,0,0,0.0016261758,4,Interacting Effects of Phenotypic Plasticity and Evolution on Population Persistence in a Changing Climate
+144,1,1,0.95783085,4,THE MICRO AND MACRO IN BODY SIZE EVOLUTION
+145,1,1,0.9975635,4,Origin of the Japanese Land Mammal Fauna: Allocation of Extant Species to Historically-based Categories.
+146,0,1,0.99587727,4,Diatoms from small ponds and terrestrial habitats in Deserta Grande Island (Madeira Archipelago)
+147,1,1,0.99701643,4,"High plant diversity and characteristic plant community structure in broad-leaved evergreen forests on Amami-Oshima and Tokunoshima Islands, Japan's newest natural World Heritage Site"
+148,1,1,0.9968804,4,Testing island biogeography theory with visitation rates of birds to British islands
+149,1,1,0.99688894,4,"Distribution of the juvenile coconut crab,<i>Birgus latro</i>(L.), on the island ofLifou, New Caledonia"
+150,0,0,0.0029521566,4,Fungi from Spartina Alterniflora in Rhode Island
+151,0,0,0.0025408512,4,Taxonomic report on small mammals from two coastal wetland (Ramsar) sites in Ghana
+152,1,0,0.023965918,4,The Ecosystem Study on Rongelap Atoll
+153,1,1,0.93770987,4,"Terrestrial insect fauna of the herbaceous stratum of reservoir embankment slopes, Korea"
+154,1,1,0.99615127,4,"A taxonomic review of the Genus Apenes Leconte (Coleoptera: Carabidae: Lebiini) in the West Indies, with descriptions of new species and notes about classification and biogeography"
+155,1,1,0.9892302,4,Alpine species in dynamic insular ecosystems through time: Conservation genetics and niche shift estimates of the endemic and vulnerable viola cheiranthifolia
+156,1,1,0.9973642,4,"Molecular identification of Trichocera maculipennis, an invasive fly species in the Maritime Antarctic"
+157,0,0,0.002570769,4,Dataset of foraminiferal sedimentary DNA (sedDNA) sequences from Svalbard
+158,1,1,0.99734616,4,"Threatened and extinct island endemic birds of the world: Distribution, threats and functional diversity"
+159,1,1,0.99655664,4,"Local distribution, habitat, and numbers of the endemic terrestrial frog<i>Leiopelma hamiltoni on</i>Maud Island, New Zealand"
+160,0,0,0.0016517948,4,Investigation and Application of Thallium Isotope Fractionation
+161,1,1,0.99756646,4,"The beetle (Coleoptera) fauna of the Antipodes Islands, with comments on the impact of mice; and an annotated checklist of the insect and arachnid fauna"
+162,1,1,0.99724007,4,The mammals of coastal Texas: A comparison between mainland and barrier island faunas
+163,0,1,0.9971228,4,Peripatus (Macroperipatus) Geayi in Panama
+164,1,1,0.9967379,4,The distribution and diversity of insular ants: Do exotic species play by different rules?
+165,0,0,0.0016397592,4,Chemical weathering rates of silicate-dominated lithological classes and associated liberation rates of phosphorus on the Japanese Archipelago—Implications for global scale analysis
+166,1,1,0.99705625,4,Relict distribution of <i>Microhyla</i> (Amphibia: Microhylidae) in the Ryukyu Archipelago: High diversity in East Asia maintained by insularization
+167,1,1,0.99751246,4,The flora and vegetation of Open Bay Islands
+168,0,0,0.0039978223,4,Indirect effects of invasive Burmese pythons on ecosystems in southern Florida
+169,1,1,0.9976774,4,"Status, density and habitat relationships of the endemic terrestrial birds of Socorro Island, Revillagigedo Islands, Mexico"
+170,0,1,0.9962838,4,"Winter conditions structure extratropical patterns of species richness of amphibians, birds and mammals globally"
+171,1,1,0.9970034,4,The tundra food web of Bylot Island in a changing climate and the role of exchanges between ecosystems
+172,1,1,0.99724126,4,"Multi-scale, multivariate community models improve designation of biodiversity hotspots in the Sunda Islands"
+173,1,0,0.0022623453,4,Mercury in lichens and reindeer hair from Alaska: 2005–2007 pilot survey
+174,0,0,0.0017843463,4,Passive roadside restoration reduces management costs and fosters native habitat
+175,1,1,0.99736893,4,Herpetofaunal communities of the leeward slopes and coasts of St. Vincent: A comparison of sites variously altered by human activity
+176,1,1,0.99682224,4,"Quantifying the presence of feral cat colonies and <scp> <i>Toxoplasma gondii</i> </scp> in relation to bird conservation areas on O'ahu, Hawai'i"
+177,0,1,0.84591115,4,"Prehistoric migration in the Caribbean: past perspectives, new models and the ideal free distribution of West Indian colonization"
+178,1,1,0.99749446,4,Pushing the Envelope in Paradise: A Novel Approach to Rat Eradication at Palmyra Atoll
+179,1,1,0.9975994,4,"Documenting the terrestrial invertebrate fauna of Barrow Island, Western Australia"
+180,0,0,0.001728922,4,The riverscape of Western Amazonia – a quantitative approach to the fluvial biogeography of the region
+181,1,1,0.99759394,4,Species delimitation and phylogenetic analyses of a New Guinean frog genus (Microhylidae: <i>Hylophorbus</i>) reveal many undescribed species and a complex diversification history driven by late Miocene events
+182,0,0,0.002724555,4,Considerable gene flow in troglomorphic cockroach species across a vast subterranean landscape
+183,1,1,0.9966158,4,Fly on the Wall: Comparing Arthropod Communities between Islands with and without House Mice (Mus musculus)1
+184,1,1,0.99637395,4,Range shifts in a foundation sedge potentially induce large Arctic ecosystem carbon losses and gains
+185,1,1,0.9975036,4,"Genetic consequences of anagenetic speciation in Acer okamotoanum (Sapindaceae) on Ullung Island, Korea"
+186,1,1,0.9968449,4,Assessing the conservation value of a human-dominated island landscape: Plant diversity in Hawaii
+187,0,0,0.0019225917,4,Ecological Insights from Long‐term Research Plots in Tropical and Temperate Forests
+188,0,1,0.7699128,4,"A new species of Lapparentophis from the mid-Cretaceous Kem Kem beds, Morocco, with remarks on the distribution of lapparentophiid snakes"
+189,1,1,0.99717486,4,Both Recent and Pleistocene geography determine animal distributional patterns in the Tuscan Archipelago
+190,1,1,0.9974252,4,"Exploration and Inventory of Native Orchid Germplasm in West Borneo, Indonesia"
+191,1,1,0.9973569,4,Species richness and representation in protected areas of the<scp>W</scp>estern hemisphere: discrepancies between checklists and range maps
+192,1,1,0.99761224,4,The Hitchhiker's guide to island endemism: Biodiversity and endemic perennial plant species in roadside and surrounding vegetation
+193,0,1,0.14697538,4,Implications of biogeography in the use of butterflyfishes (Chaetodontidae) as indicators for Western and Central Pacific areas
+194,0,0,0.0014558496,4,Correlation of Physiological and Behavior Indexes of Activity in the Study of Plethodon cinereus (Green) and Plethodon glutinosus (Green)
+195,1,0,0.009384501,4,Plant Life of Quaternary Cold Stages: Evidence from the British Isles
+196,0,1,0.9955432,4,The Biogeography of Islands: Preliminary Results from a Comparative Study of the Isles of Scilly and Cornwall
+197,0,0,0.0045334236,4,"Mesocyclops and Thermocyclops (Copepoda, Cyclopidae) in the major Visayas Islands (central Philippines)"
+198,1,1,0.9948003,4,"QUATERNARY FOSSIL FAUNAS FROM CAVES IN TAKAKA VALLEY AND ON TAKAKA HILL, NORTHWEST NELSON, SOUTH-ISLAND, NEW-ZEALAND"
+199,1,1,0.9973248,4,"Monitoring of terrestrial avifauna in six habitats on St. Eustatius, Caribbean Netherlands, 2009–2017"
+200,1,1,0.99508566,4,The First Nationwide Surveillance of Severe Fever with Thrombocytopenia Syndrome in Ruminants and Wildlife in Taiwan
+201,0,0,0.0015513994,4,Above-ground biomass references for urban trees from terrestrial laser scanning data
+202,1,0,0.0015018,4,Technical note: A high-resolution inverse modelling technique for estimating surface CO&amp;lt;sub&amp;gt;2&amp;lt;/sub&amp;gt; fluxes based on the NIES-TM–FLEXPART coupled transport model and its adjoint
+203,0,0,0.0018694407,4,Non-random lizard extinctions in land-bridge Amazonian forest islands after 28 years of isolation
+204,0,0,0.0076597366,4,The ichthyofaunal diversity of freshwater ecosystems in Gökçeada Island (NW Turkey) under the pressure of nonnative species
+205,1,1,0.99738604,4,"Biodiversity dynamics of terrestrial gastropods in the tropical montane rainforests of Nuwara Eliya, Sri Lanka"
+206,0,0,0.0014301601,4,The effects of protection from fishing on species richness: Distinguishing between alternative explanations
+207,1,1,0.9954678,4,Strategic expansion of existing forest monitoring plots: A case study using a stratified gis-based modelling approach
+208,1,0,0.021432683,4,"Risks, resources, and refugia: Spatial overlap between yellow-eyed penguin foraging distribution and prey, commercial fisheries, and marine protected areas"
+209,1,1,0.9974579,4,"Modeling the predicted suitable habitat distribution of Javan hawk-eagle Nisaetus bartelsi in the Java Island, Indonesia"
+210,1,1,0.9976532,4,The aerial invertebrate fauna of subantarctic Macquarie Island
+211,0,0,0.019163648,4,The Hawaiian freshwater algae biodiversity survey (2009-2014): systematic and biogeographic trends with an emphasis on the macroalgae
+212,1,1,0.9976043,4,"Habitat associations of parrots on the Wallacean islands of Buru, Seram and Sumba"
+213,0,0,0.0018742256,4,Ecological correlates of mammal β-diversity in Amazonian land-bridge islands: from small- to large-bodied species
+214,1,1,0.9970726,4,ZOOGEOGRAPHY OF SOME TERRESTRIAL MICRO‐ARTHROPODA IN ANTARCTICA
+215,0,0,0.0014241161,4,Vegetation community response to hydrologic and geomorphic changes following dam removal
+216,1,1,0.99734926,4,"Inventory and exploration of orchid in Polewali Mandar, West Sulawesi, Indonesia"
+217,0,0,0.0026994825,4,Nitrogen transformations along a shallow subterranean estuary
+218,0,0,0.0014991616,4,Effects of Ionizing Radiation on Terrestrial Ecosystems
+219,0,0,0.0015336558,4,Biology and Conservation of the Laysan Duck (Anas laysanensis)
+220,1,1,0.9973743,4,Insights into the evolutionary and demographic history of the extant endemic rodents of the galápagos islands
+221,0,0,0.0060234247,4,"Two new pseudocryptic species in the medium-sized common European land snails, Fruticicola Held, 1838; as a result of phylogeographic analysis of Fruticicola fruticum (O. F. Müller, 1774) (Gastropoda: Helicoidea: Camaenidae)"
+222,1,1,0.99752873,4,Documenting the flora of a diversity hotspot: Richard Thomas Lowe (1802–1874) and his botanical exploration of Madeira island
+223,0,0,0.0014677317,4,Terrestrial exports of dissolved and particulate organic carbon affect nearshore ecosystems of the Pacific coastal temperate rainforest
+224,0,1,0.9955428,4,Diversity effects on invasion vary with life history stage in marine macroalgae
+225,1,1,0.99721473,4,Survey of the mosquitoes (Diptera: Culicidae) of Mayotte
+226,1,1,0.99737585,4,Invasive rats alter woody seedling composition on seabird-dominated islands in New Zealand
+227,0,1,0.9972161,4,"Characterizing and quantifying the wildlife trade network in Sulawesi, Indonesia"
+228,1,1,0.9963756,4,Post-Fire Salvage Logging Imposes a New Disturbance that Retards Succession: The Case of Bryophyte Communities in a Macaronesian Laurel Forest
+229,0,1,0.9964669,4,The anthropogenic threat for insular microcrustacean fauna (Copepoda and Cladocera) – the case of Madeira Island
