@@ -1,85 +1,88 @@
 \contentsline {chapter}{\numberline {1}BiTeM group presentation}{4}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Biodiversity Monitoring via Question Answering}{4}{section.1.1}%
+\contentsline {section}{\numberline {1.2}IPBES Literature Classification}{5}{section.1.2}%
 \contentsline {chapter}{\numberline {2}Introduction}{6}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Context}{6}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Motivations}{6}{section.2.2}%
+\contentsline {section}{\numberline {2.2}Motivation}{6}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Objectives}{7}{section.2.3}%
-\contentsline {chapter}{\numberline {3}State of the art}{8}{chapter.3}%
+\contentsline {chapter}{\numberline {3}Literature Review}{8}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Tokenization}{8}{section.3.1}%
 \contentsline {subsection}{\numberline {3.1.1}Byte Pair Encoding}{10}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}WordPiece}{11}{subsection.3.1.2}%
-\contentsline {section}{\numberline {3.2}Word Embeddings and Word2Vec}{13}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Term Frequency–Inverse Document Frequency (TF-IDF)}{13}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Goal}{14}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Word2Vec}{14}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Negative Sampling}{15}{subsection.3.2.4}%
-\contentsline {paragraph}{Note:}{15}{paragraph*.3}%
-\contentsline {subsection}{\numberline {3.2.5}GloVe}{15}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Neural Networks}{16}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Deep Contextual Models}{17}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Recurrent Neural Networks (RNNs)}{17}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Long Short-Term Memory (LSTM)}{17}{subsection.3.4.2}%
-\contentsline {subsection}{\numberline {3.4.3}Attention for Neural Networks}{18}{subsection.3.4.3}%
-\contentsline {subsection}{\numberline {3.4.4}Seq2seq}{18}{subsection.3.4.4}%
-\contentsline {subsection}{\numberline {3.4.5}Transformers}{19}{subsection.3.4.5}%
-\contentsline {subsection}{\numberline {3.4.6}BERT}{19}{subsection.3.4.6}%
-\contentsline {subsection}{\numberline {3.4.7}BERT Variations}{20}{subsection.3.4.7}%
-\contentsline {subsection}{\numberline {3.4.8}Heads}{21}{subsection.3.4.8}%
-\contentsline {subsection}{\numberline {3.4.9}Fine-tuning}{21}{subsection.3.4.9}%
-\contentsline {subsection}{\numberline {3.4.10}Optimization Algorithms}{21}{subsection.3.4.10}%
-\contentsline {subsubsection}{Stochastic Gradient Descent}{21}{subsubsection*.4}%
-\contentsline {subsubsection}{SGD with Momentum}{21}{subsubsection*.5}%
-\contentsline {subsubsection}{RMSProp}{22}{subsubsection*.6}%
-\contentsline {subsubsection}{Adam}{22}{subsubsection*.7}%
-\contentsline {subsubsection}{AdamW}{22}{subsubsection*.8}%
-\contentsline {section}{\numberline {3.5}Evaluation}{22}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}Data splitting}{22}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}K-Fold Cross Validation}{23}{subsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.5.3}Metrics}{24}{subsection.3.5.3}%
-\contentsline {subsubsection}{Accuracy}{24}{subsubsection*.9}%
-\contentsline {subsubsection}{Recall}{25}{subsubsection*.10}%
-\contentsline {subsubsection}{Precision}{25}{subsubsection*.11}%
-\contentsline {subsubsection}{F1 Score}{25}{subsubsection*.12}%
-\contentsline {subsubsection}{F$\boldsymbol {\beta }$ Score}{25}{subsubsection*.13}%
-\contentsline {subsubsection}{Matthews Correlation Coefficient (MCC)}{25}{subsubsection*.14}%
-\contentsline {subsubsection}{Cohen's Kappa}{26}{subsubsection*.15}%
-\contentsline {subsubsection}{Normalized Discounted Cumulative Gain (nDCG)}{26}{subsubsection*.16}%
-\contentsline {subsubsection}{Precision-Recall Curve (PR)}{26}{subsubsection*.17}%
-\contentsline {subsubsection}{Average Precision (AP)}{27}{subsubsection*.18}%
-\contentsline {subsubsection}{ROC Curve}{27}{subsubsection*.19}%
-\contentsline {subsubsection}{Area Under the Curve (AUC)}{27}{subsubsection*.20}%
-\contentsline {subsection}{\numberline {3.5.4}Hyperparameter Optimization}{27}{subsection.3.5.4}%
-\contentsline {subsection}{\numberline {3.5.5}Statistical Test}{28}{subsection.3.5.5}%
-\contentsline {subsubsection}{Friedman test and Nemenyi post-hoc analysis}{28}{subsubsection*.21}%
-\contentsline {subsubsection}{McNemar's test}{28}{subsubsection*.22}%
-\contentsline {chapter}{\numberline {4}Data}{31}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Description}{31}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Pre-Processing}{32}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Repartition}{32}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Data Contamination Considerations}{33}{section.4.4}%
-\contentsline {chapter}{\numberline {5}Méthodes}{35}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Overview}{35}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Data Management and Experimental Design}{36}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Cross-Validation Strategy}{36}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Handling Imbalanced Data}{36}{subsection.5.2.2}%
-\contentsline {subsubsection}{Binary Cross-Entropy (BCE)}{36}{subsubsection*.23}%
-\contentsline {subsubsection}{Focal Loss}{37}{subsubsection*.24}%
-\contentsline {section}{\numberline {5.3}Architecture}{37}{section.5.3}%
-\contentsline {chapter}{\numberline {6}Résultats}{38}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Analyse et discussion}{41}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Ablation Studies}{41}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Impact of Including Title Information}{41}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}Binary Cross-Entropy vs. Focal Loss}{41}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Impact of Synthetic Negatives}{42}{subsection.7.1.3}%
-\contentsline {subsection}{\numberline {7.1.4}Domain-Specific vs. General-Purpose Models}{42}{subsection.7.1.4}%
-\contentsline {subsection}{\numberline {7.1.5}Ensemble Performance}{42}{subsection.7.1.5}%
-\contentsline {subsection}{\numberline {7.1.6}Contamination}{42}{subsection.7.1.6}%
-\contentsline {section}{\numberline {7.2}Limitations}{43}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Dataset Size and Generalizability}{43}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Temporal Evaluation Bias}{43}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Domain Scope}{43}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Computational Resources}{44}{subsection.7.2.4}%
-\contentsline {chapter}{\numberline {8}Conclusion}{45}{chapter.8}%
-\contentsline {chapter}{\numberline {9}Bibliography}{47}{chapter.9}%
-\contentsline {chapter}{\numberline {10}Annexes}{48}{chapter.10}%
-\contentsline {subsection}{\numberline {10.0.1}Workflow}{49}{subsection.10.0.1}%
+\contentsline {subsection}{\numberline {3.1.2}WordPiece}{10}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}Word Embeddings and Word2Vec}{11}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Term Frequency--Inverse Document Frequency (TF-IDF)}{11}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Goal}{11}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Word2Vec}{12}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Negative Sampling}{12}{subsection.3.2.4}%
+\contentsline {paragraph}{Note:}{13}{paragraph*.3}%
+\contentsline {subsection}{\numberline {3.2.5}GloVe}{13}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Neural Networks}{13}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Deep Contextual Models}{15}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Recurrent Neural Networks (RNNs)}{15}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Long Short-Term Memory (LSTM)}{15}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Attention for Neural Networks}{16}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Seq2seq}{16}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.5}Transformers}{17}{subsection.3.4.5}%
+\contentsline {subsection}{\numberline {3.4.6}BERT}{18}{subsection.3.4.6}%
+\contentsline {subsection}{\numberline {3.4.7}BERT Variations}{18}{subsection.3.4.7}%
+\contentsline {subsection}{\numberline {3.4.8}Heads}{19}{subsection.3.4.8}%
+\contentsline {subsection}{\numberline {3.4.9}Fine-tuning}{19}{subsection.3.4.9}%
+\contentsline {subsection}{\numberline {3.4.10}Optimization Algorithms}{20}{subsection.3.4.10}%
+\contentsline {subsubsection}{Stochastic Gradient Descent}{20}{subsubsection*.4}%
+\contentsline {subsubsection}{SGD with Momentum}{20}{subsubsection*.5}%
+\contentsline {subsubsection}{RMSProp}{20}{subsubsection*.6}%
+\contentsline {subsubsection}{Adam}{21}{subsubsection*.7}%
+\contentsline {subsubsection}{AdamW}{21}{subsubsection*.8}%
+\contentsline {section}{\numberline {3.5}Evaluation}{21}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Data splitting}{21}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}K-Fold Cross Validation}{22}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Metrics}{23}{subsection.3.5.3}%
+\contentsline {subsubsection}{Accuracy}{23}{subsubsection*.9}%
+\contentsline {subsubsection}{Recall}{23}{subsubsection*.10}%
+\contentsline {subsubsection}{Precision}{24}{subsubsection*.11}%
+\contentsline {subsubsection}{F1 Score}{24}{subsubsection*.12}%
+\contentsline {subsubsection}{F$\boldsymbol {\beta }$ Score}{24}{subsubsection*.13}%
+\contentsline {subsubsection}{Matthews Correlation Coefficient (MCC)}{24}{subsubsection*.14}%
+\contentsline {subsubsection}{Cohen's Kappa}{24}{subsubsection*.15}%
+\contentsline {subsubsection}{Normalized Discounted Cumulative Gain (nDCG)}{25}{subsubsection*.16}%
+\contentsline {subsubsection}{Precision-Recall Curve (PR)}{25}{subsubsection*.17}%
+\contentsline {subsubsection}{Average Precision (AP)}{25}{subsubsection*.18}%
+\contentsline {subsubsection}{ROC Curve}{26}{subsubsection*.19}%
+\contentsline {subsubsection}{Area Under the Curve (AUC)}{26}{subsubsection*.20}%
+\contentsline {subsection}{\numberline {3.5.4}Hyperparameter Optimization}{26}{subsection.3.5.4}%
+\contentsline {subsection}{\numberline {3.5.5}Statistical Test}{26}{subsection.3.5.5}%
+\contentsline {subsubsection}{Friedman test and Nemenyi post-hoc analysis}{27}{subsubsection*.21}%
+\contentsline {subsubsection}{McNemar's test}{27}{subsubsection*.22}%
+\contentsline {chapter}{\numberline {4}Methods}{29}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Overview}{29}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Hyperparameter Optimization}{30}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Dataset Management}{31}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Description (BioMoQA)}{31}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Pre-Processing (BioMoQA)}{31}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Description (IPBES)}{32}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Pre-Processing (IPBES)}{32}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Handling Imbalanced Data}{33}{subsection.4.3.5}%
+\contentsline {subsubsection}{Binary Cross-Entropy (BCE)}{33}{subsubsection*.23}%
+\contentsline {subsubsection}{Focal Loss}{33}{subsubsection*.24}%
+\contentsline {section}{\numberline {4.4}Architecture}{33}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Common encoder and training loop}{33}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}BioMoQA: binary head and losses}{34}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}IPBES: multi-label head and losses}{34}{subsection.4.4.3}%
+\contentsline {paragraph}{Baselines.}{34}{paragraph*.25}%
+\contentsline {chapter}{\numberline {5}Implementation}{35}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Reproducibility and Code Availability}{35}{section.5.1}%
+\contentsline {chapter}{\numberline {6}Results}{36}{chapter.6}%
+\contentsline {section}{\numberline {6.1}IPBES Results}{38}{section.6.1}%
+\contentsline {chapter}{\numberline {7}Discussion}{43}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Ablation Studies}{43}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Impact of Including Title Information}{43}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Binary Cross-Entropy vs. Focal Loss}{43}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}Impact of Synthetic Negatives}{44}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.4}Domain-Specific vs. General-Purpose Models}{44}{subsection.7.1.4}%
+\contentsline {subsection}{\numberline {7.1.5}Ensemble Performance}{44}{subsection.7.1.5}%
+\contentsline {section}{\numberline {7.2}Limitations}{44}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Data Contamination Considerations}{44}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Domain Scope}{45}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Computational Resources}{45}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Statistical Testing Assumptions}{45}{subsection.7.2.4}%
+\contentsline {chapter}{\numberline {8}Conclusion}{46}{chapter.8}%

@@ -72,7 +72,7 @@
 
 Je souhaite tout d'abord remercier Julien Knafou, grâce à qui j'ai pu trouver ce stage, pour l'aide qu'il m'a accordé dans mon apprentissage. \\
 Je suis également particulièrement reconnaissant pour la confiance que m'a accordé Patrick Ruch, directeur du stage.
-TODO : Completer
+Je remercie aussi l'ensemble des membres du groupe BiTeM pour leur accueil et leurs conseils précieux et instructifs tout au long de cette période, ainsi que mes encadrants académiques pour leurs retours pertinents et leur disponibilité. Enfin, j'exprime ma gratitude aux partenaires du projet, notamment les équipes impliquées dans le projet BioMoQA et l'IPBES, pour les échanges scientifiques et l'accès aux données.
 
 \tableofcontents
 
@@ -82,47 +82,53 @@ The BiTeM group (Bibliomics and Text Mining Group), in which I conducted this in
 
 The group is also affiliated with the text mining group of the Swiss Institute of Bioinformatics (SIB), which currently works on the Swiss Institute of Bioinformatics Literature Services (SIBiLS), a platform providing personalized Information Retrieval in the biological literature. SIBiLS includes daily updated and semantically enriched data from four collections (MEDLINE, PubMedCentral (PMC), Plazi treatments, and PMC supplementary files), a customizable search tool, a question answering service, customized literature triage for cell lines characterization, and a freely accessible API allowing researchers worldwide to integrate these services into their workflows.
 
-BiTeM's lab provides a robust and scalable infrastructure based on cloud and federated architectures, enabling advanced text mining, semantic search, and AI-powered metadata curation across large biomedical and biodiversity datasets. As a BiTeM intern, I was assigned tasks within two distinct but complementary projects that will be detailed below.
+BiTeM's lab provides a robust and scalable infrastructure based on cloud and federated architectures, enabling advanced text mining, semantic search, and deep-learning powered metadata curation across large biomedical and biodiversity datasets. As a BiTeM intern, I was assigned tasks within two distinct but complementary projects that will be detailed below.
 
 \section{Biodiversity Monitoring via Question Answering}
 
-The Biodiversity Monitoring via Question Answering (BioMoQA) project is an initiative gathering researchers from different institutions across Europe. Its primary objective is to enhance SIBiLS by improving access to biodiversity-related scientific literature through AI-powered analytical services, such as question-answering systems and SPARQL endpoints. These tools aim to assist researchers in addressing critical biodiversity questions related to climate change, habitat loss, and invasive species.
+The Biodiversity Monitoring via Question Answering (BioMoQA) project is an initiative gathering researchers from different institutions across Europe. One of its secondary objective is to enhance SIBiLS by improving access to biodiversity-related scientific literature through deep-learning powered analytical services. These tools aim to assist researchers in addressing critical biodiversity questions related to climate change, habitat loss, and invasive species.
 
 The main application motivating this project is a collaboration with the University of Neuchâtel to monitor biodiversity on island ecosystems. Researchers at this institution require efficient tools to identify relevant publications among the vast corpus of environmental and biological literature.
 
 In this context, my primary task was to build a binary classifier model that labels biodiversity scientific journal abstracts based on their relevance to island ecosystems, as defined by domain experts at the University of Neuchâtel. The classifier is designed to function as a ranking system in practice, prioritizing the identification and high ranking of relevant documents over perfect classification accuracy. This approach recognizes that in information retrieval applications, it is more important to ensure relevant documents appear at the top of search results than to perfectly classify every document.
 
+\section{IPBES Literature Classification}
+
+The Intergovernmental Science-Policy Platform on Biodiversity and Ecosystem Services (IPBES) produces assessments that synthesize evidence on biodiversity and ecosystem services to inform policy. In parallel to BioMoQA, I developed a multi-label classifier tailored to IPBES-related literature. The objective is to automatically assign documents to assessment-relevant thematic axes: IAS (Invasive Alien Species), SUA (Sustainable Use Assessment), and VA (Values Assessment). Unlike the binary BioMoQA task, each abstract may belong to none, one, or multiple labels.
+
+The modeling pipeline mirrors BioMoQA: transformer encoders with a task-specific classification head, stratified cross-validation, random-search hyperparameter optimization, and rigorous statistical comparisons. Inputs concatenate title and abstract when available, and training optimizes threshold-independent ranking quality (ROC-AUC, Average Precision) alongside per-label discrimination. This classifier is being integrated into SIBiLS to support large-scale literature triage and consistent tagging of assessment themes; the integration is underway. Detailed methods and results are presented in the Methods and Results chapters.
+
 \chapter{Introduction}
 
 \section{Context}
 
-During this internship, conducted from March to July 2025, I collaborated with the BiTeM group on two complementary projects within the broader scope of AI-powered scientific literature analysis. The primary focus of this report details my work on the Biodiversity Monitoring via Question Answering (BioMoQA) project, where I developed a transformer-based classifier for ranking biodiversity-related scientific abstracts. Additionally, I contributed to the development of a multi-label classifier for the IPBES (Intergovernmental Panel on Biodiversity and Ecosystem Services) dataset. While the IPBES project results are not yet available due to ongoing long computation times, both projects share the common goal of enhancing researchers' ability to efficiently navigate the ever-growing corpus of scientific literature.
+During this internship, conducted from March to July 2025, I collaborated with the BiTeM group to -as said earlier- build two classification models. The primary focus of this report details my work on the Biodiversity Monitoring via Question Answering (BioMoQA) project, where I developed a transformer-based classifier for ranking biodiversity-related scientific abstracts. Additionally, I developed and evaluated a multi-label classifier for the IPBES (Intergovernmental Panel on Biodiversity and Ecosystem Services) dataset, which results are also reported here. Both projects share the common goal of enhancing researchers' ability to efficiently navigate the ever-growing corpus of scientific literature. Both models are in the process of being integrated into the SIBiLS interface; this integration is underway and still ongoing at the time of writing.
 
-Over the past decade, the exponential growth of scientific publications has created significant challenges for researchers seeking to stay current with developments in their fields. The volume of scientific literature published annually has increased by over 8\% in the life sciences alone, reaching more than two million articles per year as of 2024 \cite{nih:stats2024}. Advances in natural language processing (NLP) have opened new avenues for distilling large volumes of textual data into concise summaries and extracting high-quality, relevant information \cite{sebastiani2002machine,westergaard2018comprehensive}. Modern transformer-based models enable state-of-the-art performance in tasks including summarization, information retrieval, and question answering \cite{vaswani2017attention,devlin2019bert}.
+The central challenge addressed in this project is the development of automated systems that can effectively rank scientific documents by relevance rather than simply classifying them. This ranking-focused approach is crucial for practical information retrieval applications, where the goal is to present users with the most relevant documents at the top of their search results.
 
-The central challenge addressed in this work is the development of automated systems that can effectively rank scientific documents by relevance rather than merely classifying them. This ranking-focused approach is crucial for practical information retrieval applications, where the goal is to present users with the most relevant documents at the top of their search results.
+\section{Motivation}
 
-\section{Motivations}
-
-Researchers studying specialized domains, such as island ecosystems in biodiversity research, often face difficulty locating precise, high-quality data among a noisy corpus. This challenge is particularly acute in interdisciplinary fields where relevant information may be scattered across multiple domains and publication venues. The traditional approach of manual literature review becomes increasingly impractical as the volume of potentially relevant publications grows exponentially.
-
-The need for automated literature triage is especially critical in biodiversity research, where timely access to relevant findings can inform conservation decisions and policy making. Island ecosystems, being particularly vulnerable to environmental changes and human impacts, require specialized monitoring approaches supported by comprehensive literature reviews.
+Over the past decade, the exponential growth of scientific publications has created significant challenges for researchers seeking to stay current with developments in their fields. The volume of scientific literature published annually has increased by over 8\% in the life sciences alone, reaching more than two million articles per year as of 2024 \cite{nih:stats2024}. Advances in natural language procsesing (NLP) have opened new avenues for distilling large volumes of textual data into concise summaries and extracting high-quality, relevant information \cite{sebastiani2002machine,westergaard2018comprehensive}. Modern transformer-based models enable state-of-the-art performance in tasks including summarization, information retrieval, and question answering \cite{vaswani2017attention,devlin2019bert}.
 
 \section{Objectives}
 
-The primary objective of this project, conducted within the Biodiversity Monitoring via Question Answering initiative, is to develop an automated transformer-powered classifier specifically designed for ranking scientific abstracts based on their relevance to island biodiversity research. Unlike traditional classification systems that focus solely on accuracy, our approach prioritizes ranking performance to ensure that the most relevant documents are positioned at the top of search results.
+The first objective of this project, conducted within the Biodiversity Monitoring via Question Answering initiative, is to develop an automated transformer-powered classifier specifically designed for ranking scientific abstracts based on their relevance to island biodiversity research. Unlike traditional classification systems that focus solely on accuracy, our approach prioritizes ranking performance to ensure that the most relevant documents are positioned at the top of search results.
 
-More specifically, the project aims to:
+More specifically, the project aims to: 
 
 \begin{itemize}
-    \item Develop a robust binary classification system capable of distinguishing between abstracts relevant and irrelevant to island ecosystem research
-    \item Optimize the classifier for ranking performance rather than strict classification accuracy, recognizing that in practical information retrieval scenarios, the relative ordering of documents is more important than perfect binary classification
-    \item Evaluate multiple state-of-the-art transformer architectures, with particular attention to domain-specific models pre-trained on biomedical literature
-    \item Address the inherent class imbalance present in information retrieval datasets through appropriate loss functions and evaluation metrics
-    \item Integrate the resulting classifier into the SIBiLS platform to assist researchers worldwide in efficiently identifying relevant biodiversity literature
+    \item Build two production-ready classifiers: a BioMoQA binary relevance ranker and an IPBES multi-label thematic tagger (IAS, SUA, VA)
+    \item Optimize ranking quality using threshold-independent metrics: ROC-AUC for BioMoQA; weighted Average Precision and ROC-AUC for IPBES
+    \item Compare BERT pre-trainedmodels (BERT-base, RoBERTa, BioBERT, BiomedBERT) and ensembles under stratified 5-fold cross-validation with fixed seeds
+    \item Perform random-search hyperparameter optimization per model/loss, then train fold-specific final models and ensembles
+    \item Mitigate imbalance: add curated synthetic negatives for BioMoQA; use per-label metrics and thresholding for IPBES
+    \item Use title+abstract inputs and quantify the impact of titles on ranking performance
+    \item Prepare reproducible deployment and integration into the SIBiLS platform (environment pinning, deterministic runs)
 \end{itemize}
 
 This work contributes to the broader goals of the BioMoQA project (detailed in Chapter 1) by providing a foundational component for automated literature triage. The ultimate vision is to enable researchers to pose complex questions about island biodiversity and receive ranked lists of relevant publications, thereby accelerating scientific discovery and supporting evidence-based conservation efforts.
+
+In parallel, we design a multi-label classifier for the IPBES corpus to automatically tag documents with one or more assessment axes (IAS, SUA, VA). As with BioMoQA, the emphasis is on ranking quality rather than hard classification: we optimize threshold-independent metrics (weighted Average Precision and ROC-AUC) so that axis-relevant documents are surfaced early. The IPBES pipeline reuses the same transformer encoders, training procedures, and statistical validation, and is intended for integration into SIBiLS to standardize large-scale thematic triage across assessments.
 
 The practical impact of this work extends beyond academic research, as the resulting system will be deployed within the SIBiLS platform, making it freely accessible to the global research community and actively contributing to making science more open and accessible.
 
@@ -202,7 +208,7 @@ Below, we focus only on BPE and WordPiece, as these are the primary tokenization
 
 % Should I put that much details ?
 
-Byte-Pair Encoding (BPE) was first introduced in 1994 by Philip Gage as a text compression algorithm. It was then modified by \cite{sennrich2015neural} as a tokenizer for Large Language Models (LLMs). BPE builds a vocabulary by iteratively merging the most common pair of characters until the desired vocabulary size is reached. The process starts with individual characters and progressively combines frequent character pairs into larger subword units, creating a data-driven vocabulary that balances between character-level and word-level representations.
+Byte-Pair Encoding (BPE) was first introduced in 1994 by Philip Gage. It was then modified by \cite{sennrich2015neural} as a tokenizer for Large Language Models (LLMs). BPE builds a vocabulary by iteratively merging the most common pair of characters until the desired vocabulary size is reached. The process starts with individual characters and progressively combines frequent character pairs into larger subword units, creating a data-driven vocabulary that balances between character-level and word-level representations.
 
 \subsection{WordPiece}\label{WordPiece}
 
@@ -214,9 +220,9 @@ WordPiece training is similar to BPE but differs in key ways. When splitting wor
 
 After a text has been tokenized, we still need to translate these tokens into a format that a machine learning model can understand: numbers. This translation step is known as \textit{word embedding}.
 
-\subsection{Term Frequency–Inverse Document Frequency (TF-IDF)}
+\subsection{Term Frequency--Inverse Document Frequency (TF-IDF)}
 
-One of the earliest and most straightforward approaches to transforming text into numerical values is the TF-IDF method, which stands for \textit{Term Frequency–Inverse Document Frequency}. The idea behind TF-IDF is to assign a weight to each word based on how important it is to a particular document, while also accounting for how common that word is across the entire corpus.
+One of the earliest and most straightforward approaches to transforming text into numerical values is the TF-IDF method, which stands for \textit{Term Frequency--Inverse Document Frequency}. The idea behind TF-IDF is to assign a weight to each word based on how important it is to a particular document, while also accounting for how common that word is across the entire corpus.
 
 Mathematically, it is defined as:
 
@@ -249,9 +255,9 @@ While both achieve a similar goal, they have different strengths. CBOW is faster
 
 \subsection{Negative Sampling}
 
-A major challenge in training these models is the sheer size of the vocabulary. When the Skip-Gram model tries to predict a context word, it technically has to calculate a probability for every single word in the entire vocabulary (which could be tens of thousands of words) using a softmax function. This is incredibly expensive and slow.
+A challenge in training these models is the big size of the vocabulary. When the Skip-Gram model tries to predict a context word, it technically has to calculate a probability for every single word in the entire vocabulary (which could be tens of thousands of words) using a softmax function. This is incredibly expensive and slow.
 
-This is where \textbf{Negative Sampling} comes in as a clever efficiency hack. Instead of framing the task as a massive multi-class classification problem, it reframes it as a much simpler binary classification problem. For a given pair of words `(input, output)`, such as `("mat", "sat")`, the model is trained to predict whether they are a true context pair (output 1). At the same time, we generate a few "negative" samples by pairing the input word with random words from the vocabulary, like `("mat", "banana")`. The model is trained to identify these as fake pairs (output 0).
+This is where \textbf{Negative Sampling} comes in as a clever efficiency hack. Instead of framing the task as a multi-class classification problem, it reframes it as a much simpler binary classification problem. For a given pair of words `(input, output)`, such as `("mat", "sat")`, the model is trained to predict whether they are a true context pair (output 1). At the same time, we generate a few "negative" samples by pairing the input word with random words from the vocabulary, like `("mat", "banana")`. The model is trained to identify these as fake pairs (output 0).
 
 This way, at each training step, the model only has to update the weights for the one true "positive" example and a small number of manufactured "negative" examples, rather than all the weights for the entire vocabulary. This dramatically speeds up training without a significant loss in the quality of the final embeddings.
 
@@ -315,9 +321,8 @@ To address the limitations of simple RNNs, the Long Short-Term Memory (LSTM) net
 
 \begin{figure}[!h]
     \centering
-    % Ensure you have this image in the specified path
     \includegraphics[width=0.8\textwidth]{images/lstm_cell.png} 
-    \caption{The structure of an LSTM cell, showing the cell state and three gates. Source: Christopher Olah's blog.}
+    \caption{The structure of an LSTM cell, showing the cell state and three gates.}
 \end{figure}
 
 The cell state acts as a conveyor belt for information, allowing it to flow down the sequence largely unchanged. The gates, which are composed of a sigmoid layer and a pointwise multiplication, regulate what information is added to or removed from this cell state.
@@ -349,16 +354,15 @@ In their famous paper "Attention Is All You Need," \cite{vaswani2017attention} p
 
 \begin{figure}[!h]
     \centering
-    % Ensure you have this image in the specified path
     \includegraphics[scale=0.5]{images/transformer_arch.png} 
-    \caption{The Transformer architecture, highlighting the Multi-Head Attention and Encoder-Decoder stacks. Source: Vaswani et al. (2017).}
+    \caption{The Transformer architecture, highlighting the Multi-Head Attention and Encoder-Decoder stacks.}
 \end{figure}
 
 The architecture is built from stacks of encoders and decoders. Since there is no recurrence, the model has no fundamental sense of word order. This is solved by injecting \textbf{positional encodings} into the input embeddings, which provide information about the relative or absolute position of tokens in the sequence. By parallelizing the attention mechanism into multiple "heads" (\textbf{Multi-Head Attention}), the model can learn different types of relationships simultaneously. This parallelizable, non-recurrent design made the Transformer far more efficient to train on hardware than LSTMs, allowing the development of models pre-trained on a huge amount of data.
 
 \subsection{BERT}
 
-BERT, or \textbf{Bidirectional Encoder Representations from Transformers}, represents a paradigm shift in how deep learning is applied to NLP \cite{devlin2019bert}. Instead of training a model from scratch for a specific task, BERT is a language representation model that is pre-trained on a massive amount of unlabeled text, and can then be quickly fine-tuned for various downstream tasks.
+BERT, or \textbf{Bidirectional Encoder Representations from Transformers}, represents a shift in how deep learning is applied to NLP \cite{devlin2019bert}. Instead of training a model from scratch for a specific task, BERT is a language representation model that is pre-trained on a massive amount of unlabeled text, and can then be quickly fine-tuned for various downstream tasks.
 
 Architecturally, BERT is composed of a stack of Transformer \textbf{encoders}. Unlike traditional language models that process text from left-to-right or right-to-left, BERT is deeply bidirectional. It achieves this through two novel pre-training tasks:
 \begin{enumerate}
@@ -369,7 +373,7 @@ After pre-training on a huge corpus (like Wikipedia and the BookCorpus), the res
 
 \subsection{BERT Variations}
 
-The success of BERT sparked a wave of research into pre-trained language models. Many variations have been proposed, often tweaking the pre-training objectives, architecture, or training data. The key innovation of RoBERTa \cite{liu2019roberta} demonstrated that the original BERT was significantly undertrained. By training for longer, on more data, with larger batches, removing the NSP objective (which they found to be of limited benefit), and using a dynamic masking strategy, RoBERTa was able to substantially outperform BERT on many benchmarks.
+The success of BERT provoked a wave of research into pre-trained language models. Many variations have been proposed, often tweaking the pre-training objectives, architecture, or training data. The key innovation of RoBERTa \cite{liu2019roberta} demonstrated that the original BERT was significantly undertrained. By training for longer, on more data, with larger batches, removing the NSP objective (which they found to be of limited benefit), and using a dynamic masking strategy, RoBERTa was able to substantially outperform BERT on many benchmarks.
 
 It was soon discovered that pre-training on a corpus tailored to a specific domain could yield significant performance gains on tasks within that domain. Models like BioBERT \cite{lee2020biobert} and BioMedBERT \cite{gu2021domain} are trained on vast collections of biomedical literature (e.g., PubMed abstracts). This allows them to learn the specific syntax, vocabulary, and semantic relationships prevalent in medical and biological texts.
 
@@ -393,6 +397,8 @@ BiomedBERT-fulltext & BERT pre-trained on full-text articles & 110M & 512 & PubM
 \end{tabular}%
 }
 \end{table}
+
+The summary in Table~\ref{tab:biomoqa_summary} quantifies these trends: the BCE ensemble achieves the highest ROC-AUC, AP, and F1 with modest variance, while the strongest single models (bert-base, RoBERTa) are close behind. This aligns with the title-inclusive BCE advantage indicated by the critical difference analysis.
 
 The domain-specific models (BioBERT and BiomedBERT variants) are particularly relevant for our biodiversity classification task, as they have been exposed to scientific terminology and writing styles characteristic of biological literature. BiomedBERT-fulltext represents the most comprehensive pre-training, having been trained on both abstracts and full-text articles, potentially providing richer contextual understanding.
 
@@ -549,7 +555,7 @@ In this context, for T the total number of data, the expected agreement by chanc
 \begin{equation} \label{eq1}
 \begin{split}
 p_e & = \frac{TP + FP}{T} \times \frac{TP + FN}{T}+ \frac{FP + TN}{T} \times \frac{FN + TN}{T} \\\\
-    & = P(pred= +) \times P(True= +) + P(pred= -) \times P(True= 1) 
+    & = P(pred= +) \times P(True= +) + P(pred= -) \times P(True= -) 
 \end{split}
 \end{equation}
 
@@ -619,7 +625,7 @@ This statistic is evaluated against a chi-squared distribution with one degree o
 
 While the Friedman test provides a holistic ranking across multiple data contexts, McNemar's test offers a focused verdict on two models' relative performance on a specific dataset. The former is ideal for establishing a general hierarchy of models, making it robust against performance fluctuations on any single dataset. The latter is a high-resolution tool for a head-to-head comparison, directly testing whose errors are a subset of the other's. The choice between them depends entirely on whether the goal is a broad comparison of many models or a specific duel between two.
 
-The process begins with the raw dataset, which is then prepared and split into 4 folds for cross-validation. For each fold, we iterate through every combination of model architecture and loss function. For each combination, we first perform hyperparameter optimization (HPO) using 25 trials of random search, optimizing for the ROC-AUC metric. The best set of hyperparameters is then used to train the final model for that fold. After training all individual models for a given fold, their predictions on the test set are combined to form an ensemble. All results and trained models are saved for subsequent analysis.
+The process begins with the raw dataset, which is then prepared and split into 5 folds for cross-validation. For each fold, we iterate through every combination of model architecture and loss function. For each combination, we first perform hyperparameter optimization (HPO) using 25 trials of random search, optimizing for the ROC-AUC metric (BioMoQA) or weighted AP (IPBES, see below). The best set of hyperparameters is then used to train the final model for that fold. After training all individual models for a given fold, their predictions on the test set are combined to form an ensemble. All results and trained models are saved for subsequent analysis.
 
 
 \chapter{Methods}
@@ -632,7 +638,7 @@ Our experimental workflow is designed to ensure a robust and fair comparison of 
     \centering
     \begin{tikzpicture}[node distance=2cm, auto]
         \node (start) [io] {Raw Data};
-        \node (preprocess) [process, below of=start] {Data Preprocessing \& K-Fold Split (4-Folds)};
+        \node (preprocess) [process, below of=start] {Data Preprocessing \& K-Fold Split (5-Folds)};
         \node (loop) [decision, below of=preprocess, yshift=-1cm] {For each fold};
         \node (hpo) [process, below of=loop, yshift=-1cm] {Hyperparameter Optimization (25 Trials, ROC-AUC)};
         \node (train) [process, below of=hpo] {Train Model with Best Hyperparameters};
@@ -654,25 +660,30 @@ Our experimental workflow is designed to ensure a robust and fair comparison of 
     \label{fig:workflow}
 \end{figure}
 
-The process begins with the raw dataset, which is then prepared and split into 4 folds for cross-validation. For each fold, we iterate through every combination of model architecture and loss function. For each combination, we first perform hyperparameter optimization (HPO) using 25 trials of random search, optimizing for the ROC-AUC metric. The best set of hyperparameters is then used to train the final model for that fold. After training all individual models for a given fold, their predictions on the test set are combined to form an ensemble. All results and trained models are saved for subsequent analysis.
+The process begins with the raw dataset, which is then prepared and split into 5 folds for cross-validation. For each fold, we iterate through every combination of model architecture and loss function. For each combination, we first perform hyperparameter optimization (HPO) using 25 trials of random search, optimizing for a chosen metric. The best set of hyperparameters is then used to train the final model for that fold. After training all individual models for a given fold, their predictions on the test set are combined to form an ensemble. All results and trained models are saved for subsequent analysis.
 
 \section{Hyperparameter Optimization}
 
-Hyperparameter optimization is essential for achieving optimal model performance and ensuring fair comparisons between different architectures. Rather than relying on default settings, we systematically search for the best combination of hyperparameters for each model and loss function combination.
+Hyperparameter optimization aims to optimize model performance and ensure fair comparisons between architectures. Rather than relying on default settings, we systematically search for the best combination of hyperparameters for each model and loss function combination.
 
-We employ random search with 25 trials for each model, optimizing the ROC-AUC metric on the development set. ROC-AUC was chosen as the primary optimization metric because it directly aligns with our ranking objective—it measures the model's ability to rank positive examples higher than negative ones across all possible thresholds. This threshold-independent property makes it particularly suitable for information retrieval applications where users will see ranked lists rather than hard classifications.
+\subsection*{Common protocol}
+We employ random search with 25 trials per model. The search space includes learning rates (1e-5 to 5e-5), batch sizes (8, 16, 32), warmup steps (0 to 10\% of total steps), and weight decay values (0.01 to 0.1). For Focal Loss variants (when used), we also optimize gamma (1.0 to 3.0) and alpha (0.1 to 0.5). Early stopping monitors the development metric with a patience of 3 epochs. After HPO, we train the final model on the train+dev split for that fold and optimize an operating threshold for F1 on the dev part for reporting thresholded metrics.
 
-The hyperparameter search space includes learning rates (1e-5 to 5e-5), batch sizes (8, 16, 32), warmup steps (0 to 10\% of total steps), and weight decay values (0.01 to 0.1). For models using Focal Loss, we also optimize the focusing parameter gamma (1.0 to 3.0) and the balancing factor alpha (0.1 to 0.5).
+\subsection*{BioMoQA}
+For the binary BioMoQA task, HPO optimizes ROC-AUC on the development set. This aligns with the ranking objective of surfacing relevant island biodiversity abstracts at the top of results. We additionally record F1, precision, recall, MCC, and AP.
 
-Beyond the primary ROC-AUC optimization, we implement F1-score threshold optimization for each trained model. This involves finding the probability threshold that maximizes the F1-score on the development set, providing fairer comparisons between models when reporting classification metrics. Early stopping is employed based on development set ROC-AUC with a patience of 3 epochs to prevent overfitting.
+\subsection*{IPBES}
+For the multi-label IPBES task, HPO optimizes weighted-average Average Precision. This choice reflects the need to reward ranking relevant papers early in the list and to penalize missing relevant papers.
 
-All experiments were conducted using three partitions of an NVIDIA A100 GPU cluster: two 16GB partitions and one 40GB partition. Hyperparameter optimization was parallelized using 1 GPU and 10 CPU cores per trial, allowing three concurrent trials across the available GPUs. This setup enabled efficient exploration of the hyperparameter space while managing computational resources effectively.
+All experiments were conducted using two partitions of 40GB of an NVIDIA A100 GPU cluster. Hyperparameter optimization was parallelized using 1 GPU and 10 CPU cores per trial, allowing two concurrent trials across the available GPUs. This setup enabled efficient exploration of the hyperparameter space while managing computational resources effectively.
 
-\section{Data Management and Experimental Design}
-\subsection{Description}
+\section{Dataset Management}
+This section summarizes dataset handling for both tasks to avoid repetition. We highlight only task-specific aspects beyond the common setup described earlier (stratified 5-fold CV, fixed seeds, strict train/dev/test separation per fold).
+
+\subsection{Description (BioMoQA)}
 The dataset used in this project originates from the BioMoQA initiative and consists of scientific abstracts from journals related to biodiversity. The primary goal is to classify these abstracts based on their relevance to island ecosystems, a task defined by researchers at the University of Neuchâtel. Each abstract is labeled as either "relevant" (positive class) or "irrelevant" (negative class).
 
-The original dataset comprised 449 manually curated documents: 326 positives (relevant to island biodiversity) and 123 negatives (irrelevant). Given the severe class imbalance and the relatively small size of the dataset, synthetic negatives were added to improve model training. These synthetic negatives were obtained from PubMed using the following query:
+The original dataset comprised 1434 manually curated documents: 996 positives (relevant to island biodiversity) and 438 negatives (irrelevant). Given the severe class imbalance and the relatively small size of the dataset, synthetic negatives were added to improve model training. These synthetic negatives were obtained from PubMed using the following query:
 
 \begin{verbatim}
 (English[Language]) AND Environment[MeSH Terms] AND 
@@ -684,13 +695,15 @@ atoll[Title/Abstract] OR insular[Title/Abstract] OR
 AND (fha[Filter])
 \end{verbatim}
 
-This query specifically targets recent environmental publications (2021-2025) while explicitly excluding island-related terms, ensuring that the synthetic negatives are genuinely irrelevant to the island biodiversity domain. The filter \texttt{fha[Filter]} restricts results to papers with available abstracts.
+This query specifically targets recent environmental publications (2021-2025) to avoid any bias caused by the remembering of some models trained on scientific literature posterior to 2021, while explicitly excluding island-related terms, ensuring that the synthetic negatives are genuinely irrelevant to the island biodiversity domain. The filter \texttt{fha[Filter]} restricts results to papers with available abstracts.
 
-A total of 1,000 synthetic negatives were randomly sampled from the query results and added to the training data, bringing the total corpus to 1,449 documents. Importantly, all testing and evaluation is performed exclusively on the original 449 manually curated documents, as we have higher confidence in their labels and this approach provides a more reliable estimate of real-world performance.
+A total of 500 synthetic negatives were sampled from the query results and added to the training data, bringing the total corpus to 1934 documents. Importantly, all testing and evaluation is performed exclusively on the original 1434 manually curated documents, as we have higher confidence in their labels and this approach provides a more reliable estimate of real-world performance.
 
 The input for our models is the concatenation of the title and the abstract of each scientific publication, providing rich textual context for classification decisions.
 
-\subsection{Pre-Processing}
+
+\subsection{Pre-Processing (BioMoQA)}
+
 The data preprocessing pipeline, implemented in \texttt{preprocess\_biomoqa.py} in the code, focuses on data cleaning, integration, and cross-validation setup rather than text normalization, which is handled by the transformer tokenizers themselves.
 
 The preprocessing workflow consists of several key steps:
@@ -698,49 +711,25 @@ The preprocessing workflow consists of several key steps:
 \begin{itemize}
     \item \textbf{Data Cleaning}: The pipeline removes duplicates based on title, abstract, and DOI fields while handling conflicts where identical content has different labels. Missing values in essential fields (title, abstract, keywords, labels) result in row removal to ensure data quality.
     
-    \item \textbf{Synthetic Negative Integration}: The 1,000 synthetic negatives retrieved from PubMed are combined with the original 449 manually curated documents. These synthetic negatives are labeled with -1 initially to distinguish them from original negatives (labeled 0) during the splitting process.
+    \item \textbf{Synthetic Negative Integration}: The 500 synthetic negatives retrieved from PubMed are combined with the original 1434 manually curated documents. These synthetic negatives are labeled with -1 initially to distinguish them from original negatives (labeled 0) during the splitting process.
     
-    \item \textbf{Stratified Cross-Validation Setup}: A 4-fold stratified cross-validation is implemented exclusively on the original 449 documents to ensure representative class distributions across folds. The stratification preserves the proportion of relevant vs. irrelevant documents in each fold.
+    \item \textbf{Stratified Cross-Validation Setup}: A 5-fold stratified cross-validation is implemented exclusively on the original 1434 documents to ensure representative class distributions across folds. The stratification preserves the proportion of relevant vs. irrelevant documents in each fold.
     
-    \item \textbf{Train/Dev/Test Splitting}: For each fold, the original data is split into training (≈56\%), development (≈19\%), and test (≈25\%) sets using stratified sampling. Crucially, all 1,000 synthetic negatives are added only to the training sets, ensuring that evaluation metrics are computed solely on manually curated data.
+    \item \textbf{Train/Dev/Test Splitting}: For each fold, the original data is split into training (\textasciitilde56\%), development (\textasciitilde19\%), and test (\textasciitilde25\%) sets using stratified sampling. Crucially, all 500 synthetic negatives are added only to the training sets, ensuring that evaluation metrics are computed solely on manually curated data.
     
     \item \textbf{Reproducibility Controls}: All random processes use fixed seeds derived from a master seed to ensure reproducible fold assignments and data splits across experimental runs.
 \end{itemize}
 
 The pipeline also validates fold integrity by ensuring no overlap between test sets across folds and converts all synthetic negative labels from -1 to 0 after the splitting process. This approach maintains clear separation between training and evaluation data while maximizing the use of available synthetic negatives for model training.
 
-\subsection{Class Distribution}
-A significant characteristic of the dataset, after adding the optional negatives, is its imbalance. As shown in Figure \ref{fig:data_repartition}, the irrelevant class significantly outnumbers the relevant one. This is a common scenario in information retrieval and classification tasks, where the number of relevant documents is often a small fraction of the total corpus \cite{manning2008introduction,he2009learning}.
+\subsection{Description (IPBES)}
+The IPBES corpus consists of policy- and assessment-oriented biodiversity literature annotated with three non-exclusive labels: IAS (Invasive Alien Species), SUA (Sustainable Use Assessment), and VA (Values Assessment). Documents may bear zero, one, or multiple labels. We apply the same stratified 5-fold CV protocol, preserving label distributions across folds and ensuring no leakage between folds. Title and abstract are concatenated as model input when available.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/class_distribution.png} 
-    \caption{Class distribution in the BioMoQA dataset.}
-    \label{fig:data_repartition}
-\end{figure}
-
-This class imbalance has major implications for both training and evaluation. A model trained on such data might develop a bias towards the majority class, achieving high accuracy by simply predicting every instance as "irrelevant". This makes accuracy a poor metric for performance assessment. Consequently, this motivates the use of more robust evaluation metrics like the F1-score, MCC, and AUC, as well as specialized training techniques like using a weighted loss function (Focal Loss), which will be discussed in the following sections.
-
-To provide a qualitative insight into the textual content, Figure \ref{fig:wordcloud} displays a word cloud generated from the abstracts of the relevant class. It highlights the prominence of terms related to geography, species, and ecological concepts, which is consistent with the task of identifying literature on island biodiversity.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/wordcloud.png} 
-    \caption{Word cloud for relevant documents.}
-    \label{fig:wordcloud}
-\end{figure}
-
-\subsection{Data Contamination Considerations}
-An important methodological consideration in this work is the potential for data contamination between pre-training and evaluation sets. Several of the transformer models used in this study, particularly the biomedical variants (BioBERT, BiomedBERT-abstract, and BiomedBERT-fulltext), were pre-trained on large corpora including PubMed abstracts and PMC full-text articles \cite{devlin2019bert,lee2020biobert}. Given that our evaluation set contains scientific abstracts that may have been published before the models' pre-training cutoff dates, there is a possibility that some test documents were seen during pre-training.
-
-This contamination could lead to overestimated performance, as models might have memorized specific passages or patterns rather than learning to generalize to new content. Ideally, to provide the most honest evaluation of model capabilities, testing should be restricted to publications released after the models' pre-training data collection periods (typically 2018-2020 for most models).
-
-However, the current study's focus on island biodiversity research, combined with the specific curation criteria applied by domain experts at the University of Neuchâtel, provides some mitigation against this concern. The task requires understanding of domain-specific concepts and the ability to identify subtle indicators of relevance to island ecosystems, which extends beyond simple memorization \cite{thessen2012applications}.
-
-Future work should consider establishing evaluation protocols that explicitly account for temporal splits, ensuring that test data comes exclusively from publications post-dating the pre-training corpora. This would provide a more conservative and realistic assessment of model performance in real-world deployment scenarios.
+\subsection{Pre-Processing (IPBES)}
+Pre-processing mirrors BioMoQA: deduplication, integrity checks, fold assignment with fixed seeds, and generation of train/dev/test splits per fold. Because labels are multi-hot, we compute and log both per-label supports and overall label cardinality per split to monitor balance.
 
 \subsection{Handling Imbalanced Data}
-As noted, our dataset is highly imbalanced. To counteract the tendency of models to favor the majority class, we explored two different loss functions for the binary classification task.
+As noted, as we add more an more synthetic negatives isntance our dataset become imbalanced. To counteract the tendency of models to favor the majority class, we explored two different loss functions for the binary classification task.
 
 \subsubsection{Binary Cross-Entropy (BCE)}
 The standard loss function for binary classification is Binary Cross-Entropy. For a single prediction, it is defined as:
@@ -753,69 +742,19 @@ To address the imbalance issue, we also experimented with Focal Loss \cite{lin20
 where \(\hat{y}_t\) is the predicted probability for the ground-truth class, \(\alpha_t\) is a weighting factor to balance class importance, and \(\gamma \ge 0\) is the focusing parameter. When \(\gamma=0\), Focal Loss is equivalent to BCE. A higher \(\gamma\) value increases the focus on hard examples. In our experiments, we use \(\gamma=2\) and \(\alpha=0.25\), standard values from the original paper.
 
 \section{Architecture}
-Our primary models are based on the Transformer architecture, leveraging pre-trained models from the Hugging Face library. The models investigated are the one introduced in \ref{tab:model_comparison}.
+\subsection{Common encoder and training loop}
+Our models are based on Transformer encoders (Table~\ref{tab:model_comparison}) from Hugging Face. Fine-tuning uses AdamW, linear warmup/decay, and early stopping on the development metric. Inputs concatenate title and abstract when available.
 
-On top of each pre-trained base model, we add a sequence classification "head". This consists of a dropout layer for regularization followed by a single linear layer that maps the final hidden state of the `[CLS]` token to a single logit, representing the binary classification output. The entire model, including the pre-trained base, is then fine-tuned on our specific task.
+\subsection{BioMoQA: binary head and losses}
+For BioMoQA, we add a single-logit classification head on the `[CLS]` representation with dropout regularization. We evaluate BCE and Focal Loss; reporting includes ROC-AUC, AP, F1, precision/recall, and MCC.
 
-As a baseline, we also trained a Support Vector Machine (SVM) classifier on TF-IDF features extracted from the text.
+\subsection{IPBES: multi-label head and losses}
+For IPBES, the head outputs one logit per label (IAS, SUA, VA) with sigmoid activations; training uses per-label BCE with logits.
+
+\paragraph{Baselines.} We also trained SVMs and Random Forests with TF-IDF features as a non-neural baseline for comparison in BioMoQA.
 
 \chapter{Implementation}
-
-This chapter describes the software implementation of the BioMoQA classification pipeline, detailing the code structure and workflow from data preprocessing to final results generation.
-
-\section{Code Architecture}
-
-The implementation follows a modular architecture organized into three main components within the \texttt{src/} directory:
-
-\subsection{Data Pipeline (\texttt{src/data\_pipeline/biomoqa/})}
-
-The data processing pipeline consists of two main modules:
-
-\begin{itemize}
-    \item \textbf{\texttt{create\_raw.py}}: Handles the acquisition of synthetic negative examples from PubMed using the Biopython library. This module implements the PubMed query described in the Data section and processes the retrieved abstracts into a standardized format.
-    
-    \item \textbf{\texttt{preprocess\_biomoqa.py}}: Manages data cleaning, cross-validation fold generation, and train/dev/test splits. This module ensures stratified sampling, handles the integration of synthetic negatives with original data, and generates the fold structures used throughout the experimental pipeline.
-\end{itemize}
-
-\subsection{Model Training and Evaluation (\texttt{src/models/biomoqa/})}
-
-The machine learning pipeline consists of several interconnected modules:
-
-\begin{itemize}
-    \item \textbf{\texttt{model\_init.py}}: Initializes transformer models from the Hugging Face library, configures tokenizers, and sets up classification heads with appropriate dropout layers.
-    
-    \item \textbf{\texttt{hpo.py}}: Implements hyperparameter optimization using Optuna's random search. This module handles the search space definition, trial execution, and best parameter selection based on ROC-AUC performance on development sets.
-    
-    \item \textbf{\texttt{train.py}}: Executes model training with the optimized hyperparameters. Implements early stopping, F1-score threshold optimization, and model checkpointing. Supports both Binary Cross-Entropy and Focal Loss training regimes.
-    
-    \item \textbf{\texttt{ensemble.py}}: Creates ensemble predictions by averaging the outputs of individual models trained within each fold. Handles both BCE and Focal Loss ensemble variants.
-    
-    \item \textbf{\texttt{baselines.py}}: Implements traditional machine learning baselines including SVM with TF-IDF features for comparison with transformer models.
-\end{itemize}
-
-\subsection{Orchestration and Configuration}
-
-The experimental workflow is orchestrated through shell scripts located in the \texttt{scripts/} directory:
-
-\begin{itemize}
-    \item \textbf{\texttt{launch\_final.sh}}: The main execution script that coordinates the entire pipeline from data preprocessing through ensemble creation. This script iterates over all model-loss combinations, manages cross-validation folds, and ensures proper sequencing of HPO and training phases.
-    
-    \item \textbf{\texttt{config.py}}: Centralizes all configuration parameters including random seeds, file paths, and experimental settings to ensure consistency across all pipeline components.
-\end{itemize}
-
-\section{Experimental Workflow}
-
-The implementation follows the workflow illustrated in Figure \ref{fig:workflow}:
-
-\begin{enumerate}
-    \item \textbf{Data Preparation}: Raw data is processed and augmented with synthetic negatives, then split into 4 cross-validation folds with stratified sampling.
-    
-    \item \textbf{Model Training}: For each fold and each model-loss combination, hyperparameter optimization is performed followed by final model training with the best parameters.
-    
-    \item \textbf{Evaluation}: Models are evaluated on their respective test folds, with metrics computed and saved to CSV files in the \texttt{results/biomoqa/} directory.
-    
-    \item \textbf{Ensemble Creation}: Individual model predictions are combined to create ensemble models for each loss function and fold combination.
-\end{enumerate}
+This chapter outlines the code organization and execution flow. We summarize modules for data processing, model training/evaluation, orchestration, and environment setup. The IPBES multi-label pipeline reuses the same components as BioMoQA, with a multi-label classification head and weighted-average metrics.
 
 \section{Reproducibility and Code Availability}
 
@@ -825,78 +764,187 @@ All experiments are fully reproducible through the use of fixed random seeds and
 
 The modular design of the codebase facilitates extension to other domains or datasets, making it a valuable resource for future research in scientific literature classification and ranking applications.
 
+For the IPBES model, use the same \texttt{uv} environment and orchestration. Its implementation is available in another public GitHub repository :  \url{https://github.com/CTGN/IPBES-Classifier.git}
+
+
 \chapter{Results}
-In this chapter, we present the empirical results of our experiments. We compare the performance of the different Transformer models and the SVM baseline across the two loss functions, using the metrics established in the evaluation chapter. All results are reported as the average over the 4 folds of the cross-validation.
+In this chapter, we present the empirical results of our experiments. We compare the performance of the different BERT models and the SVM and Random Forest baselines across the two loss functions, using the metrics established in the evaluation chapter. All results are reported as the average over the 5 folds of the cross-validation.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/biomoqa_f1_distribution.png}
+    \caption{Distribution of F1 scores for BioMoQA across folds and models.}
+    \label{fig:biomoqa_f1}
+\end{figure}
+
+Figure \ref{fig:biomoqa_f1} summarizes the F1 performance for all models (with titles). Several trends are apparent. First, all Transformer models outperform the best of baselines. Second, the ensemble performs clearly better than any other stand alone model as expected. Third the RoBERTa and BERT-base model seems to be the strongest standalone performers, while domain-specific models remain competitive. Finally, the BCE loss function performs consistently better than the loss function with less variance.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/biomoqa_roc_auc_distribution.png}
+    \caption{Distribution of ROC-AUC scores across folds and models for BioMoQA.}
+    \label{fig:biomoqa_auc_dist}
+\end{figure}
+
+Figure \ref{fig:biomoqa_auc_dist} shows the distribution of ROC-AUC across folds and models. Variability across folds remains moderate. Overall, we can do the same observations as above.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/biomoqa_precision_recall.png}
+    \caption{Precision--Recall behavior for BioMoQA across thresholds and models.}
+    \label{fig:biomoqa_pr}
+\end{figure}
+
+On figure \ref{fig:biomoqa_pr} what is interesting to see is that BioBERT, this time, seems to perform slightly better accross thresholds.
+
+
+To assess whether the observed differences among model variants exceed random variation, we compared 10 variants (5 models \(\times\) 2 loss functions). For each of the 5 cross-validation folds, we ranked the 10 variants by ROC-AUC on that fold's test split, and then applied the Friedman test treating folds as blocks and variants as treatments. This yielded \(p < 0.005\) for the null of equal average ranks. Because cross-validation folds come from the same underlying dataset and are not strictly independent, we treat this result as indicative rather than definitive; see Section \ref{sec:stat_test_dependence}. We therefore emphasize effect sizes and the critical difference diagram (Figure \ref{fig:biomoqa_cd_auc}), using Nemenyi post-hoc comparisons primarily as a descriptive aid.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/biomoqa_critical_difference_roc_auc.png}
+    \caption{Critical difference diagram for BioMoQA ROC-AUC (alpha=0.05).}
+    \label{fig:biomoqa_cd_auc}
+\end{figure}
+
+The diagram suggests that including the title with BCE loss performs better on average. Within the above caveats, RoBERTa appears to be the strongest standalone model, followed by BERT-base. A plausible explanation is RoBERTa's optimized pre-training (longer training, dynamic masking, larger batches) yielding stronger sentence-level representations that pair well with short titles; domain-specific gains may be muted here because island biodiversity relies on broad language and geographical cues rather than biomedical jargon.
+
+Table~\ref{tab:biomoqa_summary} quantifies these trends: the BCE ensemble achieves the highest ROC-AUC, AP, and F1 with modest variance, while the strongest single backbones (bert-base, RoBERTa) are close behind. This aligns with the title-inclusive BCE advantage indicated by the critical difference analysis.
 
 \begin{table}[h!]
 \centering
-\caption{Mean performance of all models across 4-fold cross-validation. Best performance for each metric is in bold. AUC is ROC-AUC.}
-\label{tab:main_results}
+\caption{BioMoQA: mean $\pm$ SD across 5 folds (BCE, with title).}
+\label{tab:biomoqa_summary}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{llccccc}
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Loss} & \textbf{Model} & \textbf{AUC} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} & \textbf{MCC} \\
+Model & ROC-AUC & AP & F1 & Accuracy & MCC \\
 \midrule
-\multirow{5}{*}{BCE} & bert-base-uncased & 0.717 & 0.859 & 0.831 & 0.889 & 0.348 \\
-& roberta-base & 0.816 & 0.866 & 0.826 & 0.911 & 0.381 \\
-& biobert-v1.1 & 0.809 & 0.867 & 0.822 & 0.918 & 0.385 \\
-& BiomedBERT-abstract & 0.776 & 0.870 & 0.823 & 0.923 & 0.351 \\
-& BiomedBERT-fulltext & 0.787 & 0.856 & 0.813 & 0.905 & 0.307 \\
-\midrule
-\multirow{5}{*}{Focal} & bert-base-uncased & 0.648 & 0.848 & 0.747 & 0.986 & 0.016 \\
-& roberta-base & 0.628 & 0.847 & 0.744 & 0.986 & 0.051 \\
-& biobert-v1.1 & 0.695 & 0.848 & 0.738 & 1.000 & 0.000 \\
-& BiomedBERT-abstract & 0.742 & 0.873 & 0.800 & 0.961 & 0.287 \\
-& BiomedBERT-fulltext & 0.689 & 0.848 & 0.738 & 0.986 & 0.032 \\
-\midrule
-Ensemble BCE & - & 0.826 & 0.879 & 0.849 & 0.913 & 0.428 \\
-Ensemble Focal & - & 0.784 & 0.720 & 0.874 & 0.609 & 0.331 \\
+BiomedBERT-abs & 0.900 $\pm$ 0.026 & 0.940 $\pm$ 0.023 & 0.897 $\pm$ 0.024 & 0.856 $\pm$ 0.035 & 0.661 $\pm$ 0.085 \\
+BiomedBERT-abs-ft & 0.896 $\pm$ 0.027 & 0.935 $\pm$ 0.024 & 0.884 $\pm$ 0.019 & 0.840 $\pm$ 0.027 & 0.627 $\pm$ 0.065 \\
+biobert-v1 & 0.906 $\pm$ 0.013 & 0.943 $\pm$ 0.013 & 0.892 $\pm$ 0.018 & 0.849 $\pm$ 0.025 & 0.645 $\pm$ 0.060 \\
+bert-base & 0.913 $\pm$ 0.012 & 0.949 $\pm$ 0.008 & 0.901 $\pm$ 0.012 & 0.862 $\pm$ 0.019 & 0.676 $\pm$ 0.049 \\
+roberta-base & 0.903 $\pm$ 0.011 & 0.938 $\pm$ 0.006 & 0.901 $\pm$ 0.019 & 0.865 $\pm$ 0.025 & 0.691 $\pm$ 0.058 \\
+Ensemble & 0.926 $\pm$ 0.005 & 0.956 $\pm$ 0.007 & 0.912 $\pm$ 0.013 & 0.877 $\pm$ 0.021 & 0.714 $\pm$ 0.052 \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-Table \ref{tab:main_results} summarizes the key performance metrics for all models. Several trends are immediately apparent. First, all Transformer-based models significantly outperform the SVM baseline, highlighting the effectiveness of pre-trained language models for this task. Second, domain-specific models (BioBERT and BiomedBERT) consistently perform better than general-purpose models (BERT and RoBERTa). Finally, the ensemble model, which averages the predictions of all Transformer models trained with Focal Loss, achieves the best performance across all metrics.
+
+
+\section{IPBES Results}
+\label{sec:ipbes_results}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/model_comparison_boxplot.png}
-    \caption{Boxplot of ROC-AUC scores across the 4 folds for each model, separated by loss function.}
-    \label{fig:boxplot}
+    \includegraphics[width=0.9\textwidth]{images/ipbes_f1_distribution.png}
+    \caption{Distribution of weighted-average F1 for IPBES across folds and models.}
+    \label{fig:ipbes_f1}
 \end{figure}
 
-Figure \ref{fig:boxplot} provides a more detailed view of the performance distribution, showing the ROC-AUC scores for each fold. The boxplots confirm the trends observed in the summary table, with the domain-specific models showing not only higher median performance but also less variance across the folds compared to the general-purpose models. The performance improvement when using Focal Loss is also visible, particularly for the better-performing models.
-
-To assess the statistical significance of these observed differences, we conducted a Friedman test on the model rankings across the 10 experiments (5 models x 2 loss functions). The test yielded a p-value \( < 0.001 \), indicating that there are statistically significant differences among the models' performances. We followed this with a Nemenyi post-hoc test to perform pairwise comparisons. The results are visualized in the critical difference diagram in Figure \ref{fig:nemenyi}.
+Figure \ref{fig:ipbes_f1} shows that all BERT models are competitive, but with the BCE-based ensemble being particularly and surprisingly low. What is very clear tho, is that the baseline performs very poorly compared to the BERT based models.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=1.0\textwidth]{images/nemenyi.png}
-    \caption{Critical difference diagram for the Nemenyi test (alpha=0.05). Models connected by a horizontal bar are not significantly different from each other.}
-    \label{fig:nemenyi}
+    \includegraphics[width=0.9\textwidth]{images/ipbes_roc_auc_distributions.png}
+    \caption{Distribution of weighted-average ROC-AUC across folds and models for IPBES.}
+    \label{fig:ipbes_auc_dist}
 \end{figure}
 
-The diagram shows a clear hierarchy. The top-performing models (BiomedBERT variants with Focal Loss) are statistically superior to the general-purpose models and the SVM baseline. Interestingly, there is no statistically significant difference between the different domain-specific models, nor between the two general-purpose models, but the gap between these two groups is significant.
+Weighted ROC-AUC distributions in Figure \ref{fig:ipbes_auc_dist} are high and tight for the best models, indicating stable ranking quality across thresholds. The ensemble consistently leads, while differences between the top single models are small, since the variance is notable.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/ipbes_precision_recall.png}
+    \caption{Weighted-average precision--recall behavior for IPBES across models. Note the relative difficulty of SUA compared to IAS and VA.}
+    \label{fig:ipbes_pr}
+\end{figure}
+
+Figure \ref{fig:ipbes_pr} highlights the precision--recall trade-off for all threshold and for each model. What strengthen what we saw earlier is that the ensemble learning is again performing well along the different thresholds. BioBERT this time seems better than the other standalone models.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/ipbes_roc_ias.png}
+    \caption{Per-label ROC curve: IAS.}
+    \label{fig:ipbes_roc_ias}
+\end{figure}
+
+For IAS (Figure \ref{fig:ipbes_roc_ias}), the ROC curve approaches the top-left corner, consistent with strong separability (mean ROC-AUC \(\approx 0.97\)) and high AP, indicating reliable detection of IAS-relevant documents.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/ipbes_roc_sua.png}
+    \caption{Per-label ROC curve: SUA.}
+    \label{fig:ipbes_roc_sua}
+\end{figure}
+
+For SUA (Figure \ref{fig:ipbes_roc_sua}), the curve is farther from the top-left than IAS/VA, reflecting the lower separability (mean ROC-AUC \(\approx 0.91\)) and lower AP. This corroborates that SUA is the hardest axis and benefits most from ensembling and recall-oriented thresholding.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/ipbes_roc_va.png}
+    \caption{Per-label ROC curve: VA.}
+    \label{fig:ipbes_roc_va}
+\end{figure}
+
+For VA (Figure \ref{fig:ipbes_roc_va}), performance sits between IAS and SUA (mean ROC-AUC \(\approx 0.95\); AP \(\approx 0.87\)), indicating good rankability with moderate headroom for improvement compared to IAS.
+
+Quantitatively, the BCE ensemble achieves mean macro ROC-AUC of 0.943 (SD \textasciitilde 0.003) and mean macro AP of 0.886 (SD \textasciitilde 0.004) across folds. Per-label means for the ensemble are: IAS ROC-AUC 0.971 and AP 0.972; SUA ROC-AUC 0.907 and AP 0.818; VA ROC-AUC 0.948 and AP 0.867. The spread is narrow for IAS/VA and wider for SUA (AP spanning roughly 0.807--0.836), indicating SUA as the hardest axis.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/ipbes_critical_difference_AP.png}
+    \caption{Critical difference diagram for IPBES Average Precision (alpha=0.05). Only BCE-loss models with title are considered.}
+    \label{fig:ipbes_cd_ap}
+\end{figure}
+
+Table~\ref{tab:ipbes_summary} corroborates the preceding figures: the BCE ensemble attains the highest macro ROC-AUC and AP with tight standard deviations, while its weighted F1 remains below the top single models (e.g., BioBERT, RoBERTa). This pattern matches our ranking-oriented objective and the earlier observation that the ensemble’s F1 is comparatively lower despite superior ranking metrics.
 
 
-\chapter{Results Analysis and discussion}
+\begin{table}[h!]
+\centering
+\caption{IPBES: mean $\pm$ SD across 5 folds (BCE, with title).}
+\label{tab:ipbes_summary}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+Model & ROC-AUC (macro) & AP (macro) & F1 (weighted) \\
+\midrule
+BiomedBERT-abs & 0.933 $\pm$ 0.002 & 0.863 $\pm$ 0.009 & 0.805 $\pm$ 0.008 \\
+BiomedBERT-abs-ft & 0.917 $\pm$ 0.007 & 0.834 $\pm$ 0.010 & 0.785 $\pm$ 0.011 \\
+biobert-v1 & 0.942 $\pm$ 0.008 & 0.883 $\pm$ 0.016 & 0.838 $\pm$ 0.011 \\
+bert-base & 0.931 $\pm$ 0.013 & 0.866 $\pm$ 0.023 & 0.824 $\pm$ 0.019 \\
+roberta-base & 0.934 $\pm$ 0.004 & 0.872 $\pm$ 0.009 & 0.828 $\pm$ 0.004 \\
+Ensemble & 0.942 $\pm$ 0.003 & 0.885 $\pm$ 0.005 & 0.780 $\pm$ 0.011 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+
+Figure \ref{fig:ipbes_cd_ap} visually confirms the modest but consistent advantages of BioBERT and the ensemble; most pairwise gaps remain below the significance threshold at \(\alpha=0.05\).
+
+What we can conclude from this results for the IPBES dataset is that our expections are confirmed : the ensemble model performed the best while the best standalone model performance is made by a domain specific model (BioBER), suggesting that the model was able to grasp more meaning thanks to a specfic scientfic understanding.
+
+\chapter{Discussion}
 
 \section{Ablation Studies}
 
 \subsection{Impact of Including Title Information}
 To evaluate the contribution of title information to classification performance, we compared models trained with and without the concatenated title-abstract input. The results from our experiments show that including the title consistently improves performance across all models and metrics. 
 
-Models trained with both title and abstract achieved an average F1-score improvement of approximately 2-3 percentage points compared to abstract-only models. This improvement is particularly notable given that titles typically contain only 10-15 words compared to 200+ words in abstracts. The title appears to provide crucial high-level semantic signals that complement the detailed information in abstracts, especially for identifying domain-specific concepts related to island biodiversity.
+Models trained with both title and abstract achieved an average ROC-AUC score improvement of approximately 1-2 percentage points compared to abstract-only models. This improvement is particularly notable given that titles typically contain only 10-15 words compared to 200+ words in abstracts. The title appears to provide crucial high-level semantic signals that complement the detailed information in abstracts, especially for identifying domain-specific concepts related to island biodiversity.
 
 \subsection{Binary Cross-Entropy vs. Focal Loss}
-The comparison between BCE and Focal Loss reveals interesting patterns in how these loss functions handle class imbalance. As shown in Table \ref{tab:main_results}, Focal Loss models exhibit markedly different behavior compared to BCE models:
+The comparison between BCE and Focal Loss reveals interesting patterns in how these loss functions handle class imbalance. As shown in Figure \ref{fig:biomoqa_f1}, Focal Loss models exhibit markedly different behavior compared to BCE models:
 
 Focal Loss models achieve higher recall (often approaching 100\%) but lower precision, indicating a strong tendency to classify documents as positive. This behavior aligns with Focal Loss's design to focus on hard-to-classify examples, which in our imbalanced dataset often means giving more attention to the minority positive class. However, this comes at the cost of reduced precision and, importantly, lower ROC-AUC scores.
 
-BCE models demonstrate more balanced precision-recall trade-offs and superior ROC-AUC performance, making them better suited for our ranking application. The ensemble of BCE models achieves the best overall performance with an ROC-AUC of 0.826 and F1-score of 0.879, suggesting that for information retrieval tasks, the balanced approach of BCE is preferable.
+BCE models demonstrate more balanced precision-recall trade-offs and superior ROC-AUC performance, making them better suited for our ranking application. The ensemble of BCE models achieves the best overall performance, suggesting that for information retrieval tasks, the balanced approach of BCE is preferable.
 
 \subsection{Impact of Synthetic Negatives}
-The addition of 1,000 synthetic negatives to the training data proved beneficial for model performance. When comparing models trained with and without synthetic negatives (keeping the test set constant), we observed consistent improvements in classification performance. The synthetic negatives help address the severe class imbalance (326 positives vs. 123 negatives) and provide the model with more examples of irrelevant content.
+The addition of 500 synthetic negatives to the training data proved beneficial for model performance. When comparing models trained with and without synthetic negatives (keeping the test set constant), we observed consistent improvements in classification performance. The synthetic negatives help address the severe class imbalance (996 positives vs. 438 negatives) and provide the model with more examples of irrelevant content.
 
 The carefully crafted PubMed query for synthetic negatives, which explicitly excludes island-related terms while including environmental content, ensures that these additional examples are genuinely negative while maintaining topical relevance. This approach allows models to better distinguish between general environmental literature and island-specific biodiversity research.
 
@@ -908,52 +956,37 @@ This finding suggests that the island biodiversity classification task may benef
 \subsection{Ensemble Performance}
 The ensemble of BCE models achieves the best overall performance, demonstrating the value of combining multiple model predictions. By averaging the outputs of different transformer architectures, the ensemble reduces individual model variance and provides more robust predictions. The diversity of models in the ensemble (combining general-purpose and domain-specific architectures) contributes to this improved performance.
 
-\subsection{Contamination}
-A potential limitation of the evaluation methodology is the possibility of data contamination or "leakage" across the cross-validation folds. The documents in the dataset are not guaranteed to be fully independent. For instance, different articles might be published by the same author, on the same specific topic, or as part of the same series of studies. If highly similar documents are split between the training and testing folds, the model might learn to recognize surface-level patterns (like author names or specific jargon) rather than generalizing to the underlying scientific concepts. This could lead to an overestimation of the model's true performance on completely new, unseen data. A more robust (but more complex) evaluation schema would involve splitting the data based on publication year or journal to ensure better separation.
-
 \section{Limitations}
 
-\subsection{Dataset Size and Generalizability}
-The primary limitation of this work is the relatively small size of the manually curated dataset, consisting of only 449 documents (326 positives and 123 negatives). While this dataset was carefully curated by domain experts at the University of Neuchâtel, the small size limits the robustness of our conclusions and the generalizability of our models to broader biodiversity literature.
+\subsection{Data Contamination Considerations}
+An important methodological consideration in this work is the potential for data contamination between pre-training and evaluation sets. Several of the transformer models used in this study, particularly the biomedical variants (BioBERT, BiomedBERT-abstract, and BiomedBERT-fulltext), were pre-trained on large corpora including PubMed abstracts and PMC full-text articles \cite{devlin2019bert,lee2020biobert}. Given that our evaluation set contains scientific abstracts that may have been published before the models' pre-training cutoff dates, there is a possibility that some test documents were seen during pre-training.
 
-Deep learning models, particularly large transformer models, typically benefit from much larger training datasets. The addition of 1,000 synthetic negatives partially addresses this limitation, but ideally, a larger collection of manually annotated documents would provide more reliable training and evaluation. The small test sets in each cross-validation fold (approximately 25-30 positives and 30-35 negatives) also contribute to higher variance in performance estimates.
+This contamination could lead to overestimated performance, as models might have memorized specific passages or patterns rather than learning to generalize to new content. Ideally, to provide the most honest evaluation of model capabilities, testing should be restricted to publications released after the models' pre-training data collection periods (typically 2018-2020 for most models).
 
-\subsection{Temporal Evaluation Bias}
-As discussed in the data contamination section, the most significant methodological limitation is the potential overlap between our evaluation set and the pre-training corpora of the biomedical models. For the most honest evaluation of model capabilities, future work should restrict testing to publications released after 2021, ensuring temporal separation from the pre-training data collection periods.
-
-This temporal split would provide a more conservative and realistic assessment of how these models would perform on truly new publications in a real-world deployment scenario. The current evaluation, while valuable, may overestimate model performance due to potential memorization effects.
+However, the pre-training set having a really high-volume of data, we can assume that this contamination is a minor one. 
 
 \subsection{Domain Scope}
 While the focus on island biodiversity provides a specific and valuable use case, it also limits the broader applicability of our findings. The lessons learned about domain-specific vs. general-purpose models, and the relative performance of different transformer architectures, may not generalize to other biodiversity domains or scientific literature classification tasks.
 
 \subsection{Computational Resources}
-Our experiments were constrained by available computational resources, limiting the extent of hyperparameter exploration and the number of random seeds used for robustness testing. While 25 trials per model represents a reasonable search effort, more extensive optimization might yield additional performance gains.
+Our experiments were constrained by available computational resources, limiting the extent of hyperparameter exploration. While 25 trials per model represents a reasonable search effort, more extensive optimization might yield additional performance gains.
 
-\subsection{Statistical Testing Assumptions}
+\subsection{Statistical Testing Assumptions}\label{sec:stat_test_dependence}
 An important methodological limitation concerns the independence assumptions underlying our statistical tests. The Friedman test and subsequent Nemenyi post-hoc analysis assume that the performance measurements across folds are independent observations. However, in cross-validation, the folds are not truly independent as they are derived from the same underlying dataset and may contain related documents (e.g., papers from the same authors, research groups, or on highly similar topics).
 
-This violation of the independence assumption could lead to inflated confidence in the statistical significance of observed differences between models. A more rigorous approach would require techniques specifically designed for dependent samples or larger-scale experiments with truly independent datasets. Nevertheless, the substantial effect sizes observed between model categories (e.g., domain-specific vs. general-purpose) suggest that the main conclusions remain valid despite this limitation.
+This violation of the independence assumption could lead to inflated confidence in the statistical significance of observed differences between models. A more rigorous approach would require techniques specifically designed for dependent samples or larger-scale experiments with truly independent datasets. However, the effect sizes observed between model categories (e.g., domain-specific vs. general-purpose) suggest that the main conclusions remain valid despite this limitation.
 
 Despite these limitations, the work provides valuable insights into transformer-based classification for scientific literature and establishes a foundation for future research in automated biodiversity literature triage.
 
 \chapter{Conclusion}
 
-This project successfully developed and evaluated transformer-based models for classifying biodiversity-related scientific abstracts relevant to island ecosystems research. The work contributes both to the specific goals of the BioMoQA project and to the broader understanding of information retrieval applications in scientific literature.
+This project developed BERT-based classifiers for two complementary literature-triage tasks and evaluated them under rigorous 5-fold cross-validation, ranking-oriented metrics, and statistical comparisons. For BioMoQA, the BCE ensemble with titles achieved strong ranking performance with mean ROC-AUC of 0.926 (SD \textasciitilde 0.004), AP of 0.956 (SD \textasciitilde 0.006), and F1 of 0.912 (SD \textasciitilde 0.012), alongside accuracy 0.877, precision 0.890, recall 0.936, and MCC 0.714. These results confirm that transformer ensembles provide robust separation between relevant and irrelevant island-biodiversity abstracts.
 
-Our experimental evaluation across multiple transformer architectures and loss functions reveals several key findings. Contrary to expectations, domain-specific biomedical models did not dramatically outperform general-purpose models, suggesting that the island biodiversity classification task benefits from broad language understanding capabilities. The performance differences between models trained with Binary Cross-Entropy and Focal Loss highlight the importance of choosing appropriate loss functions for ranking applications, with BCE proving superior for our information retrieval objectives.
+For IPBES, the BCE ensemble attained a mean macro ROC-AUC of 0.942 (SD \textasciitilde 0.003), mean macro AP of 0.885 (SD \textasciitilde 0.004), and weighted F1 of 0.780 (SD \textasciitilde 0.010) across folds, with clear per-label differences: IAS is easiest, VA intermediate, and SUA the hardest axis (lower AP and ROC-AUC). These findings validate the feasibility of reliable, large-scale multi-label tagging for assessment-relevant themes.
 
-The best-performing configuration achieved a ROC-AUC of 0.826 and F1-score of 0.879 using an ensemble of transformer models trained with Binary Cross-Entropy loss. While these results demonstrate the feasibility of automated classification for this domain, they also highlight the challenges of working with small, specialized datasets in scientific domains.
+Across both tasks, BCE-trained BERT models and their ensembles consistently outperformed classical baselines. Domain-specific models were competitive, while general-purpose models also performed strongly, suggesting that broad language understanding complements specialized vocabulary for these applications. The addition of carefully curated synthetic negatives in BioMoQA contributed to improved robustness under class imbalance.
 
-The addition of carefully curated synthetic negatives proved beneficial for model training, demonstrating a practical approach to address severe class imbalance in specialized domains. The inclusion of title information alongside abstracts consistently improved performance, emphasizing the value of complete document representations for classification tasks.
-
-This work establishes a solid foundation for an automated literature triage system that will be integrated into the SIBiLS platform, supporting researchers worldwide in efficiently identifying relevant biodiversity literature. The ranking-focused approach ensures that the system will be practically useful for information retrieval scenarios where users need ranked lists of relevant publications rather than hard classifications.
-
-Future work should address the key limitations identified in this study, particularly the need for larger manually annotated datasets and temporal evaluation protocols that account for potential pre-training data contamination. Additionally, extending the approach to other biodiversity domains beyond island ecosystems would test the generalizability of our findings and expand the impact of automated literature triage systems in environmental research.
-
-The broader impact of this work extends beyond the specific domain of island biodiversity, providing insights into transformer-based classification for scientific literature and demonstrating the practical challenges and solutions for deploying AI systems in specialized scientific domains \cite{cohen2010overview,westergaard2018comprehensive}. As part of the open science initiative, the resulting system will contribute to making scientific knowledge more accessible and discoverable for the global research community.
-
-
-\chapter{Bibliography}
+In the coming weeks, both models will be integrated into SIBiLS to deliver ranked, explainable literature triage to end users. This deployment will make the systems’ capabilities broadly accessible within an open-science ecosystem and support faster, more consistent evidence discovery for biodiversity and policy assessments.
 
 \printbibliography
 
