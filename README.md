@@ -33,6 +33,30 @@ uv sync
 uv run python -c "import torch; print('Installation successful!')"
 ```
 
+## Download Dataset and Model Weights (Linux)
+
+The dataset and pretrained model weights are publicly hosted in an S3 bucket: [biomoqa-classifier (public)](https://biomoqa-classifier.s3.text-analytics.ch/).
+
+Use `wget` to download the contents into the correct project folders:
+```bash
+# From project root
+mkdir -p data results/final_model
+
+# Download model checkpoints → results/final_model/
+wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
+  -P results/final_model \
+  https://biomoqa-classifier.s3.text-analytics.ch/checkpoints/
+
+# Download dataset → data/
+wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
+  -P data \
+  https://biomoqa-classifier.s3.text-analytics.ch/dataset/
+```
+
+After running the above commands:
+- `results/final_model/` contains the cross-validation checkpoints
+- `data/` contains the dataset files
+
 ## Training
 
 ### Data Preprocessing
@@ -260,6 +284,6 @@ abstract,title,keywords
 ## Results
 
 Trained models and evaluation metrics are saved in:
-- `results/final_model/` - Final trained models
+- `results/final_model/` - Final trained models weights
 - `results/metrics/` - Performance metrics
 - Model checkpoints follow the pattern: `best_model_cross_val_{loss}_{model}_{fold}/`

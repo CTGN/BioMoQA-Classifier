@@ -67,13 +67,6 @@
     \end{center}
 \end{titlepage}
 
-
-\chapter*{Remerciements}
-
-Je souhaite tout d'abord remercier Julien Knafou, grâce à qui j'ai pu trouver ce stage, pour l'aide qu'il m'a accordé dans mon apprentissage. \\
-Je suis également particulièrement reconnaissant pour la confiance que m'a accordé Patrick Ruch, directeur du stage.
-Je remercie aussi l'ensemble des membres du groupe BiTeM pour leur accueil et leurs conseils précieux et instructifs tout au long de cette période, ainsi que mes encadrants académiques pour leurs retours pertinents et leur disponibilité. Enfin, j'exprime ma gratitude aux partenaires du projet, notamment les équipes impliquées dans le projet BioMoQA et l'IPBES, pour les échanges scientifiques et l'accès aux données.
-
 \tableofcontents
 
 \chapter{BiTeM group presentation}
@@ -122,7 +115,7 @@ More specifically, the project aims to:
     \item Compare BERT pre-trainedmodels (BERT-base, RoBERTa, BioBERT, BiomedBERT) and ensembles under stratified 5-fold cross-validation with fixed seeds
     \item Perform random-search hyperparameter optimization per model/loss, then train fold-specific final models and ensembles
     \item Mitigate imbalance: add curated synthetic negatives for BioMoQA; use per-label metrics and thresholding for IPBES
-    \item Use title+abstract inputs and quantify the impact of titles on ranking performance
+    \item Use title + abstract inputs and quantify the impact of titles on ranking performance
     \item Prepare reproducible deployment and integration into the SIBiLS platform (environment pinning, deterministic runs)
 \end{itemize}
 
