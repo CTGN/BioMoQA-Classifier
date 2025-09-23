@@ -8,8 +8,18 @@ from transformers import (
     AutoModelForSequenceClassification,
     DataCollatorWithPadding
 )
+from pathlib import Path
+import sys
+
+# Add project root to sys.path for imports
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
+
+
 from src.config import CONFIG
 from src.utils import map_name
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -231,8 +241,10 @@ class BioMoQAPredictor:
         
         return tokens
     
+    #TODO : edit this so that it make sense
     def predict_batch(
         self,
+        batch_size: int,
         abstracts: List[str],
         titles: Optional[List[str]] = None,
         keywords: Optional[List[str]] = None
@@ -263,27 +275,35 @@ class BioMoQAPredictor:
     
     def evaluate_text(
         self,
-        abstract: str,
-        title: Optional[str] = None,
-        keywords: Optional[str] = None,
+        data,
         return_binary: bool = False
     ) -> Dict[str, Any]:
-        score = self.predict_score(abstract, title, keywords)
-        
-        result = {
-            "abstract": abstract,
-            "score": score
-        }
-        
+        abstract = data.get('abstract', '')
+        title = data.get('title') if self.with_title else None
+        keywords = data.get('keywords') if self.with_keywords else None
+
+        result={}
+        result["doi"]=data.get("doi", None)
+        result["abstract"] = abstract
         if title is not None:
             result["title"] = title
         if keywords is not None:
             result["keywords"] = keywords
-            
-        if return_binary:
-            result["prediction"] = int(score > self.threshold)
-            
-        return result
+
+        if  isinstance(abstract,str) and (self.with_title == isinstance(title,str)) and (self.with_keywords == isinstance(keywords,str)):
+            score = self.predict_score(abstract, title, keywords)
+            result["score"] = score
+
+            if return_binary:
+                result["prediction"] = int(score > self.threshold) 
+                
+            return result
+        else:
+            logger.warning(f"Invalid input types for abstract/title/keywords. Expected type str but got {type(abstract)}/{type(title)}/{type(keywords)}. Returning None for score and prediction.")
+            result["score"] = None
+            if return_binary:
+                result["prediction"] = None
+            return result
 
 
 def load_predictor(
@@ -322,13 +342,13 @@ def example_usage():
     """
     
     score = predictor.predict_score(abstract)
-    print(f"Prediction score: {score:.4f}")
+    logger.info(f"Prediction score: {score:.4f}")
     
     binary_pred = predictor.predict_binary(abstract)
-    print(f"Binary prediction: {binary_pred}")
+    logger.info(f"Binary prediction: {binary_pred}")
     
     result = predictor.evaluate_text(abstract, return_binary=True)
-    print(f"Full evaluation: {result}")
+    logger.info(f"Full evaluation: {result}")
 
 
 def main():
@@ -358,7 +378,7 @@ Examples:
         "--model_name",
         type=str,
         required=True,
-        help="Model name (e.g., BiomedBERT-abs)"
+        help="Model name (can be one of the following : bert-base, roberta-base, BiomedBERT-abs, BiomedBERT-abs-ft,biobert-v1)"
     )
     parser.add_argument(
         "--loss_type",
@@ -372,7 +392,6 @@ Examples:
         default="results/final_model",
         help="Directory containing model checkpoints"
     )
-    
     parser.add_argument(
         "--abstract",
         type=str,
@@ -418,6 +437,12 @@ Examples:
         help="Device to use for inference (default: auto)"
     )
     
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=8,
+        help="Batch size for batch predictions (default: 8)"
+    )
     parser.add_argument(
         "--output_file",
         type=str,
@@ -465,16 +490,21 @@ Examples:
         
         if args.input_file:
             logger.info(f"Loading texts from: {args.input_file}")
-            import json
+            if args.input_file.endswith('.json'):
+                import json
+                
+                with open(args.input_file, 'r', encoding='utf-8') as f:
+                    if args.input_file.endswith('.json'):
+                        texts_data = json.load(f)
+                    else:
+                        texts_data = []
+                        for line in f:
+                            if line.strip():
+                                texts_data.append(json.loads(line.strip()))
             
-            with open(args.input_file, 'r', encoding='utf-8') as f:
-                if args.input_file.endswith('.json'):
-                    texts_data = json.load(f)
-                else:
-                    texts_data = []
-                    for line in f:
-                        if line.strip():
-                            texts_data.append(json.loads(line.strip()))
+            elif args.input_file.endswith('.csv'):
+                df = pd.read_csv(args.input_file)
+                texts_data = df.to_dict(orient='records')
             
             logger.info(f"Processing {len(texts_data)} texts...")
             for i, text_data in enumerate(texts_data):
@@ -482,9 +512,7 @@ Examples:
                     logger.info(f"Processing text {i+1}/{len(texts_data)}")
                 
                 result = predictor.evaluate_text(
-                    abstract=text_data.get('abstract', ''),
-                    title=text_data.get('title') if args.with_title else None,
-                    keywords=text_data.get('keywords') if args.with_keywords else None,
+                    data=text_data,
                     return_binary=True
                 )
                 results.append(result)
@@ -511,27 +539,10 @@ Examples:
         logger.info("\n" + "="*60)
         logger.info("PREDICTION RESULTS")
         logger.info("="*60)
-        
-        for i, result in enumerate(results):
-            if len(results) > 1:
-                logger.info(f"\nResult {i+1}:")
-                logger.info("-" * 20)
-            
-            if 'title' in result:
-                logger.info(f"Title: {result['title']}")
-            if 'keywords' in result:
-                logger.info(f"Keywords: {result['keywords']}")
-            
-            abstract_display = result['abstract']
-            if len(abstract_display) > 200:
-                abstract_display = abstract_display[:200] + "..."
-            logger.info(f"Abstract: {abstract_display}")
-            
-            logger.info(f"Score: {result['score']:.4f}")
-            logger.info(f"Prediction: {'Positive' if result['prediction'] == 1 else 'Negative'}")
-            
-            if args.threshold != 0.5:
-                logger.info(f"Threshold used: {args.threshold}")
+
+        results_df=pd.DataFrame(results)
+        results_df.index+=1
+        logger.info(f"\n{results_df.head(10)}")
         
         if args.output_file:
             logger.info(f"\nSaving results to: {args.output_file}")
@@ -539,6 +550,10 @@ Examples:
             with open(args.output_file, 'w', encoding='utf-8') as f:
                 json.dump(results, f, indent=2, ensure_ascii=False)
             logger.info("Results saved successfully!")
+        else:
+            pd.DataFrame(results).to_csv("predictions.csv", index=False)
+            filepath = os.path.abspath("predictions.csv")
+            logger.info(f"\nResults saved to {filepath}")
             
     except Exception as e:
         logger.error(f"Error: {e}")

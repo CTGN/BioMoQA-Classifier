@@ -11,9 +11,10 @@ import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# Add src to path to import your modules
-project_root = Path(__file__).parent.parent.absolute()
-sys.path.insert(0, str(project_root))
+# Add project root to sys.path for imports
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 
 from web.utils import get_example_texts, format_confidence_score
 from src.models.biomoqa.folds_ensemble_predictor import CrossValidationPredictor, validate_model_path
@@ -100,7 +101,7 @@ def render_sidebar():
     # Base path for models
     base_path = st.sidebar.text_input(
         "Models Base Path",
-        value="results/biomoqa/final_model",
+        value="results/final_model",
         help="Base directory containing the fold model checkpoints"
     )
     
@@ -273,7 +274,7 @@ def render_batch_upload():
                     st.error("Please load ensemble models first.")
                     return
                 
-                process_batch_scoring(abstracts)
+                process_batch_scoring(texts_data)
                 
         except Exception as e:
             st.error(f"Error processing file: {str(e)}")
@@ -563,8 +564,8 @@ def process_batch_scoring(abstracts):
     # Results table with ranking
     df_results = pd.DataFrame([
         {
+            *full_result,
             "Rank": i + 1,
-            "Abstract": r['abstract'][:150] + "..." if len(r['abstract']) > 150 else r['abstract'],
             "Ensemble Score": f"{r['ensemble_score']:.4f}",
             "Score Range": f"{r['min_score']:.3f}-{r['max_score']:.3f}",
             "Stability (σ)": f"{r['std_score']:.3f}",

@@ -133,18 +133,12 @@ The inference system provides multiple interfaces for classifying research abstr
 ### Command Line Interface (Recommended)
 ```bash
 # Single text prediction
-uv run experiments/inference.py \
+uv run src/models/biomoqa/instantiation.py \
   --model_name "BiomedBERT-abs" \
-  --abstract "Your research abstract text here..." \
-  --title "Your title here..." \
+  --input_file path/to/input_text \
   --loss_type "BCE" \
   --with_title \
   --threshold 0.5
-
-# Run demo with example texts
-uv run experiments/inference.py \
-  --model_name "BiomedBERT-abs" \
-  --demo
 
 # Process multiple texts (not yet implemented in CLI)
 ```
@@ -152,7 +146,7 @@ uv run experiments/inference.py \
 ### Programmatic Usage
 ```python
 # Using the ensemble predictor (recommended)
-from src.models.biomoqa.ensemble import load_ensemble_predictor
+from src.models.biomoqa.folds_ensemble_predictor import load_ensemble_predictor
 
 predictor = load_ensemble_predictor(
     model_type="BiomedBERT-abs",
@@ -249,7 +243,7 @@ abstract,title,keywords
 - `--run`: Experiment run number
 
 **Inference Parameters:**
-- `--model_name`: Model architecture name (e.g., `BiomedBERT-abs`)
+- `--model_name`: Model architecture name (can be one of the following : bert-base, roberta-base, BiomedBERT-abs, BiomedBERT-abs-ft,biobert-v1)
 - `--loss_type`: Loss type used during training (`BCE`, `focal`)
 - `--weights_parent_dir`: Directory containing model checkpoints
 - `--threshold`: Classification threshold (default: 0.5)

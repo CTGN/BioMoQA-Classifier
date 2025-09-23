@@ -132,11 +132,12 @@ class CrossValidationPredictor:
             }
         }
     
-    def score_batch_optimized(self, abstracts: list, batch_size: int = 16) -> list:
+    def score_batch_optimized(self, data, batch_size: int = 16) -> list:
         """
         Optimized batch scoring using GPU acceleration
         Process multiple abstracts simultaneously for better performance
         """
+        abstracts = [item.get('abstract', '') for item in data if item.get('abstract', '')]
         if not abstracts:
             return []
         
