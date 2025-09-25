@@ -58,6 +58,21 @@ class CrossValidationPredictor:
                 model.to(self.device)
                 model.eval()
                 
+                # Apply GPU optimizations
+                if self.device == "cuda":
+                    # Enable FP16 mixed precision if requested
+                    if self.use_fp16:
+                        model = model.half()  # Convert model to FP16
+                        logger.info(f"✅ Enabled FP16 mixed precision for fold {fold}")
+                    
+                    # Enable model compilation if requested and supported
+                    if self.use_compile and hasattr(torch, 'compile'):
+                        try:
+                            model = torch.compile(model, mode="reduce-overhead")
+                            logger.info(f"✅ Compiled model for fold {fold}")
+                        except Exception as e:
+                            logger.warning(f"Model compilation failed for fold {fold}: {e}")
+                
                 self.fold_tokenizers[fold] = tokenizer
                 self.fold_models[fold] = model
                 
@@ -93,11 +108,15 @@ class CrossValidationPredictor:
             )
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
-        # Make prediction
+        # Make prediction with proper dtype handling
         with torch.no_grad():
+            # Handle FP16 inputs if model is using FP16
+            if self.use_fp16 and self.device == "cuda":
+                inputs = {k: v.half() if v.dtype == torch.float32 else v for k, v in inputs.items()}
+            
             outputs = model(**inputs)
             logits = outputs.logits
-            score = torch.sigmoid(logits).squeeze().cpu().item()
+            score = torch.sigmoid(logits).squeeze().float().cpu().item()  # Convert back to float32 for consistency
         
         prediction = int(score > self.threshold)
         return {
@@ -213,11 +232,15 @@ class CrossValidationPredictor:
                     )
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
                 
-                # Get predictions for entire batch
+                # Get predictions for entire batch with proper dtype handling
                 with torch.no_grad():
+                    # Handle FP16 inputs if model is using FP16
+                    if self.use_fp16 and self.device == "cuda":
+                        inputs = {k: v.half() if v.dtype == torch.float32 else v for k, v in inputs.items()}
+                    
                     outputs = model(**inputs)
                     logits = outputs.logits
-                    scores = torch.sigmoid(logits).squeeze().cpu().numpy()
+                    scores = torch.sigmoid(logits).squeeze().float().cpu().numpy()  # Convert back to float32 for consistency
                     
                     # Handle single item case
                     if len(batch_abstracts) == 1:
