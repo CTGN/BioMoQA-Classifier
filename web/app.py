@@ -491,12 +491,12 @@ def process_batch_scoring(texts_data):
     abstracts = []
     for item in texts_data:
         if isinstance(item, str):
-            abstracts.append(item)
+            abstracts.append(item if item is not None else None)
         elif isinstance(item, dict):
-            abstract = item.get('abstract', item.get('text', ''))
+            abstract = item.get('abstract', item.get('text', None))
             abstracts.append(abstract)
         else:
-            abstracts.append('')  # Fallback for unexpected types
+            abstracts.append(None)  # Fallback for unexpected types
     
     # Get batch size from session state (default to 16)
     batch_size = getattr(st.session_state, 'batch_size', 16)
@@ -509,13 +509,39 @@ def process_batch_scoring(texts_data):
 
         print("Starting batch scoring...")
         
-        # Prepare data for the predictor (it expects list of dicts with 'abstract' key)
+        # Prepare data for the predictor, handling None abstracts
         predictor_data = []
+        valid_indices = []
         for i, abstract in enumerate(abstracts):
-            predictor_data.append({"abstract": abstract, "index": i})
+            if abstract is not None:
+                predictor_data.append({"abstract": abstract, "index": i})
+                valid_indices.append(i)
         
-        # Use optimized batch scoring - much faster!
-        full_results = st.session_state.predictor.score_batch_optimized(predictor_data, batch_size=batch_size)
+        # Use optimized batch scoring for valid abstracts only
+        if predictor_data:
+            valid_results = st.session_state.predictor.score_batch_optimized(predictor_data, batch_size=batch_size)
+        else:
+            valid_results = []
+        
+        # Create full results array with None for invalid abstracts
+        full_results = []
+        valid_result_idx = 0
+        for i, abstract in enumerate(abstracts):
+            if abstract is not None and valid_result_idx < len(valid_results):
+                full_results.append(valid_results[valid_result_idx])
+                valid_result_idx += 1
+            else:
+                # Create None result for None abstracts
+                full_results.append({
+                    "ensemble_score": None,
+                    "statistics": {
+                        "std_score": None,
+                        "min_score": None,
+                        "max_score": None,
+                        "consensus_strength": None,
+                        "positive_folds": None
+                    }
+                })
 
         print("Batch scoring complete.")
         
