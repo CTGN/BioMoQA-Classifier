@@ -495,8 +495,13 @@ def process_batch_scoring(texts_data):
 
         print("Starting batch scoring...")
         
+        # Prepare data for the predictor (it expects list of dicts with 'abstract' key)
+        predictor_data = []
+        for i, abstract in enumerate(abstracts):
+            predictor_data.append({"abstract": abstract, "index": i})
+        
         # Use optimized batch scoring - much faster!
-        full_results = st.session_state.predictor.score_batch_optimized(abstracts, batch_size=batch_size)
+        full_results = st.session_state.predictor.score_batch_optimized(predictor_data, batch_size=batch_size)
 
         print("Batch scoring complete.")
         
