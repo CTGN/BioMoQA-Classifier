@@ -61,7 +61,7 @@ def main():
         # Input mode selection
         input_mode = st.radio(
             "Select input mode:",
-            ["Single Text Scoring", "Batch Scoring & Ranking", "Example Texts"],
+            ["Batch Scoring & Ranking","Single Text Scoring", "Example Texts"],
             horizontal=True
         )
         
@@ -525,8 +525,8 @@ def process_batch_scoring(texts_data):
         predictor_data = []
         valid_indices = []
         for i, (abstract, title) in enumerate(zip(abstracts, titles)):
-            if abstract is not None:
-                predictor_data.append({"abstract": abstract, "title": title, "index": i})
+            if abstract is not None and str(abstract).strip():
+                predictor_data.append({"abstract": str(abstract), "title": title, "index": i})
                 valid_indices.append(i)
         
         # Use optimized batch scoring for valid abstracts only
@@ -539,7 +539,7 @@ def process_batch_scoring(texts_data):
         full_results = []
         valid_result_idx = 0
         for i, (abstract, title) in enumerate(zip(abstracts, titles)):
-            if abstract is not None and valid_result_idx < len(valid_results):
+            if abstract is not None and str(abstract).strip() and valid_result_idx < len(valid_results):
                 full_results.append(valid_results[valid_result_idx])
                 valid_result_idx += 1
             else:
