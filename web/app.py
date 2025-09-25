@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="BioMoQA Scorer",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 
@@ -41,6 +41,13 @@ def main():
         st.session_state.model_loaded = False
     if 'batch_size' not in st.session_state:
         st.session_state.batch_size = 16
+    if 'auto_load_attempted' not in st.session_state:
+        st.session_state.auto_load_attempted = False
+    
+    # Auto-load roberta-base model on first visit
+    if not st.session_state.auto_load_attempted and not st.session_state.model_loaded:
+        st.session_state.auto_load_attempted = True
+        load_ensemble_models("roberta-base", "BCE", "results/final_model", 0.5, None)
     
     # Sidebar for model configuration
     render_sidebar()
