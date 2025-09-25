@@ -201,6 +201,13 @@ def load_ensemble_models(model_type: str, loss_type: str, base_path: str, thresh
 
 def render_single_text_input():
     """Render the single text input interface"""
+    # Title input
+    title = st.text_input(
+        "Title",
+        placeholder="Enter the research title here (optional)...",
+        help="The title text to use alongside the abstract"
+    )
+    
     # Abstract input
     abstract = st.text_area(
         "Abstract*",
@@ -231,7 +238,7 @@ def render_single_text_input():
         # Make prediction
         with st.spinner("Scoring with ensemble..."):
             try:
-                result = st.session_state.predictor.score_text(abstract)
+                result = st.session_state.predictor.score_text(abstract, title)
                 render_scoring_results(result)
                 
             except Exception as e:
@@ -341,7 +348,7 @@ def render_example_texts():
         
         with st.spinner("Scoring example..."):
             try:
-                result = st.session_state.predictor.score_text(example['abstract'])
+                result = st.session_state.predictor.score_text(example['abstract'], example.get('title'))
                 render_scoring_results(result)
                 
             except Exception as e:
@@ -487,16 +494,21 @@ def process_batch_scoring(texts_data):
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Extract abstracts for scoring - handle both dict and string formats
+    # Extract abstracts and titles for scoring - handle both dict and string formats
     abstracts = []
+    titles = []
     for item in texts_data:
         if isinstance(item, str):
             abstracts.append(item if item is not None else None)
+            titles.append(None)  # No title available for string input
         elif isinstance(item, dict):
             abstract = item.get('abstract', item.get('text', None))
+            title = item.get('title', None)
             abstracts.append(abstract)
+            titles.append(title)
         else:
             abstracts.append(None)  # Fallback for unexpected types
+            titles.append(None)
     
     # Get batch size from session state (default to 16)
     batch_size = getattr(st.session_state, 'batch_size', 16)
@@ -509,12 +521,12 @@ def process_batch_scoring(texts_data):
 
         print("Starting batch scoring...")
         
-        # Prepare data for the predictor, handling None abstracts
+        # Prepare data for the predictor, handling None abstracts and titles
         predictor_data = []
         valid_indices = []
-        for i, abstract in enumerate(abstracts):
+        for i, (abstract, title) in enumerate(zip(abstracts, titles)):
             if abstract is not None:
-                predictor_data.append({"abstract": abstract, "index": i})
+                predictor_data.append({"abstract": abstract, "title": title, "index": i})
                 valid_indices.append(i)
         
         # Use optimized batch scoring for valid abstracts only
@@ -526,7 +538,7 @@ def process_batch_scoring(texts_data):
         # Create full results array with None for invalid abstracts
         full_results = []
         valid_result_idx = 0
-        for i, abstract in enumerate(abstracts):
+        for i, (abstract, title) in enumerate(zip(abstracts, titles)):
             if abstract is not None and valid_result_idx < len(valid_results):
                 full_results.append(valid_results[valid_result_idx])
                 valid_result_idx += 1

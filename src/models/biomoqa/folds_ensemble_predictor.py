@@ -64,19 +64,29 @@ class CrossValidationPredictor:
         
         logger.info(f"Successfully loaded all {self.num_folds} fold models!")
     
-    def predict_single_fold(self, abstract: str, fold: int) -> dict:
+    def predict_single_fold(self, abstract: str, fold: int, title: str = None) -> dict:
         """Score using a single fold model"""
         tokenizer = self.fold_tokenizers[fold]
         model = self.fold_models[fold]
         
-        # Tokenize input
-        inputs = tokenizer(
-            abstract,
-            truncation=True,
-            max_length=512,
-            padding=True,
-            return_tensors="pt"
-        )
+        # Tokenize input - use title and abstract if title is provided
+        if title is not None:
+            inputs = tokenizer(
+                title,
+                abstract,
+                truncation=True,
+                max_length=512,
+                padding=True,
+                return_tensors="pt"
+            )
+        else:
+            inputs = tokenizer(
+                abstract,
+                truncation=True,
+                max_length=512,
+                padding=True,
+                return_tensors="pt"
+            )
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
         # Make prediction
@@ -92,14 +102,14 @@ class CrossValidationPredictor:
             "prediction": prediction
         }
     
-    def score_text(self, abstract: str) -> dict:
+    def score_text(self, abstract: str, title: str = None) -> dict:
         """Score a text using ensemble of all fold models"""
         fold_results = []
         fold_scores = []
         
         # Get predictions from all folds
         for fold in range(1, self.num_folds + 1):
-            result = self.predict_single_fold(abstract, fold)
+            result = self.predict_single_fold(abstract, fold, title)
             fold_results.append(result)
             fold_scores.append(result["score"])
         
@@ -135,11 +145,21 @@ class CrossValidationPredictor:
     def score_batch_optimized(self, data, batch_size: int = 16) -> list:
         """
         Optimized batch scoring using GPU acceleration
-        Process multiple abstracts simultaneously for better performance
+        Process multiple abstracts and titles simultaneously for better performance
         """
-        abstracts = [item.get('abstract', '') for item in data if item.get('abstract', '')]
-        if not abstracts:
+        # Extract abstracts and titles, filter out items with None abstracts
+        valid_items = []
+        for item in data:
+            abstract = item.get('abstract', '')
+            if abstract:  # Only process items with valid abstracts
+                title = item.get('title', None)
+                valid_items.append({'abstract': abstract, 'title': title})
+        
+        if not valid_items:
             return []
+        
+        abstracts = [item['abstract'] for item in valid_items]
+        titles = [item['title'] for item in valid_items]
         
         logger.info(f"Processing {len(abstracts)} abstracts with batch_size={batch_size}")
         
@@ -149,6 +169,7 @@ class CrossValidationPredictor:
         for batch_start in range(0, len(abstracts), batch_size):
             batch_end = min(batch_start + batch_size, len(abstracts))
             batch_abstracts = abstracts[batch_start:batch_end]
+            batch_titles = titles[batch_start:batch_end]
             
             logger.info(f"Processing batch {batch_start//batch_size + 1}/{(len(abstracts)-1)//batch_size + 1}")
             
@@ -160,14 +181,30 @@ class CrossValidationPredictor:
                 tokenizer = self.fold_tokenizers[fold]
                 model = self.fold_models[fold]
                 
-                # Tokenize entire batch
-                inputs = tokenizer(
-                    batch_abstracts,
-                    truncation=True,
-                    max_length=512,
-                    padding=True,
-                    return_tensors="pt"
-                )
+                # Tokenize entire batch - handle titles
+                # Check if any titles are not None in this batch
+                has_titles = any(title is not None for title in batch_titles)
+                
+                if has_titles:
+                    # Use title-abstract pairs, handling None titles
+                    title_inputs = [title if title is not None else "" for title in batch_titles]
+                    inputs = tokenizer(
+                        title_inputs,
+                        batch_abstracts,
+                        truncation=True,
+                        max_length=512,
+                        padding=True,
+                        return_tensors="pt"
+                    )
+                else:
+                    # No titles in this batch, use abstracts only
+                    inputs = tokenizer(
+                        batch_abstracts,
+                        truncation=True,
+                        max_length=512,
+                        padding=True,
+                        return_tensors="pt"
+                    )
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
                 
                 # Get predictions for entire batch
@@ -191,7 +228,7 @@ class CrossValidationPredictor:
                     })
             
             # Compile final results for this batch
-            for i, abstract in enumerate(batch_abstracts):
+            for i, (abstract, title) in enumerate(zip(batch_abstracts, batch_titles)):
                 fold_results = [batch_fold_results[fold][i] for fold in range(1, self.num_folds + 1)]
                 fold_scores = [result["score"] for result in fold_results]
                 
