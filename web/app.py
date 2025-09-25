@@ -529,6 +529,7 @@ def process_batch_scoring(texts_data):
             # Create combined result with original data + predictions
             combined_result = {
                 **original_data,  # All original columns
+                "original_index": i + 1,  # Store original position here
                 "ensemble_score": prediction_result["ensemble_score"],
                 "std_score": prediction_result["statistics"]["std_score"],
                 "min_score": prediction_result["statistics"]["min_score"],
@@ -613,9 +614,7 @@ def process_batch_scoring(texts_data):
             help="Show only results above this score"
         )
     
-    # Add original index and score rank to each result
-    for i, result in enumerate(results):
-        result['original_index'] = i + 1
+    # Results already have original_index from when they were created
     
     # Calculate score ranks (1 = highest score)
     sorted_by_score = sorted(results, key=lambda x: x['ensemble_score'], reverse=True)
