@@ -148,7 +148,7 @@ def render_sidebar():
     # Store batch size in session state
     st.session_state.batch_size = batch_size
     
-    # GPU memory info
+    # GPU memory info and optimization status
     if device_option in ["auto", "cuda"] and torch.cuda.is_available():
         gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
         st.sidebar.info(f"🔥 GPU Memory: {gpu_memory:.1f} GB")
@@ -158,6 +158,12 @@ def render_sidebar():
             st.sidebar.info("💡 Mid-range GPU: batch_size=16-32 recommended")
         else:
             st.sidebar.warning("⚠️ Low GPU memory: use batch_size=8 or less")
+        
+        # Show optimization features
+        st.sidebar.subheader("⚡ GPU Optimizations")
+        st.sidebar.info("🎯 **FP16 Mixed Precision**: 2x memory savings + speed boost")
+        st.sidebar.info("🚀 **Model Compilation**: PyTorch 2.0+ optimization")
+        st.sidebar.info("📊 **Dynamic Batching**: Length-based grouping for efficiency")
     
     # Show model info
     st.sidebar.subheader("📋 Model Configuration")
@@ -176,28 +182,41 @@ def render_sidebar():
     st.sidebar.code("Model: bert-base\nLoss: focal")
 
 def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, device: str):
-    """Load the ensemble of fold models"""
-    with st.spinner("Loading ensemble models..."):
+    """Load the ensemble of fold models with GPU optimizations"""
+    with st.spinner("Loading ensemble models with GPU optimizations..."):
         try:
             # Validate base path
             if not os.path.exists(base_path):
                 st.sidebar.error("Base path does not exist. Please check the path.")
                 return
             
-            # Load predictor
+            # Load predictor with GPU optimizations enabled
             predictor = CrossValidationPredictor(
                 model_type=model_type,
                 loss_type=loss_type,
                 base_path=base_path,
                 threshold=threshold,
-                device=device
+                device=device,
+                use_fp16=True,  # Enable FP16 for GPU acceleration
+                use_compile=True  # Enable torch.compile for PyTorch 2.0+ optimization
             )
             
             # Store in session state
             st.session_state.predictor = predictor
             st.session_state.model_loaded = True
             
-            st.sidebar.success(f"✅ Loaded {predictor.num_folds} fold models successfully!")
+            # Show optimization status
+            optimization_info = []
+            if predictor.use_fp16:
+                optimization_info.append("FP16 Mixed Precision")
+            if predictor.use_compile:
+                optimization_info.append("Model Compilation")
+            
+            success_msg = f"✅ Loaded {predictor.num_folds} fold models successfully!"
+            if optimization_info:
+                success_msg += f"\n🚀 Optimizations: {', '.join(optimization_info)}"
+            
+            st.sidebar.success(success_msg)
             
         except Exception as e:
             st.sidebar.error(f"Failed to load ensemble models: {str(e)}")
@@ -251,7 +270,7 @@ def render_single_text_input():
 def render_batch_upload():
     """Render the batch upload interface"""
     st.info("🚀 Upload a JSON or CSV file with multiple texts for GPU-accelerated batch scoring and ranking.")
-    st.success("⚡ Optimized for A100 GPU: Process hundreds of texts in seconds with batch inference!")
+    st.success("⚡ **GPU Optimizations**: FP16 mixed precision + dynamic batching + model compilation for maximum speed!")
     
     # File upload
     uploaded_file = st.file_uploader(
@@ -401,6 +420,21 @@ def render_model_status():
         st.info(f"**Device:** {st.session_state.predictor.device}")
         st.info(f"**Reference Threshold:** {st.session_state.predictor.threshold}")
         st.info(f"**Current Batch Size:** {st.session_state.batch_size}")
+        
+        # Show GPU optimizations status
+        if hasattr(st.session_state.predictor, 'use_fp16') or hasattr(st.session_state.predictor, 'use_compile'):
+            st.subheader("⚡ GPU Optimizations")
+            if getattr(st.session_state.predictor, 'use_fp16', False):
+                st.success("🎯 **FP16 Mixed Precision**: Enabled")
+            else:
+                st.info("🎯 **FP16 Mixed Precision**: Disabled")
+                
+            if getattr(st.session_state.predictor, 'use_compile', False):
+                st.success("🚀 **Model Compilation**: Enabled")
+            else:
+                st.info("🚀 **Model Compilation**: Disabled")
+                
+            st.success("📊 **Dynamic Batching**: Enabled")
         
         # Show batch processing status
         if st.session_state.batch_processing:

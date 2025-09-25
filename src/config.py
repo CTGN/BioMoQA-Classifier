@@ -183,7 +183,7 @@ CONFIG = {
         "learning_rate": None,
         "gradient_accumulation_steps": 4,
         "num_train_epochs": 10,
-        "fp16": False,
+        "fp16": True,  # Enable mixed precision for 2x memory savings and speed improvements
         "logging_strategy": "epoch",
         "report_to": "tensorboard",
     },
