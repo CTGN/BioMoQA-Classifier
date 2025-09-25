@@ -239,18 +239,39 @@ def render_batch_upload():
     uploaded_file = st.file_uploader(
         "Choose a file",
         type=['json', 'csv'],
-        help="Upload a JSON file (array of objects) or CSV file with 'abstract' column"
+        help="Upload a JSON file (array of strings or objects with 'abstract'/'text' field) or CSV file with 'abstract' column"
     )
     
     if uploaded_file:
         try:
             # Parse file based on type
             if uploaded_file.name.endswith('.json'):
-                texts_data = json.load(uploaded_file)
-                if not isinstance(texts_data, list):
-                    st.error("JSON file must contain an array of objects.")
+                json_data = json.load(uploaded_file)
+                if not isinstance(json_data, list):
+                    st.error("JSON file must contain an array.")
                     return
-                abstracts = [item.get('abstract', '') for item in texts_data]
+                
+                # Handle different JSON formats
+                texts_data = []
+                abstracts = []
+                
+                for i, item in enumerate(json_data):
+                    if isinstance(item, str):
+                        # Array of strings - treat each string as abstract
+                        abstracts.append(item)
+                        texts_data.append({"abstract": item, "index": i + 1})
+                    elif isinstance(item, dict):
+                        # Array of objects - extract abstract field
+                        abstract = item.get('abstract', item.get('text', ''))
+                        if not abstract:
+                            # If no 'abstract' or 'text' field, try to find the first string field
+                            string_fields = [v for v in item.values() if isinstance(v, str)]
+                            abstract = string_fields[0] if string_fields else ''
+                        abstracts.append(abstract)
+                        texts_data.append(item)
+                    else:
+                        st.error(f"Unsupported item type in JSON array: {type(item)}")
+                        return
             elif uploaded_file.name.endswith('.csv'):
                 df = pd.read_csv(uploaded_file)
                 if 'abstract' not in df.columns:
@@ -452,8 +473,16 @@ def process_batch_scoring(texts_data):
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Extract abstracts for scoring
-    abstracts = [item.get('abstract', '') for item in texts_data]
+    # Extract abstracts for scoring - handle both dict and string formats
+    abstracts = []
+    for item in texts_data:
+        if isinstance(item, str):
+            abstracts.append(item)
+        elif isinstance(item, dict):
+            abstract = item.get('abstract', item.get('text', ''))
+            abstracts.append(abstract)
+        else:
+            abstracts.append('')  # Fallback for unexpected types
     
     # Get batch size from session state (default to 16)
     batch_size = getattr(st.session_state, 'batch_size', 16)
