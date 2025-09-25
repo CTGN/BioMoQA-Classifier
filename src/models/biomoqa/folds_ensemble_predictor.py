@@ -90,6 +90,44 @@ class CrossValidationPredictor:
                 raise Exception(f"Failed to load fold {fold}: {str(e)}")
         
         logger.info(f"Successfully loaded all {self.num_folds} fold models!")
+        
+        # Quick diagnostic test
+        self._run_diagnostic_test()
+    
+    def _run_diagnostic_test(self):
+        """Run a quick test to verify models are working correctly"""
+        try:
+            logger.info("🔍 Running diagnostic test...")
+            test_abstract = "This is a test abstract about biodiversity research."
+            test_title = "Test Title"
+            
+            # Test fold 1 with basic inference
+            fold = 1
+            tokenizer = self.fold_tokenizers[fold]
+            model = self.fold_models[fold]
+            
+            # Simple tokenization test
+            inputs = tokenizer(
+                test_abstract,
+                truncation=True,
+                max_length=512,
+                padding=True,
+                return_tensors="pt"
+            )
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            
+            # Simple inference test
+            with torch.no_grad():
+                outputs = model(**inputs)
+                logits = outputs.logits
+                score = torch.sigmoid(logits).squeeze().cpu().item()
+            
+            logger.info(f"✅ Diagnostic test passed! Test score: {score:.4f}")
+            
+        except Exception as e:
+            logger.error(f"❌ Diagnostic test failed: {str(e)}")
+            import traceback
+            logger.error(f"Diagnostic traceback: {traceback.format_exc()}")
     
     def predict_single_fold(self, abstract: str, fold: int, title: str = None) -> dict:
         """Score using a single fold model"""
@@ -307,8 +345,26 @@ class CrossValidationPredictor:
     def _process_fold_batch_sequential(self, fold: int, batch_abstracts: List[str], batch_titles: List[str]) -> List[Dict]:
         """Process a batch of texts through a single fold model (optimized sequential)"""
         try:
+            # Check if fold models are loaded
+            if fold not in self.fold_tokenizers:
+                raise ValueError(f"Tokenizer for fold {fold} not found")
+            if fold not in self.fold_models:
+                raise ValueError(f"Model for fold {fold} not found")
+                
             tokenizer = self.fold_tokenizers[fold]
             model = self.fold_models[fold]
+            
+            # Verify model is on correct device
+            model_device = next(model.parameters()).device
+            logger.info(f"Debug - Fold {fold}: Model on device {model_device}, Expected: {self.device}")
+            
+            # Validate input data
+            if not batch_abstracts:
+                raise ValueError(f"Empty batch_abstracts for fold {fold}")
+            if len(batch_abstracts) != len(batch_titles):
+                raise ValueError(f"Mismatch between abstracts and titles length for fold {fold}")
+            
+            logger.info(f"Debug - Fold {fold}: Processing {len(batch_abstracts)} abstracts")
             
             # Tokenize entire batch - handle titles
             has_titles = any(title is not None for title in batch_titles)
@@ -317,6 +373,7 @@ class CrossValidationPredictor:
                 # Use title-abstract pairs, handling None titles
                 title_inputs = [str(title) if title is not None else "" for title in batch_titles]
                 abstract_inputs = [str(abstract) if abstract is not None else "" for abstract in batch_abstracts]
+                logger.info(f"Debug - Fold {fold}: Tokenizing with titles")
                 inputs = tokenizer(
                     title_inputs,
                     abstract_inputs,
@@ -328,6 +385,7 @@ class CrossValidationPredictor:
             else:
                 # No titles in this batch, use abstracts only
                 abstract_inputs = [str(abstract) if abstract is not None else "" for abstract in batch_abstracts]
+                logger.info(f"Debug - Fold {fold}: Tokenizing without titles")
                 inputs = tokenizer(
                     abstract_inputs,
                     truncation=True,
@@ -336,24 +394,38 @@ class CrossValidationPredictor:
                     return_tensors="pt"
                 )
             
+            logger.info(f"Debug - Fold {fold}: Tokenization complete, input shape: {inputs['input_ids'].shape}")
+            
             # Move to device and handle FP16
+            logger.info(f"Debug - Fold {fold}: Moving tensors to device {self.device}")
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
             # Get predictions for entire batch with proper dtype handling
             with torch.no_grad():
+                logger.info(f"Debug - Fold {fold}: Starting inference")
+                
                 # Handle FP16 inputs if model is using FP16
                 if self.use_fp16 and self.device == "cuda":
+                    logger.info(f"Debug - Fold {fold}: Converting to FP16")
                     inputs = {k: v.half() if v.dtype == torch.float32 else v for k, v in inputs.items()}
                 
+                logger.info(f"Debug - Fold {fold}: Running model forward pass")
                 outputs = model(**inputs)
+                logger.info(f"Debug - Fold {fold}: Model forward pass complete")
+                
                 logits = outputs.logits
+                logger.info(f"Debug - Fold {fold}: Logits shape: {logits.shape}")
+                
                 scores = torch.sigmoid(logits).squeeze().float().cpu().numpy()  # Convert back to float32 for consistency
+                logger.info(f"Debug - Fold {fold}: Scores computed")
                 
                 # Handle single item case
                 if len(batch_abstracts) == 1:
                     scores = [scores.item()]
                 else:
                     scores = scores.tolist()
+                
+                logger.info(f"Debug - Fold {fold}: Scores converted to list: {len(scores)} items")
             
             # Return fold results
             fold_results = []
@@ -368,7 +440,17 @@ class CrossValidationPredictor:
             return fold_results
             
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
             logger.error(f"❌ Fold {fold} processing failed: {str(e)}")
+            logger.error(f"Full traceback: {error_details}")
+            
+            # Additional debugging info
+            logger.error(f"Debug info - Fold: {fold}, Device: {self.device}")
+            logger.error(f"Debug info - Batch size: {len(batch_abstracts)}")
+            logger.error(f"Debug info - Use FP16: {self.use_fp16}")
+            logger.error(f"Debug info - Use compile: {self.use_compile}")
+            
             raise e  # Re-raise to handle at higher level
     
     def score_batch_parallel(self, data, batch_size: int = 16, max_workers: int = 5) -> list:
@@ -556,14 +638,38 @@ class CrossValidationPredictor:
                     batch_fold_results[fold] = fold_results
                 except Exception as e:
                     logger.error(f"❌ Fold {fold} failed: {e}")
-                    # Continue with other folds, mark this fold as failed
-                    batch_fold_results[fold] = []
-                    for i in range(len(batch_abstracts)):
-                        batch_fold_results[fold].append({
-                            "fold": fold,
-                            "score": 0.0,  # Default score for failed fold
-                            "prediction": 0
-                        })
+                    
+                    # Try fallback with disabled optimizations
+                    logger.info(f"🔄 Attempting fallback for fold {fold} with disabled optimizations")
+                    try:
+                        # Temporarily disable FP16 and compilation for this fold
+                        original_fp16 = self.use_fp16
+                        original_compile = self.use_compile
+                        self.use_fp16 = False
+                        self.use_compile = False
+                        
+                        fold_results = self._process_fold_batch_sequential(fold, batch_abstracts, batch_titles)
+                        batch_fold_results[fold] = fold_results
+                        logger.info(f"✅ Fold {fold} succeeded with fallback mode")
+                        
+                        # Restore original settings
+                        self.use_fp16 = original_fp16
+                        self.use_compile = original_compile
+                        
+                    except Exception as fallback_e:
+                        logger.error(f"❌ Fold {fold} fallback also failed: {fallback_e}")
+                        # Restore original settings
+                        self.use_fp16 = original_fp16
+                        self.use_compile = original_compile
+                        
+                        # Mark this fold as failed with default scores
+                        batch_fold_results[fold] = []
+                        for i in range(len(batch_abstracts)):
+                            batch_fold_results[fold].append({
+                                "fold": fold,
+                                "score": 0.0,  # Default score for failed fold
+                                "prediction": 0
+                            })
             
             # Compile results for this batch and place them in correct positions
             for i, original_idx in enumerate(indices):
