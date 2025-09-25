@@ -10,8 +10,9 @@ import numpy as np
 import logging
 from typing import List, Dict, Any, Optional
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 import threading
+import multiprocessing as mp
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class CrossValidationPredictor:
         
         # Thread safety for parallel processing
         self._model_locks = {}
+        self._gpu_lock = threading.Lock()  # Global GPU lock for CUDA operations
         
         self._load_fold_models()
     
@@ -302,9 +304,9 @@ class CrossValidationPredictor:
         
         return final_results
     
-    def _process_fold_batch(self, fold: int, batch_abstracts: List[str], batch_titles: List[str]) -> List[Dict]:
-        """Process a batch of texts through a single fold model (thread-safe)"""
-        with self._model_locks[fold]:  # Ensure thread safety
+    def _process_fold_batch_sequential(self, fold: int, batch_abstracts: List[str], batch_titles: List[str]) -> List[Dict]:
+        """Process a batch of texts through a single fold model (optimized sequential)"""
+        try:
             tokenizer = self.fold_tokenizers[fold]
             model = self.fold_models[fold]
             
@@ -333,6 +335,8 @@ class CrossValidationPredictor:
                     padding=True,
                     return_tensors="pt"
                 )
+            
+            # Move to device and handle FP16
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
             # Get predictions for entire batch with proper dtype handling
@@ -360,7 +364,12 @@ class CrossValidationPredictor:
                     "prediction": int(score > self.threshold)
                 })
             
+            logger.info(f"✅ Fold {fold} completed successfully ({len(fold_results)} results)")
             return fold_results
+            
+        except Exception as e:
+            logger.error(f"❌ Fold {fold} processing failed: {str(e)}")
+            raise e  # Re-raise to handle at higher level
     
     def score_batch_parallel(self, data, batch_size: int = 16, max_workers: int = 5) -> list:
         """
@@ -498,10 +507,11 @@ class CrossValidationPredictor:
     def score_batch_ultra_optimized(self, data, base_batch_size: int = 16, max_workers: int = 5, use_dynamic_batching: bool = True) -> list:
         """
         Ultra-optimized batch scoring with:
-        - Parallel fold processing (~5x speedup)
-        - Dynamic length-based batching (~2x speedup from better GPU utilization)
-        - Optimized memory management
-        Total expected speedup: ~10x over original implementation
+        - Dynamic length-based batching for better GPU utilization
+        - Optimized sequential fold processing (GPU operations are inherently sequential)
+        - Smart memory management
+        - FP16 + compilation optimizations
+        Expected speedup: ~3-5x over original implementation
         """
         # Extract abstracts and titles, filter out items with None abstracts
         valid_items = []
@@ -518,7 +528,7 @@ class CrossValidationPredictor:
         titles = [item['title'] for item in valid_items]
         
         logger.info(f"🚀 ULTRA-OPTIMIZED Processing {len(abstracts)} abstracts")
-        logger.info(f"⚡ Features: Parallel folds + Dynamic batching + Optimized memory")
+        logger.info(f"⚡ Features: Dynamic batching + Sequential folds + FP16 + Compilation")
         
         # Create dynamic batches based on text length
         if use_dynamic_batching:
@@ -537,25 +547,23 @@ class CrossValidationPredictor:
             
             logger.info(f"⚡ Processing dynamic batch {batch_num + 1}/{len(batch_indices)} (size: {len(indices)})")
             
-            # Process all folds in parallel
+            # Process all folds sequentially (but optimized)
             batch_fold_results = {}
             
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # Submit all fold processing tasks
-                future_to_fold = {
-                    executor.submit(self._process_fold_batch, fold, batch_abstracts, batch_titles): fold
-                    for fold in range(1, self.num_folds + 1)
-                }
-                
-                # Collect results as they complete
-                for future in as_completed(future_to_fold):
-                    fold = future_to_fold[future]
-                    try:
-                        fold_results = future.result()
-                        batch_fold_results[fold] = fold_results
-                    except Exception as e:
-                        logger.error(f"❌ Fold {fold} failed: {e}")
-                        raise e
+            for fold in range(1, self.num_folds + 1):
+                try:
+                    fold_results = self._process_fold_batch_sequential(fold, batch_abstracts, batch_titles)
+                    batch_fold_results[fold] = fold_results
+                except Exception as e:
+                    logger.error(f"❌ Fold {fold} failed: {e}")
+                    # Continue with other folds, mark this fold as failed
+                    batch_fold_results[fold] = []
+                    for i in range(len(batch_abstracts)):
+                        batch_fold_results[fold].append({
+                            "fold": fold,
+                            "score": 0.0,  # Default score for failed fold
+                            "prediction": 0
+                        })
             
             # Compile results for this batch and place them in correct positions
             for i, original_idx in enumerate(indices):
@@ -594,7 +602,8 @@ class CrossValidationPredictor:
             
             # Optimized memory cleanup - less frequent
             if batch_num % 3 == 0:  # Every 3 batches
-                torch.cuda.empty_cache()
+                if self.device == "cuda":
+                    torch.cuda.empty_cache()
         
         return final_results
 

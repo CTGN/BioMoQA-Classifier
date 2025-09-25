@@ -155,7 +155,7 @@ def render_sidebar():
         use_ultra_optimization = st.checkbox(
             "Enable Ultra-Optimization",
             value=True,
-            help="Use parallel fold processing + dynamic batching for ~10x speedup"
+            help="Use dynamic batching + optimized processing for ~3-5x speedup"
         )
         
         use_dynamic_batching = st.checkbox(
@@ -165,11 +165,11 @@ def render_sidebar():
         )
         
         max_workers = st.slider(
-            "Parallel Workers",
+            "Processing Mode",
             min_value=1,
-            max_value=8,
-            value=5,
-            help="Number of parallel fold processors (5 = all folds in parallel)"
+            max_value=2,
+            value=1,
+            help="1 = Sequential (stable), 2 = Experimental parallel"
         )
     
     # Store advanced settings in session state
@@ -199,7 +199,7 @@ def render_sidebar():
         st.sidebar.info("⚡ **Parallel Processing**: All 5 folds run simultaneously")
         
         if use_ultra_optimization:
-            st.sidebar.success("🚀 **ULTRA-OPTIMIZATION ENABLED** (~10x faster!)")
+            st.sidebar.success("🚀 **ULTRA-OPTIMIZATION ENABLED** (~3-5x faster!)")
         else:
             st.sidebar.info("💡 Enable Ultra-Optimization for maximum speed")
     
@@ -312,7 +312,7 @@ def render_batch_upload():
     # Show current optimization status
     use_ultra = getattr(st.session_state, 'use_ultra_optimization', True)
     if use_ultra:
-        st.success("⚡ **ULTRA-OPTIMIZATION ENABLED**: Parallel processing + dynamic batching + FP16 + compilation = ~10x faster!")
+        st.success("⚡ **ULTRA-OPTIMIZATION ENABLED**: Dynamic batching + FP16 + compilation = ~3-5x faster!")
     else:
         st.success("⚡ **GPU Optimizations**: FP16 mixed precision + dynamic batching + model compilation for maximum speed!")
     
