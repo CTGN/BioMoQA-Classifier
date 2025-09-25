@@ -30,7 +30,8 @@ class CrossValidationPredictor:
         
         # GPU optimization settings
         self.use_fp16 = use_fp16 if use_fp16 is not None else (self.device == "cuda")
-        self.use_compile = use_compile if use_compile is not None else (torch.__version__ >= "2.0.0" and self.device == "cuda")
+        # Disable compilation by default due to threading/CUDA graph conflicts
+        self.use_compile = use_compile if use_compile is not None else False
         
         # Store fold models and tokenizers
         self.fold_models = {}
@@ -72,13 +73,15 @@ class CrossValidationPredictor:
                         model = model.half()  # Convert model to FP16
                         logger.info(f"✅ Enabled FP16 mixed precision for fold {fold}")
                     
-                    # Enable model compilation if requested and supported
+                    # Enable model compilation if requested and supported (use safer mode)
                     if self.use_compile and hasattr(torch, 'compile'):
                         try:
-                            model = torch.compile(model, mode="reduce-overhead")
-                            logger.info(f"✅ Compiled model for fold {fold}")
+                            # Use "default" mode instead of "reduce-overhead" to avoid CUDA graph issues
+                            model = torch.compile(model, mode="default", dynamic=True)
+                            logger.info(f"✅ Compiled model for fold {fold} (safe mode)")
                         except Exception as e:
                             logger.warning(f"Model compilation failed for fold {fold}: {e}")
+                            self.use_compile = False  # Disable for all folds if one fails
                 
                 self.fold_tokenizers[fold] = tokenizer
                 self.fold_models[fold] = model

@@ -171,11 +171,18 @@ def render_sidebar():
             value=1,
             help="1 = Sequential (stable), 2 = Experimental parallel"
         )
+        
+        enable_compilation = st.checkbox(
+            "Enable Model Compilation (Experimental)",
+            value=False,
+            help="⚠️ May cause errors with threading. Only enable if you experience no issues."
+        )
     
     # Store advanced settings in session state
     st.session_state.use_ultra_optimization = use_ultra_optimization
     st.session_state.use_dynamic_batching = use_dynamic_batching
     st.session_state.max_workers = max_workers
+    st.session_state.enable_compilation = enable_compilation
     
     # Store batch size in session state
     st.session_state.batch_size = batch_size
@@ -194,9 +201,12 @@ def render_sidebar():
         # Show optimization features
         st.sidebar.subheader("⚡ GPU Optimizations")
         st.sidebar.info("🎯 **FP16 Mixed Precision**: 2x memory savings + speed boost")
-        st.sidebar.info("🚀 **Model Compilation**: PyTorch 2.0+ optimization")
+        if enable_compilation:
+            st.sidebar.info("🚀 **Model Compilation**: PyTorch 2.0+ optimization (EXPERIMENTAL)")
+        else:
+            st.sidebar.info("🚀 **Model Compilation**: Disabled for stability")
         st.sidebar.info("📊 **Dynamic Batching**: Length-based grouping for efficiency")
-        st.sidebar.info("⚡ **Parallel Processing**: All 5 folds run simultaneously")
+        st.sidebar.info("⚡ **Sequential Processing**: Stable fold processing")
         
         if use_ultra_optimization:
             st.sidebar.success("🚀 **ULTRA-OPTIMIZATION ENABLED** (~3-5x faster!)")
@@ -236,7 +246,7 @@ def load_ensemble_models(model_type: str, loss_type: str, base_path: str, thresh
                 threshold=threshold,
                 device=device,
                 use_fp16=True,  # Enable FP16 for GPU acceleration
-                use_compile=True  # Enable torch.compile for PyTorch 2.0+ optimization
+                use_compile=enable_compilation  # User-configurable compilation
             )
             
             # Store in session state
@@ -311,10 +321,12 @@ def render_batch_upload():
     
     # Show current optimization status
     use_ultra = getattr(st.session_state, 'use_ultra_optimization', True)
+    enable_comp = getattr(st.session_state, 'enable_compilation', False)
     if use_ultra:
-        st.success("⚡ **ULTRA-OPTIMIZATION ENABLED**: Dynamic batching + FP16 + compilation = ~3-5x faster!")
+        comp_text = " + compilation" if enable_comp else ""
+        st.success(f"⚡ **ULTRA-OPTIMIZATION ENABLED**: Dynamic batching + FP16{comp_text} = ~2-4x faster!")
     else:
-        st.success("⚡ **GPU Optimizations**: FP16 mixed precision + dynamic batching + model compilation for maximum speed!")
+        st.success("⚡ **GPU Optimizations**: FP16 mixed precision + dynamic batching for maximum speed!")
     
     # File upload
     uploaded_file = st.file_uploader(
