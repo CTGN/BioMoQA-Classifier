@@ -447,10 +447,13 @@ def render_scoring_results(result):
         
         st.plotly_chart(fig, use_container_width=True)
 
-def process_batch_scoring(abstracts):
+def process_batch_scoring(texts_data):
     """Process batch of abstracts using optimized ensemble scoring"""
     progress_bar = st.progress(0)
     status_text = st.empty()
+    
+    # Extract abstracts for scoring
+    abstracts = [item.get('abstract', '') for item in texts_data]
     
     # Get batch size from session state (default to 16)
     batch_size = getattr(st.session_state, 'batch_size', 16)
@@ -472,19 +475,20 @@ def process_batch_scoring(abstracts):
         end_time = time.time()
         processing_time = end_time - start_time
         
-        # Simplify results for batch display
+        # Combine original data with prediction results
         results = []
-        for result in full_results:
-            simplified_result = {
-                **result,
-                "ensemble_score": result["ensemble_score"],
-                "std_score": result["statistics"]["std_score"],
-                "min_score": result["statistics"]["min_score"],
-                "max_score": result["statistics"]["max_score"],
-                "consensus_strength": result["statistics"]["consensus_strength"],
-                "positive_folds": result["statistics"]["positive_folds"]
+        for i, (original_data, prediction_result) in enumerate(zip(texts_data, full_results)):
+            # Create combined result with original data + predictions
+            combined_result = {
+                **original_data,  # All original columns
+                "ensemble_score": prediction_result["ensemble_score"],
+                "std_score": prediction_result["statistics"]["std_score"],
+                "min_score": prediction_result["statistics"]["min_score"],
+                "max_score": prediction_result["statistics"]["max_score"],
+                "consensus_strength": prediction_result["statistics"]["consensus_strength"],
+                "positive_folds": prediction_result["statistics"]["positive_folds"]
             }
-            results.append(simplified_result)
+            results.append(combined_result)
         
         progress_bar.progress(1.0)
         
@@ -541,14 +545,15 @@ def process_batch_scoring(abstracts):
     st.plotly_chart(fig, use_container_width=True)
     
     # Ranking controls
-    st.subheader("🏆 Ranked Results")
+    st.subheader("🏆 Results with Rankings")
+    st.info("📋 **Original_Index**: Position in uploaded dataset | **Score_Rank**: Rank by ensemble score (1 = highest)")
     
     col1, col2 = st.columns(2)
     with col1:
         sort_order = st.selectbox(
             "Sort Order",
-            ["Original","Highest to Lowest Score", "Lowest to Highest Score"],
-            help="Choose ranking order"
+            ["Original Order", "Highest to Lowest Score", "Lowest to Highest Score"],
+            help="Choose display order - Original preserves input order"
         )
     with col2:
         score_filter = st.slider(
@@ -560,24 +565,55 @@ def process_batch_scoring(abstracts):
             help="Show only results above this score"
         )
     
-    # Apply filters and sorting
-    filtered_results = [r for r in results if r['ensemble_score'] >= score_filter]
-    if sort_order == "Lowest to Highest Score":
-        filtered_results.sort(key=lambda x: x['ensemble_score'])
+    # Add original index and score rank to each result
+    for i, result in enumerate(results):
+        result['original_index'] = i + 1
     
-    #TODO: Fix the following in order to show all the original columns we had in the input on top of the new predicitons ones,the scores should match each instance
-    # Results table with ranking
-    df_results = pd.DataFrame([
-        {
-            **r,
-            "rank": i+1,
-            "Ensemble Score": f"{r['ensemble_score']:.4f}",
-            "Score Range": f"{r['min_score']:.3f}-{r['max_score']:.3f}",
-            "Stability (σ)": f"{r['std_score']:.3f}",
+    # Calculate score ranks (1 = highest score)
+    sorted_by_score = sorted(results, key=lambda x: x['ensemble_score'], reverse=True)
+    for rank, result in enumerate(sorted_by_score, 1):
+        result['score_rank'] = rank
+    
+    # Apply filters and sorting for display
+    filtered_results = [r for r in results if r['ensemble_score'] >= score_filter]
+    
+    if sort_order == "Highest to Lowest Score":
+        filtered_results.sort(key=lambda x: x['ensemble_score'], reverse=True)
+    elif sort_order == "Lowest to Highest Score":
+        filtered_results.sort(key=lambda x: x['ensemble_score'])
+    # If "Original Order", keep the original order (no sorting needed)
+    
+    # Create display dataframe with original data + simple ranking columns
+    display_data = []
+    for r in filtered_results:
+        # Create row with original data + simple ranking columns
+        row = {
+            "Original_Index": r['original_index'],  # Original position in dataset
+            "Score_Rank": r['score_rank'],  # Rank by ensemble score
+            **r,  # All original columns + prediction scores
+            "Ensemble_Score_Formatted": f"{r['ensemble_score']:.4f}",
+            "Score_Range": f"{r['min_score']:.3f}-{r['max_score']:.3f}",
+            "Stability": f"{r['std_score']:.3f}",
             "Consensus": f"{r['consensus_strength']:.1%}"
         }
-        for i, r in enumerate(filtered_results)
-    ])
+        display_data.append(row)
+    
+    # Create DataFrame and reorder columns to show ranking info first
+    df_results = pd.DataFrame(display_data)
+    
+    # Reorder columns: ranking columns first, then original data, then detailed scores
+    ranking_cols = ["Original_Index", "Score_Rank"]
+    score_cols = ["Ensemble_Score_Formatted", "Score_Range", "Stability", "Consensus"]
+    
+    # Get original columns (excluding the prediction scores and ranking fields we added)
+    prediction_score_cols = ["ensemble_score", "std_score", "min_score", "max_score", 
+                           "consensus_strength", "positive_folds", "original_index", "score_rank"]
+    original_cols = [col for col in df_results.columns 
+                    if col not in ranking_cols + score_cols + prediction_score_cols]
+    
+    # Final column order: ranking info, original data, formatted scores
+    column_order = ranking_cols + original_cols + score_cols
+    df_results = df_results[column_order]
     
     st.dataframe(df_results, use_container_width=True)
     
@@ -590,25 +626,21 @@ def process_batch_scoring(abstracts):
         mime="application/json"
     )
     
-    # Download as CSV with ranking
+    # Download as CSV with original data and rankings
+    # Create download dataframe with same structure as display
     df_download = pd.DataFrame([
         {
-            "rank": i + 1,
-            "abstract": r['abstract'],
-            "ensemble_score": r['ensemble_score'],
-            "std_score": r['std_score'],
-            "min_score": r['min_score'],
-            "max_score": r['max_score'],
-            "consensus_strength": r['consensus_strength'],
-            "positive_folds": r['positive_folds']
+            "original_index": r['original_index'],
+            "score_rank": r['score_rank'],
+            **{k: v for k, v in r.items() if k not in ['original_index', 'score_rank']},  # All other columns
         }
-        for i, r in enumerate(results)
+        for r in results
     ])
     csv = df_download.to_csv(index=False)
     st.download_button(
-        label="📥 Download Ranked Results (CSV)",
+        label="📥 Download Results with Rankings (CSV)",
         data=csv,
-        file_name="biomoqa_ranked_results.csv",
+        file_name="biomoqa_results_with_rankings.csv",
         mime="text/csv"
     )
 
