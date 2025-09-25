@@ -72,8 +72,8 @@ class CrossValidationPredictor:
         # Tokenize input - use title and abstract if title is provided
         if title is not None:
             inputs = tokenizer(
-                title,
-                abstract,
+                str(title),
+                str(abstract),
                 truncation=True,
                 max_length=512,
                 padding=True,
@@ -81,7 +81,7 @@ class CrossValidationPredictor:
             )
         else:
             inputs = tokenizer(
-                abstract,
+                str(abstract),
                 truncation=True,
                 max_length=512,
                 padding=True,
@@ -150,8 +150,8 @@ class CrossValidationPredictor:
         # Extract abstracts and titles, filter out items with None abstracts
         valid_items = []
         for item in data:
-            abstract = item.get('abstract', '')
-            if abstract:  # Only process items with valid abstracts
+            abstract = item.get('abstract')
+            if abstract is not None and abstract.strip():  # Only process items with valid, non-empty abstracts
                 title = item.get('title', None)
                 valid_items.append({'abstract': abstract, 'title': title})
         
@@ -187,10 +187,11 @@ class CrossValidationPredictor:
                 
                 if has_titles:
                     # Use title-abstract pairs, handling None titles
-                    title_inputs = [title if title is not None else "" for title in batch_titles]
+                    title_inputs = [str(title) if title is not None else "" for title in batch_titles]
+                    abstract_inputs = [str(abstract) if abstract is not None else "" for abstract in batch_abstracts]
                     inputs = tokenizer(
                         title_inputs,
-                        batch_abstracts,
+                        abstract_inputs,
                         truncation=True,
                         max_length=512,
                         padding=True,
@@ -198,8 +199,9 @@ class CrossValidationPredictor:
                     )
                 else:
                     # No titles in this batch, use abstracts only
+                    abstract_inputs = [str(abstract) if abstract is not None else "" for abstract in batch_abstracts]
                     inputs = tokenizer(
-                        batch_abstracts,
+                        abstract_inputs,
                         truncation=True,
                         max_length=512,
                         padding=True,
