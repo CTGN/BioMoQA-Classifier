@@ -460,9 +460,13 @@ def process_batch_scoring(abstracts):
     try:
         # Start timing
         start_time = time.time()
+
+        print("Starting batch scoring...")
         
         # Use optimized batch scoring - much faster!
         full_results = st.session_state.predictor.score_batch_optimized(abstracts, batch_size=batch_size)
+
+        print("Batch scoring complete.")
         
         # End timing
         end_time = time.time()
@@ -472,7 +476,7 @@ def process_batch_scoring(abstracts):
         results = []
         for result in full_results:
             simplified_result = {
-                "abstract": result["abstract"],
+                **result,
                 "ensemble_score": result["ensemble_score"],
                 "std_score": result["statistics"]["std_score"],
                 "min_score": result["statistics"]["min_score"],
@@ -543,7 +547,7 @@ def process_batch_scoring(abstracts):
     with col1:
         sort_order = st.selectbox(
             "Sort Order",
-            ["Highest to Lowest Score", "Lowest to Highest Score"],
+            ["Original","Highest to Lowest Score", "Lowest to Highest Score"],
             help="Choose ranking order"
         )
     with col2:
@@ -561,11 +565,12 @@ def process_batch_scoring(abstracts):
     if sort_order == "Lowest to Highest Score":
         filtered_results.sort(key=lambda x: x['ensemble_score'])
     
+    #TODO: Fix the following in order to show all the original columns we had in the input on top of the new predicitons ones,the scores should match each instance
     # Results table with ranking
     df_results = pd.DataFrame([
         {
-            *full_result,
-            "Rank": i + 1,
+            **r,
+            "rank": i+1,
             "Ensemble Score": f"{r['ensemble_score']:.4f}",
             "Score Range": f"{r['min_score']:.3f}-{r['max_score']:.3f}",
             "Stability (σ)": f"{r['std_score']:.3f}",
