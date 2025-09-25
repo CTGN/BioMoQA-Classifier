@@ -43,6 +43,10 @@ def main():
         st.session_state.batch_size = 16
     if 'auto_load_attempted' not in st.session_state:
         st.session_state.auto_load_attempted = False
+    if 'batch_processing' not in st.session_state:
+        st.session_state.batch_processing = False
+    if 'cancel_processing' not in st.session_state:
+        st.session_state.cancel_processing = False
     
     # Auto-load roberta-base model on first visit
     if not st.session_state.auto_load_attempted and not st.session_state.model_loaded:
@@ -310,13 +314,46 @@ def render_batch_upload():
                 else:
                     st.dataframe(df.head(3))
             
-            # Batch processing
-            if st.button("🚀 Score & Rank Batch", type="primary"):
+            # Batch processing buttons
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                # Main processing button - disabled if already processing
+                process_button = st.button(
+                    "🚀 Score & Rank Batch" if not st.session_state.batch_processing else "⏳ Processing...",
+                    type="primary",
+                    disabled=st.session_state.batch_processing
+                )
+            
+            with col2:
+                # Cancel button - only show if processing
+                cancel_button = False
+                if st.session_state.batch_processing:
+                    cancel_button = st.button("❌ Cancel", type="secondary")
+            
+            # Handle button clicks
+            if cancel_button:
+                st.session_state.cancel_processing = True
+                st.session_state.batch_processing = False
+                st.warning("🛑 Processing cancelled by user.")
+                st.rerun()
+            
+            if process_button:
                 if not st.session_state.model_loaded:
                     st.error("Please load ensemble models first.")
                     return
                 
-                process_batch_scoring(texts_data)
+                # Reset cancel flag and start processing
+                st.session_state.cancel_processing = False
+                st.session_state.batch_processing = True
+                
+                try:
+                    process_batch_scoring(texts_data)
+                except Exception as e:
+                    st.error(f"Batch processing failed: {str(e)}")
+                finally:
+                    # Always reset processing state when done
+                    st.session_state.batch_processing = False
                 
         except Exception as e:
             st.error(f"Error processing file: {str(e)}")
@@ -364,6 +401,13 @@ def render_model_status():
         st.info(f"**Device:** {st.session_state.predictor.device}")
         st.info(f"**Reference Threshold:** {st.session_state.predictor.threshold}")
         st.info(f"**Current Batch Size:** {st.session_state.batch_size}")
+        
+        # Show batch processing status
+        if st.session_state.batch_processing:
+            st.warning("⏳ **Batch Processing Active**")
+            st.info("Use the Cancel button to stop current processing.")
+        else:
+            st.success("🟢 **Ready for Processing**")
     else:
         st.warning("⚠️ No ensemble models loaded")
         st.info("Please configure and load ensemble models in the sidebar.")
@@ -494,6 +538,12 @@ def process_batch_scoring(texts_data):
     progress_bar = st.progress(0)
     status_text = st.empty()
     
+    # Check for cancellation at start
+    if st.session_state.cancel_processing:
+        status_text.text("❌ Processing cancelled.")
+        st.session_state.batch_processing = False
+        return
+    
     # Extract abstracts and titles for scoring - handle both dict and string formats
     abstracts = []
     titles = []
@@ -516,6 +566,12 @@ def process_batch_scoring(texts_data):
     status_text.text(f"🚀 Processing {len(abstracts)} texts with optimized batch scoring (batch_size={batch_size})...")
     
     try:
+        # Check for cancellation before starting heavy computation
+        if st.session_state.cancel_processing:
+            status_text.text("❌ Processing cancelled.")
+            st.session_state.batch_processing = False
+            return
+            
         # Start timing
         start_time = time.time()
 
@@ -525,15 +581,33 @@ def process_batch_scoring(texts_data):
         predictor_data = []
         valid_indices = []
         for i, (abstract, title) in enumerate(zip(abstracts, titles)):
+            # Check for cancellation during data preparation
+            if st.session_state.cancel_processing:
+                status_text.text("❌ Processing cancelled during data preparation.")
+                st.session_state.batch_processing = False
+                return
+                
             if abstract is not None and str(abstract).strip():
                 predictor_data.append({"abstract": str(abstract), "title": title, "index": i})
                 valid_indices.append(i)
+        
+        # Final cancellation check before scoring
+        if st.session_state.cancel_processing:
+            status_text.text("❌ Processing cancelled before scoring.")
+            st.session_state.batch_processing = False
+            return
         
         # Use optimized batch scoring for valid abstracts only
         if predictor_data:
             valid_results = st.session_state.predictor.score_batch_optimized(predictor_data, batch_size=batch_size)
         else:
             valid_results = []
+        
+        # Check for cancellation after scoring
+        if st.session_state.cancel_processing:
+            status_text.text("❌ Processing cancelled after scoring.")
+            st.session_state.batch_processing = False
+            return
         
         # Create full results array with None for invalid abstracts
         full_results = []
@@ -557,6 +631,12 @@ def process_batch_scoring(texts_data):
 
         print("Batch scoring complete.")
         
+        # Check for cancellation during results processing
+        if st.session_state.cancel_processing:
+            status_text.text("❌ Processing cancelled during results processing.")
+            st.session_state.batch_processing = False
+            return
+        
         # End timing
         end_time = time.time()
         processing_time = end_time - start_time
@@ -564,6 +644,12 @@ def process_batch_scoring(texts_data):
         # Combine original data with prediction results
         results = []
         for i, (original_data, prediction_result) in enumerate(zip(texts_data, full_results)):
+            # Check for cancellation during result combination
+            if st.session_state.cancel_processing:
+                status_text.text("❌ Processing cancelled during result combination.")
+                st.session_state.batch_processing = False
+                return
+                
             # Create combined result with original data + predictions
             combined_result = {
                 **original_data,  # All original columns
@@ -594,7 +680,11 @@ def process_batch_scoring(texts_data):
         
     except Exception as e:
         st.error(f"Batch scoring failed: {str(e)}")
+        st.session_state.batch_processing = False  # Reset processing state on error
         return []
+    finally:
+        # Always reset processing state when function completes
+        st.session_state.batch_processing = False
     
     # Display batch results
     st.header("📊 Batch Scoring & Ranking Results")
