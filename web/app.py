@@ -56,7 +56,7 @@ def main():
     # Auto-load roberta-base model on first visit
     if not st.session_state.auto_load_attempted and not st.session_state.model_loaded:
         st.session_state.auto_load_attempted = True
-        load_ensemble_models("roberta-base", "BCE", "results/final_model", 0.5, None)
+        load_ensemble_models("roberta-base", "BCE", "results/final_model", 0.5, None, False)
     
     # Sidebar for model configuration
     render_sidebar()
@@ -222,14 +222,14 @@ def render_sidebar():
     
     # Load model button
     if st.sidebar.button("🚀 Load Ensemble Models", type="primary", use_container_width=True):
-        load_ensemble_models(model_type, loss_type, base_path, threshold, device)
+        load_ensemble_models(model_type, loss_type, base_path, threshold, device, enable_compilation)
     
     # Example paths
     st.sidebar.subheader("💡 Example Model Configurations")
     st.sidebar.code("Model: BiomedBERT-abs\nLoss: BCE")
     st.sidebar.code("Model: bert-base\nLoss: focal")
 
-def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, device: str):
+def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, device: str, enable_compilation: bool = False):
     """Load the ensemble of fold models with GPU optimizations"""
     with st.spinner("Loading ensemble models with GPU optimizations..."):
         try:
