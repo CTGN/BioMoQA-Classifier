@@ -273,7 +273,14 @@ def render_batch_upload():
                         st.error(f"Unsupported item type in JSON array: {type(item)}")
                         return
             elif uploaded_file.name.endswith('.csv'):
+                # Read CSV and handle potential index column
                 df = pd.read_csv(uploaded_file)
+                
+                # Remove unnamed index columns that pandas sometimes creates
+                unnamed_cols = [col for col in df.columns if col.startswith('Unnamed:')]
+                if unnamed_cols:
+                    df = df.drop(columns=unnamed_cols)
+                
                 if 'abstract' not in df.columns:
                     st.error("CSV file must contain an 'abstract' column.")
                     return
