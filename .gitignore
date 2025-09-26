@@ -23,7 +23,7 @@ results/final_model
 
 plots/
 
-nohup.out
+./nohup.out
 
 
 # Virtual environments
