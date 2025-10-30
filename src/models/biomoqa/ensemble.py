@@ -39,8 +39,6 @@ import yaml
 
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
@@ -113,7 +111,7 @@ def parse_args():
 def get_scores_by_model(cfg):
     scores_by_models=[]
     for model in cfg['model_names']:
-        test_preds_path=os.path.join(project_root,f"results/test preds/bert/fold_{cfg['fold']}_{map_name(os.path.basename(model))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
+        test_preds_path=config.get_path('results', 'test_preds_dir') / f"fold_{cfg['fold']}_{map_name(os.path.basename(model))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv"
         logger.info(f"test_preds_path : {test_preds_path}")
         if os.path.isfile(test_preds_path):
             model_preds_df=pd.read_csv(test_preds_path)
@@ -132,7 +130,7 @@ def ensemble_pred(cfg):
     avg_models_scores = np.mean(scores_by_model, axis=0)  # Average scores across models
     logger.info(f"\nfold number {cfg['fold'] + 1} | run no. {cfg['run']}")
 
-    test_split = load_dataset("csv", data_files=os.path.join(project_root,f"data/folds/test{cfg['fold']}_run-{cfg['run']}.csv"),split="train")
+    test_split = load_dataset("csv", data_files=config.get_fold_path(cfg['fold'], cfg['run']),split="train")
 
     # Ensure avg_models_scores and test_split["labels"] have matching shapes
     if avg_models_scores.shape[0] != len(test_split["labels"]):
@@ -141,7 +139,7 @@ def ensemble_pred(cfg):
     preds = (avg_models_scores > 0.5).astype(int)
     result = detailed_metrics(preds, test_split["labels"],scores=avg_models_scores)
 
-    result_metrics_path=os.path.join(project_root,"results/metrics/binary_metrics.csv")
+    result_metrics_path=config.get_path('results', 'binary_metrics.csv')
 
     if os.path.isfile(result_metrics_path):
         result_metrics=pd.read_csv(result_metrics_path)
@@ -166,7 +164,7 @@ def ensemble_pred(cfg):
     save_dataframe(result_metrics)
 
     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':avg_models_scores,"fold":[cfg['fold'] for _ in range(len(preds))],"title":test_split['title'] })
-    test_preds_path=os.path.join(project_root,"results/test preds/bert",f"fold-{cfg['fold']}_Ensemble_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
+    test_preds_path=config.get_path('results', 'test_preds_dir') / f"fold-{cfg['fold']}_Ensemble_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv"
     
     fold_preds_df.to_csv(test_preds_path)
 

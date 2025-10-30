@@ -42,13 +42,11 @@ import pandas as pd
 # Add project root to sys.path for imports
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
 from src.models.biomoqa.model_init import *
-from src.config import CONFIG, get_config
+from src.config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +57,8 @@ def set_reproducibility(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
-    set_random_seeds(CONFIG["seed"])
-    set_seed(CONFIG["seed"])
+    set_random_seeds(get_config().get('environment', {}).get('seed', 42))
+    set_seed(get_config().get('environment', {}).get('seed', 42))
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run HPO for our BERT classifier")
@@ -147,7 +145,7 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     clear_cuda_cache()
     
     #ray.tune.utils.wait_for_gpu(target_util=0.15)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=CONFIG["num_labels"])
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=get_config().get('environment', {}).get('num_labels', 1))
 
     gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
     batch_size = 100
@@ -157,9 +155,9 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
     # Set up training arguments
     training_args = CustomTrainingArguments(
         output_dir=str(get_config().get_path("results", "models_dir")),
-        seed=CONFIG["seed"],
-        data_seed=CONFIG["seed"],
-        **CONFIG["default_training_args"],
+        seed=get_config().get('environment', {}).get('seed', 42),
+        data_seed=get_config().get('environment', {}).get('seed', 42),
+        **get_config().get('environment', {}).get('default_training_args', {}),
         loss_type=loss_type,
         pos_weight=config["pos_weight"] if loss_type=="BCE" else None,
         alpha=config["alpha"] if loss_type=="focal" else None,
@@ -293,7 +291,7 @@ def train_hpo(cfg,fold_idx,run_idx):
         config=tune_config,
         sync_config=sync_config,
         scheduler=scheduler,
-        search_alg=HyperOptSearch(metric=cfg['hpo_metric'], mode="max", random_state_seed=CONFIG["seed"]),
+        search_alg=HyperOptSearch(metric=cfg['hpo_metric'], mode="max", random_state_seed=get_config().get('environment', {}).get('seed', 42)),
         checkpoint_config=checkpoint_config,
         num_samples=cfg['num_trials'],
         resources_per_trial={"cpu": 7, "gpu": 1},
@@ -325,13 +323,13 @@ def train_hpo(cfg,fold_idx,run_idx):
     best_config['nb_optional_negs'] = cfg['nb_optional_negs']
     best_config['num_trials'] = cfg['num_trials']
 
-    plot_trial_performance(analysis,logger=logger,plot_dir=CONFIG['plot_dir'],metric=cfg['hpo_metric'],file_name=f"metrics_evol_{map_name(cfg['model_name'])}_fold-{fold_idx}_title-{cfg['with_title']}_run_{run_idx}.png")
+    plot_trial_performance(analysis,logger=logger,plot_dir=get_config().get('plot_dir'),metric=cfg['hpo_metric'],file_name=f"metrics_evol_{map_name(cfg['model_name'])}_fold-{fold_idx}_title-{cfg['with_title']}_run_{run_idx}.png")
 
     return best_config
 
 def main():
     args = parse_args()
-    set_reproducibility(CONFIG["seed"])
+    set_reproducibility(get_config().get('environment', {}).get('seed', 42))
 
     logger.info(args)
 

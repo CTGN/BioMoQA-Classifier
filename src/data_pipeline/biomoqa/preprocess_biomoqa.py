@@ -17,7 +17,7 @@ if str(project_root) not in sys.path:
     sys.path.append(str(project_root))
 
 from src.data_pipeline.biomoqa.create_raw import *
-from src.config import CONFIG, get_config
+from src.config import get_config
 
 logger = logging.getLogger(__name__)
 

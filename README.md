@@ -1,8 +1,20 @@
 # BioMoQA Classifier
 
-A machine learning pipeline for biodiversity research classification using transformer models. The system classifies scientific abstracts for biodiversity relevance with support for multiple model architectures, hyperparameter optimization, and ensemble methods.
+A machine learning pipeline for biodiversity literature classification using robust ensemble transformer models. The system classifies scientific abstracts for biodiversity relevance with support for multiple model architectures, hyperparameter optimization, and cross-validation ensemble inference.
 
-## Quick Start
+---
+
+## **Table of Contents**
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Training & Evaluation Pipeline](#training--evaluation-pipeline)
+- [Inference & Interfaces](#inference--interfaces)
+- [Project Structure](#project-structure)
+- [Results](#results)
+
+---
+
+## **Quick Start**
 
 ### Installation
 
@@ -12,17 +24,13 @@ git clone https://github.com/CTGN/BioMoQA-Classifier.git
 cd BioMoQA-Classifier
 ```
 
-2. **Install dependencies with uv**
+2. **Install dependencies (recommended: [uv](https://github.com/astral-sh/uv))**
 ```bash
-
-Use curl to download the script and execute it with sh:
-
+# Download and run install script for uv (fast Python package installer)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-If your system does not have curl, you can use wget:
-
+# Or with wget
 wget -qO- https://astral.sh/uv/install.sh | sh
-
 
 # Install project dependencies
 uv sync
@@ -33,44 +41,60 @@ uv sync
 uv run python -c "import torch; print('Installation successful!')"
 ```
 
-## Download Dataset and Model Weights (Linux)
+---
 
-The dataset and pretrained model weights are publicly hosted in an S3 bucket: [biomoqa-classifier (public)](https://biomoqa-classifier.s3.text-analytics.ch/).
+## **Configuration**
 
-Use `wget` to download the contents into the correct project folders:
+**All configuration is managed via YAML files in `configs/`.**
+- Main path and experiment config: `configs/paths.yaml`.
+- *Never* edit src/config.py or any Python constants for configuration—**use YAML & the config manager only**.
+
+Access configuration in any Python script via:
+```python
+from src.config import get_config
+config = get_config()
+data_dir = config.get("data_dir")
+fold_path = config.get_fold_path("train", fold, run)
+```
+
+You can add/modify hyperparameters, data/model locations, and training settings in your YAML—these changes will be picked up automatically.
+
+---
+
+## **Download Dataset and Model Weights (Linux)**
+
+The dataset and pretrained model weights are hosted here: [biomoqa-classifier (public)](https://biomoqa-classifier.s3.text-analytics.ch/).
+
 ```bash
 # From project root
 mkdir -p data results/final_model
 
-# Download model checkpoints → results/final_model/
+# Download model checkpoints
 wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
   -P results/final_model \
   https://biomoqa-classifier.s3.text-analytics.ch/checkpoints/
 
-# Download dataset → data/
+# Download dataset
 wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
   -P data \
   https://biomoqa-classifier.s3.text-analytics.ch/dataset/
 ```
+*Result: `results/final_model/` contains checkpoints, `data/` contains datasets.*
 
-After running the above commands:
-- `results/final_model/` contains the cross-validation checkpoints
-- `data/` contains the dataset files
+---
 
-## Training
+## **Training & Evaluation Pipeline**
 
 ### Data Preprocessing
-First, prepare the data with cross-validation folds:
+Prepare the cross-validation folds using provided scripts/dynamic config:
 ```bash
-# Generate 5-fold CV splits with 500 optional negatives
 uv run src/data_pipeline/biomoqa/preprocess_biomoqa.py \
   -nf 5 -nr 1 -on 500
 ```
 
 ### Hyperparameter Optimization (HPO)
-Find optimal hyperparameters for each model:
+Search for best hyperparameters per model with config-driven experiment control:
 ```bash
-# Run HPO for a specific model and fold
 uv run src/models/biomoqa/hpo.py \
   --config configs/hpo.yaml \
   --fold 0 \
@@ -83,10 +107,9 @@ uv run src/models/biomoqa/hpo.py \
   -t
 ```
 
-### Final Training
-Train models with optimized hyperparameters:
+### Training
+Train a model using ensemble best parameters and config-resolved data splits:
 ```bash
-# Train with best HPO configuration
 uv run src/models/biomoqa/train.py \
   --config configs/train.yaml \
   --hp_config configs/best_hpo.yaml \
@@ -100,9 +123,8 @@ uv run src/models/biomoqa/train.py \
 ```
 
 ### Ensemble Learning
-Ensemble evaluation across all trained models:
+Aggregate and score with the 5-fold ensemble:
 ```bash
-# Generate ensemble predictions
 uv run src/models/biomoqa/ensemble.py \
   --config configs/ensemble.yaml \
   --fold 0 \
@@ -112,100 +134,102 @@ uv run src/models/biomoqa/ensemble.py \
   -t
 ```
 
-### Automated Training Pipeline
-Use the provided script to train multiple models automatically (with ensemble learning):
+### Automated Pipeline
+Run the full training and evaluation pipeline:
 ```bash
-# Runs full pipeline: preprocessing → HPO → training → ensemble
 ./scripts/biomoqa/launch_final.sh
 ```
 
-This script will:
-- Train multiple model architectures (BERT, BioBERT, RoBERTa)
-- Perform 5-fold cross-validation
-- Run hyperparameter optimization
-- Train final models with best parameters
-- Generate ensemble predictions
+---
 
-## Inference
+## **Inference & Interfaces**
 
-The inference system provides multiple interfaces for classifying research abstracts:
+All model scoring is now handled by the unified API:
 
-### Command Line Interface (Recommended)
-```bash
-# Single text prediction
-uv run src/models/biomoqa/instantiation.py \
-  --model_name "BiomedBERT-abs" \
-  --input_file path/to/input_text \
-  --loss_type "BCE" \
-  --with_title \
-  --threshold 0.5
-
-# Process multiple texts (not yet implemented in CLI)
-```
-
-### Programmatic Usage
+### Programmatic Usage (Python)
 ```python
-# Using the ensemble predictor (recommended)
-from src.models.biomoqa.folds_ensemble_predictor import load_ensemble_predictor
+from src.models.biomoqa.model_api import BioMoQAEnsemblePredictor, load_data
 
-predictor = load_ensemble_predictor(
+# Instantiate ensemble predictor (all config-driven)
+predictor = BioMoQAEnsemblePredictor(
     model_type="BiomedBERT-abs",
     loss_type="BCE",
-    threshold=0.5
+    base_path="results/final_model",
+    threshold=0.5,
 )
 
-# Single text scoring with ensemble
-result = predictor.score_text("Your abstract text here")
-print(f"Ensemble Score: {result['ensemble_score']:.4f}")
-print(f"Confidence: {result['confidence']:.4f}")
+# Score a single abstract
+result = predictor.score_text("Your abstract here")
 
-# Batch processing with GPU acceleration
-results = predictor.score_batch_optimized(
-    ["Abstract 1", "Abstract 2", "Abstract 3"],
-    batch_size=16
-)
+# Score a batch of abstracts (can also use API's load_data)
+texts_data = load_data("path/to/abstracts.csv")  # Supports JSON/CSV
+batch_results = predictor.score_batch(texts_data, batch_size=8)
 ```
 
-```python
-# Using individual model predictor
-from src.models.biomoqa.instantiation import load_predictor
+### Command Line Interface (Ensemble Inference)
+You can use the model API directly from the command line for batch or single predictions:
 
-predictor = load_predictor(
-    model_name="BiomedBERT-abs",
-    loss_type="BCE",
-    with_title=False,
-    threshold=0.5
-)
-
-result = predictor.evaluate_text(
-    abstract="Your abstract text",
-    return_binary=True
-)
-```
-
-### Web Interface
-Launch the interactive web application for ensemble scoring:
+**Single Abstract Prediction:**
 ```bash
-# From project root
+uv run python src/models/biomoqa/model_api.py \
+  --model_type BiomedBERT-abs \
+  --loss_type BCE \
+  --abstract "This study discusses ecosystem biodiversity..." \
+  --title "Biodiversity Research"
+```
+
+**Batch File Prediction (CSV or JSON):**
+```bash
+uv run python src/models/biomoqa/model_api.py \
+  --model_type BiomedBERT-abs \
+  --loss_type focal \
+  --input_file data/sample_texts.csv \
+  --batch_size 16 \
+  --output_file results/predictions.csv
+```
+
+- `--model_type` (required): see supported names in Model Options below.
+- `--loss_type`, `--base_path`, `--threshold`, `--device` as per the API.
+- `--batch_size` for file-level prediction.
+- `--output_file` writes output to this file (format detected from file extension).
+- Output is pretty-printed to stdout if no `--output_file` is given.
+
+All logic matches programmatic usage—and all config remains YAML-driven as above.
+
+### Web Interface (Recommended)
+Run:
+```bash
 uv run streamlit run web/app.py
 ```
+*Features:*
+- Ensemble scoring, single/batch classification, CSV/JSON input
+- Robust file validation
+- Interactive results, download, and statistics
 
-The web interface provides:
-- **Ensemble scoring** with 5-fold cross-validation models
-- Single text classification with confidence metrics
-- Batch file processing (JSON/CSV) with GPU acceleration  
-- Interactive result visualization and statistics
-- Score-based ranking and filtering
-- Real-time performance metrics and fold-level analysis
+---
 
-**Supported Models in Web Interface:**
-- BiomedBERT-abs, BiomedBERT-full, BioBERT, BERT, RoBERTa
-- BCE and Focal loss variants
-- Configurable thresholds and batch sizes
+## **Project Structure**
+```
+├── configs/                # YAML-based configuration (centralized)
+│   └── paths.yaml
+├── src/
+│   ├── data_pipeline/
+│   ├── models/
+│   │   └── biomoqa/
+│   │        ├── model_api.py     # Unified ensemble inference API
+│   │        ├── train.py, hpo.py, ensemble.py, baselines.py
+│   └── utils/
+├── web/
+│   └── app.py               # Streamlit web app
+├── scripts/
+├── results/
+│   └── final_model/
+├── data/
+```
 
-## Configuration
+---
 
-### Model Options
+## **Model Options**
 Supported model architectures:
 - `google-bert/bert-base-uncased`
 - `dmis-lab/biobert-v1.1`
@@ -213,71 +237,18 @@ Supported model architectures:
 - `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract`
 - `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext`
 
-### Input Formats
-**JSON format** (`examples/sample_texts.json`):
-```json
-[
-  {
-    "abstract": "Your research abstract text...",
-    "title": "Optional title",
-    "keywords": "Optional keywords"
-  }
-]
-```
+---
 
-**CSV format**:
-```csv
-abstract,title,keywords
-"Research abstract text...","Title","keywords"
-```
+## **Best Practices**
+- **All config, paths, and experiment settings come from YAML** (see `configs/paths.yaml`); *never edit constants in Python files*.
+- Any new script or module accessing settings/paths **must use** the config manager (`from src.config import get_config`).
 
-### Key Parameters
-
-**Training Parameters:**
-- `--with_title` / `-t`: Include title in model input
-- `--with_keywords` / `-k`: Include keywords in model input  
-- `--nb_opt_negs` / `-on`: Number of optional negative samples
-- `--loss`: Loss function (`BCE` or `focal`)
-- `--n_trials`: Number of HPO trials
-- `--fold`: Cross-validation fold (0-4)
-- `--run`: Experiment run number
-
-**Inference Parameters:**
-- `--model_name`: Model architecture name (can be one of the following : bert-base, roberta-base, BiomedBERT-abs, BiomedBERT-abs-ft,biobert-v1)
-- `--loss_type`: Loss type used during training (`BCE`, `focal`)
-- `--weights_parent_dir`: Directory containing model checkpoints
-- `--threshold`: Classification threshold (default: 0.5)
-- `--abstract`: Text to classify (for single prediction)
-- `--demo`: Run with built-in example texts
-
-## Project Structure
-
-```
-├── configs/           # Configuration files
-├── src/
-│   ├── data_pipeline/ # Data preprocessing
-│   ├── models/
-│   │   └── biomoqa/
-│   │       ├── ensemble.py      # Shared ensemble predictor
-│   │       ├── instantiation.py # Individual model predictor  
-│   │       ├── train.py         # Model training
-│   │       ├── hpo.py          # Hyperparameter optimization
-│   │       └── baselines.py    # Traditional ML baselines
-│   └── utils/         # Utility functions
-├── experiments/
-│   └── inference.py   # Updated CLI interface
-├── web/              # Streamlit ensemble interface
-│   ├── app.py        # Main web application
-│   ├── test_ensemble.py # Testing utilities
-│   └── utils.py      # Web utilities
-├── scripts/          # Launch scripts
-└── results/          # Model outputs and metrics
-    └── final_model/  # Cross-validation model checkpoints
-```
+---
 
 ## Results
 
-Trained models and evaluation metrics are saved in:
-- `results/final_model/` - Final trained models weights
-- `results/metrics/` - Performance metrics
-- Model checkpoints follow the pattern: `best_model_cross_val_{loss}_{model}_{fold}/`
+See `results/metrics/` for evaluation reports and `results/final_model/` for model checkpoints. All result paths are guaranteed to be config-driven for reproducibility.
+
+---
+
+**For further guidance, see in-code docstrings and configs/paths.yaml as the canonical references for all parameters, file paths, and experiment options.**

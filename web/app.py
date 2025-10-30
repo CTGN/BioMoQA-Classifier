@@ -11,6 +11,7 @@ import torch
 import numpy as np
 import uuid
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import tempfile
 
 # Add project root to sys.path for imports
 project_root = Path(__file__).resolve().parent.parent
@@ -18,7 +19,7 @@ if str(project_root) not in sys.path:
     sys.path.append(str(project_root))
 
 from web.utils import get_example_texts, format_confidence_score
-from src.models.biomoqa.folds_ensemble_predictor import CrossValidationPredictor, validate_model_path
+from src.models.biomoqa.model_api import BioMoQAEnsemblePredictor, load_data
 
 # Page config
 st.set_page_config(
@@ -237,35 +238,28 @@ def load_ensemble_models(model_type: str, loss_type: str, base_path: str, thresh
             if not os.path.exists(base_path):
                 st.sidebar.error("Base path does not exist. Please check the path.")
                 return
-            
-            # Load predictor with GPU optimizations enabled
-            predictor = CrossValidationPredictor(
+
+            predictor = BioMoQAEnsemblePredictor(
                 model_type=model_type,
                 loss_type=loss_type,
                 base_path=base_path,
                 threshold=threshold,
                 device=device,
-                use_fp16=True,  # Enable FP16 for GPU acceleration
-                use_compile=enable_compilation  # User-configurable compilation
+                use_fp16=True,
+                use_compile=enable_compilation
             )
-            
-            # Store in session state
             st.session_state.predictor = predictor
             st.session_state.model_loaded = True
-            
-            # Show optimization status
+
             optimization_info = []
-            if predictor.use_fp16:
+            if getattr(predictor, "use_fp16", False):
                 optimization_info.append("FP16 Mixed Precision")
-            if predictor.use_compile:
+            if getattr(predictor, "use_compile", False):
                 optimization_info.append("Model Compilation")
-            
             success_msg = f"✅ Loaded {predictor.num_folds} fold models successfully!"
             if optimization_info:
                 success_msg += f"\n🚀 Optimizations: {', '.join(optimization_info)}"
-            
             st.sidebar.success(success_msg)
-            
         except Exception as e:
             st.sidebar.error(f"Failed to load ensemble models: {str(e)}")
             st.session_state.model_loaded = False
@@ -337,57 +331,28 @@ def render_batch_upload():
     
     if uploaded_file:
         try:
-            # Parse file based on type
-            if uploaded_file.name.endswith('.json'):
-                json_data = json.load(uploaded_file)
-                if not isinstance(json_data, list):
-                    st.error("JSON file must contain an array.")
-                    return
-                
-                # Handle different JSON formats
-                texts_data = []
-                abstracts = []
-                
-                for i, item in enumerate(json_data):
-                    if isinstance(item, str):
-                        # Array of strings - treat each string as abstract
-                        abstracts.append(item)
-                        texts_data.append({"abstract": item, "index": i + 1})
-                    elif isinstance(item, dict):
-                        # Array of objects - extract abstract field
-                        abstract = item.get('abstract', item.get('text', ''))
-                        if not abstract:
-                            # If no 'abstract' or 'text' field, try to find the first string field
-                            string_fields = [v for v in item.values() if isinstance(v, str)]
-                            abstract = string_fields[0] if string_fields else ''
-                        abstracts.append(abstract)
-                        texts_data.append(item)
-                    else:
-                        st.error(f"Unsupported item type in JSON array: {type(item)}")
-                        return
-            elif uploaded_file.name.endswith('.csv'):
-                # Read CSV and handle potential index column
-                df = pd.read_csv(uploaded_file)
-                
-                # Remove unnamed index columns that pandas sometimes creates
-                unnamed_cols = [col for col in df.columns if col.startswith('Unnamed:')]
-                if unnamed_cols:
-                    df = df.drop(columns=unnamed_cols)
-                
-                if 'abstract' not in df.columns:
-                    st.error("CSV file must contain an 'abstract' column.")
-                    return
-                abstracts = df['abstract'].fillna('').tolist()
-                texts_data = df.to_dict('records')
-            
+            # Write upload to temp file and load using API
+            suffix = os.path.splitext(uploaded_file.name)[-1]
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+                tmp_file.write(uploaded_file.read())
+                tmp_path = tmp_file.name
+            texts_data = load_data(tmp_path)
+            os.unlink(tmp_path)
+
+            if not texts_data:
+                st.error("No valid abstracts found in the uploaded file.")
+                return
+
+            abstracts = [t["abstract"] for t in texts_data]
             st.success(f"Loaded {len(abstracts)} texts for ensemble scoring.")
-            
-            # Show preview
+
+            # Show preview (as before)
             with st.expander("Preview uploaded data"):
                 if uploaded_file.name.endswith('.json'):
                     st.json(texts_data[:3])
                 else:
-                    st.dataframe(df.head(3))
+                    import pandas as pd
+                    st.dataframe(pd.DataFrame(texts_data).head(3))
             
             # Batch processing buttons
             col1, col2 = st.columns([3, 1])

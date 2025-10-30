@@ -28,15 +28,9 @@ from transformers import (
 import transformers
 import sys
 
-# Add project root to sys.path for imports
-from pathlib import Path
-project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
-
 from src.utils import *
 from src.models.biomoqa.model_init import *
-from src.config import CONFIG, get_config
+from src.config import get_config
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -204,7 +198,7 @@ def random_forest(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                     x_test_vec = vectorizer.transform(x_test)
 
                     # Fit MultiOutputClassifier with RF
-                    clf = RandomForestClassifier(n_estimators=num_trees, max_depth=None, n_jobs=-1, criterion=criterion, random_state=CONFIG["seed"])
+                    clf = RandomForestClassifier(n_estimators=num_trees, max_depth=None, n_jobs=-1, criterion=criterion, random_state=get_config().seed)
     
                     logger.info(f"X shape : {x_train_vec.shape}")
                     logger.info(f"y shape : {y_train.shape}")

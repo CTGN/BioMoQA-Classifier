@@ -31,12 +31,7 @@ from sklearn.metrics import average_precision_score,matthews_corrcoef,ndcg_score
 import sys
 from pathlib import Path
 
-# Add project root to sys.path for imports
-project_root = Path(__file__).resolve().parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
-
-from src.config import CONFIG, get_config
+from src.config import get_config
 
 
 logger = logging.getLogger(__name__)

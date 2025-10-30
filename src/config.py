@@ -1,3 +1,8 @@
+"""
+Configuration manager for BioMoQA-Classifier.
+Use get_config() to access YAML-driven config for paths, hyperparameters, etc.
+Only edit configs/paths.yaml or the Manager's defaults for configuration—never use or define global constants here!
+"""
 import os
 import yaml
 from pathlib import Path
@@ -167,24 +172,3 @@ def reload_config(project_root: Path = None):
     global _config_manager
     _config_manager = ConfigManager(project_root)
     return _config_manager
-
-# Legacy CONFIG for backward compatibility
-CONFIG = {
-    "seed": 42,
-    "plot_dir": "/home/leandre/Projects/BioMoQA_Playground/plots",
-    "results_dir": get_config().get("results_dir"),
-    "data_dir": get_config().get("data_dir"),
-    "num_folds": 5,
-    "num_runs": 1,
-    "default_optional_negatives": 500,
-    "num_labels": 1,
-    "default_training_args": {
-        "save_total_limit": 1,
-        "learning_rate": None,
-        "gradient_accumulation_steps": 4,
-        "num_train_epochs": 10,
-        "fp16": True,  # Enable mixed precision for 2x memory savings and speed improvements
-        "logging_strategy": "epoch",
-        "report_to": "tensorboard",
-    },
-}

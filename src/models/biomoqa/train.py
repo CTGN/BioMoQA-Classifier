@@ -42,13 +42,11 @@ import pandas as pd
 # Add project root to sys.path for imports
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
 from src.models.biomoqa.model_init import *
-from src.config import CONFIG, get_config
+from src.config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -326,8 +324,8 @@ def train(cfg,hp_cfg):
     save_dataframe(result_metrics)
 
     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"prediction":preds,'score':scores,"fold":[cfg['fold'] for _ in range(len(preds))],"title":test_split['title'] })
-    test_preds_dir = os.path.join(project_root, "results", "test preds", "bert")
-    test_preds_path = os.path.join(test_preds_dir,f"fold_{cfg['fold']}_{map_name(os.path.basename(cfg['model_name']))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv")
+    test_preds_dir = config.get_path('results', 'test_preds_dir')
+    test_preds_path = test_preds_dir / f"fold_{cfg['fold']}_{map_name(os.path.basename(cfg['model_name']))}_{cfg['loss_type']}{'_with_title' if cfg['with_title'] else ''}{'_with_keywords' if cfg['with_keywords'] else ''}_run-{cfg['run']}_opt_neg-{cfg['nb_optional_negs']}.csv"
     
     fold_preds_df.to_csv(test_preds_path)
 
