@@ -63,22 +63,14 @@ You can add/modify hyperparameters, data/model locations, and training settings 
 
 ## **Download Dataset and Model Weights (Linux)**
 
-The dataset and pretrained model weights are hosted here: [biomoqa-classifier (public)](https://biomoqa-classifier.s3.text-analytics.ch/).
+The dataset and pretrained model weights are publicly hosted in an S3 bucket: [biomoqa-classifier (public)](https://biomoqa-classifier.s3.text-analytics.ch/).
 
+Use the dowloading bash script :
 ```bash
 # From project root
-mkdir -p data results/final_model
-
-# Download model checkpoints
-wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
-  -P results/final_model \
-  https://biomoqa-classifier.s3.text-analytics.ch/checkpoints/
-
-# Download dataset
-wget -r -np -nH --cut-dirs=1 -R "index.html*" -e robots=off \
-  -P data \
-  https://biomoqa-classifier.s3.text-analytics.ch/dataset/
+./scripts/download_bucket.sh 
 ```
+
 *Result: `results/final_model/` contains checkpoints, `data/` contains datasets.*
 
 ---
