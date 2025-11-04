@@ -523,7 +523,7 @@ def render_batch_upload():
                 st.caption(f"Processed {st.session_state.batch_progress} / {st.session_state.batch_total} items")
                 # Light auto-refresh to update UI without heavy reloads
                 time.sleep(0.3)
-                st.experimental_rerun()
+                st.rerun()
                 
         except Exception as e:
             st.error(f"Error processing file: {str(e)}")
@@ -661,7 +661,8 @@ def render_scoring_results(result):
     with col1:
         st.metric("Mean Score", f"{stats['mean_score']:.4f}")
     with col2:
-        st.metric("Median Score", f"{stats['median_score']:.4f}")
+        median_score = float(np.median(result.get('fold_scores', []))) if result.get('fold_scores') else 0.0
+        st.metric("Median Score", f"{median_score:.4f}")
     with col3:
         st.metric("Std Deviation", f"{stats['std_score']:.4f}")
     with col4:
@@ -681,7 +682,11 @@ def render_scoring_results(result):
     
     # Individual fold scores
     with st.expander("🔍 Individual Fold Scores"):
-        fold_df = pd.DataFrame(result['fold_results'])
+        fold_scores = result.get('fold_scores', [])
+        fold_df = pd.DataFrame({
+            'fold': list(range(1, len(fold_scores) + 1)),
+            'score': [float(s) for s in fold_scores]
+        })
         fold_df['score'] = fold_df['score'].round(4)
         fold_df = fold_df.sort_values('score', ascending=False)  # Sort by score
         
