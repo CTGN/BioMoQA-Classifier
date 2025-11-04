@@ -258,6 +258,11 @@ def load_data(path: str) -> List[Dict[str, Any]]:
     records = []
     if ext == ".csv":
         df = pd.read_csv(path)
+        # Drop auto-saved index columns (e.g., when CSV was saved with index=True)
+        unnamed_cols = [c for c in df.columns if str(c).startswith("Unnamed:")]
+        if unnamed_cols:
+            df = df.drop(columns=unnamed_cols)
+            logger.info(f"Dropped index/unnamed columns from CSV: {', '.join(map(str, unnamed_cols))}")
         # Try to find an abstract column, normalize
         abs_col = None
         for col in df.columns:
