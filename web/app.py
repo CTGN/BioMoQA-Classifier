@@ -13,7 +13,6 @@ import uuid
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import tempfile
 import hashlib
-import threading
 
 # Add project root to sys.path for imports
 project_root = Path(__file__).resolve().parent.parent
@@ -167,6 +166,14 @@ def render_sidebar():
             help="Group texts by similar length for better GPU utilization"
         )
         
+        max_workers = st.slider(
+            "Processing Mode",
+            min_value=1,
+            max_value=2,
+            value=1,
+            help="1 = Sequential (stable), 2 = Experimental parallel"
+        )
+        
         enable_compilation = st.checkbox(
             "Enable Model Compilation (Experimental)",
             value=False,
@@ -176,6 +183,7 @@ def render_sidebar():
     # Store advanced settings in session state
     st.session_state.use_ultra_optimization = use_ultra_optimization
     st.session_state.use_dynamic_batching = use_dynamic_batching
+    st.session_state.max_workers = max_workers
     st.session_state.enable_compilation = enable_compilation
     
     # Store batch size in session state
@@ -395,10 +403,10 @@ def render_batch_upload():
                 if not st.session_state.model_loaded:
                     st.error("Please load ensemble models first.")
                     return
-
+                
                 # Start new processing - cancel any existing one
                 processing_id = str(uuid.uuid4())
-
+                
                 # Reset all processing state
                 st.session_state.cancel_processing = False
                 st.session_state.batch_processing = True
@@ -407,123 +415,22 @@ def render_batch_upload():
                 st.session_state.batch_progress = 0
                 st.session_state.batch_results = []
                 st.session_state.batch_total = 0
-                st.session_state.batch_finished = False
-
-                # Launch background worker thread
-                def _bg_worker(data, pid):
-                    try:
-                        # Prepare data once
-                        abstracts = []
-                        titles = []
-                        for item in data:
-                            if isinstance(item, str):
-                                abstracts.append(item if item is not None else None)
-                                titles.append(None)
-                            elif isinstance(item, dict):
-                                abstract = item.get('abstract', item.get('text', None))
-                                title = item.get('title', None)
-                                abstracts.append(abstract)
-                                titles.append(title)
-                            else:
-                                abstracts.append(None)
-                                titles.append(None)
-
-                        st.session_state.batch_total = len(abstracts)
-                        batch_size = getattr(st.session_state, 'batch_size', 16)
-
-                        # Process batches
-                        for start in range(0, len(abstracts), batch_size):
-                            if st.session_state.cancel_processing or st.session_state.processing_id != pid:
-                                break
-                            end = min(start + batch_size, len(abstracts))
-                            batch_abstracts = abstracts[start:end]
-                            batch_titles = titles[start:end]
-
-                            predictor_data = []
-                            valid_indices = []
-                            for i, (ab, ti) in enumerate(zip(batch_abstracts, batch_titles)):
-                                if ab is not None and str(ab).strip():
-                                    predictor_data.append({"abstract": str(ab), "title": ti, "index": start + i})
-                                    valid_indices.append(i)
-
-                            if predictor_data:
-                                use_ultra = getattr(st.session_state, 'use_ultra_optimization', True)
-                                use_dynamic = getattr(st.session_state, 'use_dynamic_batching', True)
-                                max_workers = getattr(st.session_state, 'max_workers', 5)
-
-                                if use_ultra:
-                                    batch_results = st.session_state.predictor.score_batch_ultra_optimized(
-                                        predictor_data,
-                                        base_batch_size=len(predictor_data),
-                                        max_workers=max_workers,
-                                        use_dynamic_batching=use_dynamic,
-                                    )
-                                else:
-                                    batch_results = st.session_state.predictor.score_batch_optimized(
-                                        predictor_data,
-                                        batch_size=len(predictor_data),
-                                    )
-                            else:
-                                batch_results = []
-
-                            # Merge back results
-                            final_results = []
-                            vr_idx = 0
-                            for i, (ab, ti) in enumerate(zip(batch_abstracts, batch_titles)):
-                                original_data = data[start + i]
-                                if ab is not None and str(ab).strip() and vr_idx < len(batch_results):
-                                    pr = batch_results[vr_idx]
-                                    vr_idx += 1
-                                else:
-                                    pr = {
-                                        "ensemble_score": None,
-                                        "statistics": {
-                                            "std_score": None,
-                                            "min_score": None,
-                                            "max_score": None,
-                                            "consensus_strength": None,
-                                            "positive_folds": None,
-                                        },
-                                    }
-                                final_results.append({
-                                    **original_data,
-                                    "original_index": start + i + 1,
-                                    "ensemble_score": pr["ensemble_score"],
-                                    "std_score": pr["statistics"]["std_score"],
-                                    "min_score": pr["statistics"]["min_score"],
-                                    "max_score": pr["statistics"]["max_score"],
-                                    "consensus_strength": pr["statistics"]["consensus_strength"],
-                                    "positive_folds": pr["statistics"]["positive_folds"],
-                                })
-
-                            # Append and advance progress
-                            st.session_state.batch_results.extend(final_results)
-                            st.session_state.batch_progress = end
-
-                        # Mark finished if not cancelled
-                        if not st.session_state.cancel_processing and st.session_state.processing_id == pid:
-                            st.session_state.batch_finished = True
-                            st.session_state.batch_processing = False
-                    except Exception as e:
-                        st.session_state.batch_processing = False
-                        st.session_state.batch_finished = False
-                        st.session_state.batch_error = str(e)
-
-                st.session_state.batch_thread = threading.Thread(
-                    target=_bg_worker,
-                    args=(st.session_state.current_batch_data, processing_id),
-                    daemon=True,
-                )
-                st.session_state.batch_thread.start()
-            
-            # Show progress UI and auto-refresh while background worker runs
-            if st.session_state.batch_processing and st.session_state.current_batch_data is not None:
-                total = max(st.session_state.batch_total or 1, 1)
-                st.progress(st.session_state.batch_progress / total)
-                st.caption(f"Processed {st.session_state.batch_progress} / {st.session_state.batch_total} items")
-                # Light auto-refresh to update UI without heavy reloads
-                time.sleep(0.3)
+                
+                # Immediately rerun to show processing state
                 st.rerun()
+            
+            # Continue processing if we're in the middle of it
+            if (st.session_state.batch_processing and 
+                st.session_state.current_batch_data is not None and
+                not st.session_state.cancel_processing):
+                
+                try:
+                    process_batch_scoring_chunked(st.session_state.current_batch_data, st.session_state.processing_id)
+                except Exception as e:
+                    st.error(f"Batch processing failed: {str(e)}")
+                    st.session_state.batch_processing = False
+                    st.session_state.processing_id = None
+                    st.session_state.current_batch_data = None
                 
         except Exception as e:
             st.error(f"Error processing file: {str(e)}")
@@ -661,8 +568,7 @@ def render_scoring_results(result):
     with col1:
         st.metric("Mean Score", f"{stats['mean_score']:.4f}")
     with col2:
-        median_score = float(np.median(result.get('fold_scores', []))) if result.get('fold_scores') else 0.0
-        st.metric("Median Score", f"{median_score:.4f}")
+        st.metric("Median Score", f"{stats['median_score']:.4f}")
     with col3:
         st.metric("Std Deviation", f"{stats['std_score']:.4f}")
     with col4:
@@ -682,11 +588,7 @@ def render_scoring_results(result):
     
     # Individual fold scores
     with st.expander("🔍 Individual Fold Scores"):
-        fold_scores = result.get('fold_scores', [])
-        fold_df = pd.DataFrame({
-            'fold': list(range(1, len(fold_scores) + 1)),
-            'score': [float(s) for s in fold_scores]
-        })
+        fold_df = pd.DataFrame(result['fold_results'])
         fold_df['score'] = fold_df['score'].round(4)
         fold_df = fold_df.sort_values('score', ascending=False)  # Sort by score
         
@@ -724,8 +626,173 @@ def render_scoring_results(result):
         st.plotly_chart(fig, use_container_width=True)
 
 def process_batch_scoring_chunked(texts_data, processing_id):
-    # Deprecated: Background worker now handles batch processing.
-    pass
+    """Process batch of abstracts with chunked processing and proper cancellation support"""
+    
+    # Check if this is still the current processing job
+    if st.session_state.processing_id != processing_id:
+        return  # This job has been superseded
+    
+    # Check for cancellation
+    if st.session_state.cancel_processing:
+        st.session_state.batch_processing = False
+        st.session_state.processing_id = None
+        st.session_state.current_batch_data = None
+        return
+    
+    # Initialize processing state if not exists
+    if 'batch_progress' not in st.session_state:
+        st.session_state.batch_progress = 0
+    if 'batch_results' not in st.session_state:
+        st.session_state.batch_results = []
+    if 'batch_total' not in st.session_state:
+        st.session_state.batch_total = 0
+    
+    # If this is the start of processing, prepare the data
+    if st.session_state.batch_progress == 0:
+        # Extract abstracts and titles for scoring
+        abstracts = []
+        titles = []
+        for item in texts_data:
+            if isinstance(item, str):
+                abstracts.append(item if item is not None else None)
+                titles.append(None)
+            elif isinstance(item, dict):
+                abstract = item.get('abstract', item.get('text', None))
+                title = item.get('title', None)
+                abstracts.append(abstract)
+                titles.append(title)
+            else:
+                abstracts.append(None)
+                titles.append(None)
+        
+        # Store prepared data in session state
+        st.session_state.batch_abstracts = abstracts
+        st.session_state.batch_titles = titles
+        st.session_state.batch_texts_data = texts_data
+        st.session_state.batch_total = len(abstracts)
+        st.session_state.batch_results = []
+        st.session_state.batch_start_time = time.time()
+    
+    # Show progress
+    progress_bar = st.progress(st.session_state.batch_progress / max(st.session_state.batch_total, 1))
+    status_text = st.empty()
+    
+    batch_size = getattr(st.session_state, 'batch_size', 16)
+    
+    # Process all batches in a single run to reduce full-page rerenders
+    while st.session_state.batch_progress < st.session_state.batch_total:
+        batch_start = st.session_state.batch_progress
+        batch_end = min(batch_start + batch_size, st.session_state.batch_total)
+        
+        status_text.text(f"🚀 Processing batch {batch_start//batch_size + 1}/{(st.session_state.batch_total-1)//batch_size + 1} (items {batch_start+1}-{batch_end})")
+        
+        # Prepare batch data
+        batch_abstracts = st.session_state.batch_abstracts[batch_start:batch_end]
+        batch_titles = st.session_state.batch_titles[batch_start:batch_end]
+        
+        # Prepare data for predictor
+        predictor_data = []
+        valid_indices = []
+        for i, (abstract, title) in enumerate(zip(batch_abstracts, batch_titles)):
+            if abstract is not None and str(abstract).strip():
+                predictor_data.append({"abstract": str(abstract), "title": title, "index": batch_start + i})
+                valid_indices.append(i)
+        
+        # Process this batch using ultra-optimization if enabled
+        if predictor_data:
+            try:
+                # Get optimization settings
+                use_ultra = getattr(st.session_state, 'use_ultra_optimization', True)
+                use_dynamic = getattr(st.session_state, 'use_dynamic_batching', True)
+                max_workers = getattr(st.session_state, 'max_workers', 5)
+                
+                if use_ultra:
+                    # Use ultra-optimized method with parallel processing
+                    batch_results = st.session_state.predictor.score_batch_ultra_optimized(
+                        predictor_data, 
+                        base_batch_size=len(predictor_data),
+                        max_workers=max_workers,
+                        use_dynamic_batching=use_dynamic
+                    )
+                else:
+                    # Use standard optimized method
+                    batch_results = st.session_state.predictor.score_batch_optimized(predictor_data, batch_size=len(predictor_data))
+            except Exception as e:
+                st.error(f"Error processing batch: {str(e)}")
+                st.session_state.batch_processing = False
+                st.session_state.processing_id = None
+                st.session_state.current_batch_data = None
+                return
+        else:
+            batch_results = []
+        
+        # Process results for this batch
+        batch_final_results = []
+        valid_result_idx = 0
+        
+        for i, (abstract, title) in enumerate(zip(batch_abstracts, batch_titles)):
+            original_data = st.session_state.batch_texts_data[batch_start + i]
+            
+            if abstract is not None and str(abstract).strip() and valid_result_idx < len(batch_results):
+                prediction_result = batch_results[valid_result_idx]
+                valid_result_idx += 1
+            else:
+                # Create None result for invalid abstracts
+                prediction_result = {
+                    "ensemble_score": None,
+                    "statistics": {
+                        "std_score": None,
+                        "min_score": None,
+                        "max_score": None,
+                        "consensus_strength": None,
+                        "positive_folds": None
+                    }
+                }
+            
+            # Combine original data with prediction results
+            combined_result = {
+                **original_data,
+                "original_index": batch_start + i + 1,
+                "ensemble_score": prediction_result["ensemble_score"],
+                "std_score": prediction_result["statistics"]["std_score"],
+                "min_score": prediction_result["statistics"]["min_score"],
+                "max_score": prediction_result["statistics"]["max_score"],
+                "consensus_strength": prediction_result["statistics"]["consensus_strength"],
+                "positive_folds": prediction_result["statistics"]["positive_folds"]
+            }
+            batch_final_results.append(combined_result)
+        
+        # Add batch results to overall results
+        st.session_state.batch_results.extend(batch_final_results)
+        st.session_state.batch_progress = batch_end
+        
+        # Update progress
+        progress_bar.progress(st.session_state.batch_progress / st.session_state.batch_total)
+        
+        # Brief yield to allow UI to update without full rerun
+        time.sleep(0.05)
+
+    # Processing complete
+    if st.session_state.batch_total > 0 and st.session_state.batch_progress >= st.session_state.batch_total:
+        end_time = time.time()
+        processing_time = end_time - st.session_state.batch_start_time
+        texts_per_second = st.session_state.batch_total / max(processing_time, 1e-6)
+
+        status_text.text(f"✅ Batch scoring complete! Processed {st.session_state.batch_total} texts in {processing_time:.2f}s ({texts_per_second:.1f} texts/sec)")
+
+        display_batch_results(st.session_state.batch_results, processing_time, texts_per_second, batch_size)
+
+        # Reset processing state
+        st.session_state.batch_processing = False
+        st.session_state.processing_id = None
+        st.session_state.current_batch_data = None
+        # Keep results for display
+    else:
+        # Processing already complete, just show results
+        if hasattr(st.session_state, 'batch_results') and st.session_state.batch_results:
+            processing_time = time.time() - st.session_state.batch_start_time
+            texts_per_second = st.session_state.batch_total / processing_time
+            display_batch_results(st.session_state.batch_results, processing_time, texts_per_second, batch_size)
 
 
 def display_batch_results(results, processing_time, texts_per_second, batch_size):
