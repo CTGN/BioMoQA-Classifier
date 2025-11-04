@@ -104,6 +104,149 @@ class BioMoQAEnsemblePredictor:
                 results.append(self.score_text(entry.get("abstract", ""), entry.get("title")))
         return results
 
+    def score_batch_optimized(self, batch: List[Dict[str, Union[str, None]]], batch_size: int = 8) -> List[Dict[str, Any]]:
+        """
+        Optimized batched scoring on GPU:
+        - Tokenizes a minibatch once per fold, runs a single forward pass per fold
+        - Aggregates fold scores per input to produce ensemble metrics
+        """
+        if not batch:
+            return []
+
+        results: List[Dict[str, Any]] = []
+        # Process in minibatches for memory control
+        for i in range(0, len(batch), batch_size):
+            minibatch = batch[i:i + batch_size]
+
+            # Collect per-fold scores for the whole minibatch
+            fold_scores_per_item: List[List[float]] = [[] for _ in range(len(minibatch))]
+
+            # Run each fold once on the minibatch
+            for fold in range(1, self.num_folds + 1):
+                tokenizer = self.fold_tokenizers[fold]
+                model = self.fold_models[fold]
+
+                # Prepare tokenized inputs with optional title as pair
+                abstracts = [str(entry.get("abstract", "") or "") for entry in minibatch]
+                titles = [entry.get("title") for entry in minibatch]
+
+                if any(titles):
+                    tokens = tokenizer(
+                        titles,
+                        abstracts,
+                        truncation=True,
+                        max_length=512,
+                        padding=True,
+                        return_tensors="pt",
+                    )
+                else:
+                    tokens = tokenizer(
+                        abstracts,
+                        truncation=True,
+                        max_length=512,
+                        padding=True,
+                        return_tensors="pt",
+                    )
+
+                tokens = {k: v.to(self.device, non_blocking=False) for k, v in tokens.items()}
+
+                with torch.inference_mode():
+                    # Cast only float32 tensors when on cuda + fp16
+                    if self.use_fp16 and self.device == "cuda":
+                        tokens = {k: (v.half() if v.dtype == torch.float32 else v) for k, v in tokens.items()}
+                    outputs = model(**tokens)
+                    logits = outputs.logits
+                    # logits shape: [batch, 1] or [batch]
+                    scores = torch.sigmoid(logits).view(-1).float().detach().cpu().tolist()
+
+                for idx, s in enumerate(scores):
+                    fold_scores_per_item[idx].append(float(s))
+
+            # Aggregate per-item across folds
+            for fold_scores in fold_scores_per_item:
+                ensemble_score = float(np.mean(fold_scores)) if fold_scores else 0.0
+                stats = {
+                    "mean_score": ensemble_score,
+                    "std_score": float(np.std(fold_scores)) if len(fold_scores) > 1 else 0.0,
+                    "min_score": float(np.min(fold_scores)) if fold_scores else 0.0,
+                    "max_score": float(np.max(fold_scores)) if fold_scores else 0.0,
+                    "positive_folds": sum(1 for s in fold_scores if s > self.threshold),
+                    "consensus_strength": (
+                        max(
+                            sum(1 for s in fold_scores if s > self.threshold),
+                            sum(1 for s in fold_scores if s <= self.threshold),
+                        ) / self.num_folds
+                        if fold_scores
+                        else 0.0
+                    ),
+                }
+                results.append(
+                    {
+                        "ensemble_score": ensemble_score,
+                        "ensemble_prediction": int(ensemble_score > self.threshold),
+                        "fold_scores": fold_scores,
+                        "statistics": stats,
+                    }
+                )
+
+        return results
+
+    def score_batch_ultra_optimized(
+        self,
+        batch: List[Dict[str, Union[str, None]]],
+        base_batch_size: int = 8,
+        max_workers: int = 1,
+        use_dynamic_batching: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        Ultra-optimized path:
+        - Optionally groups inputs by approximate length to reduce padding (dynamic batching)
+        - Uses the same GPU-batched execution per fold under the hood
+        - max_workers is accepted for API compatibility; computation runs sequentially per fold for stability
+        """
+        if not batch:
+            return []
+
+        if not use_dynamic_batching:
+            return self.score_batch_optimized(batch, batch_size=base_batch_size)
+
+        # Create sortable tuples: (length_score, original_index, item)
+        def length_of(entry: Dict[str, Union[str, None]]) -> int:
+            abstract = str(entry.get("abstract", "") or "")
+            title = str(entry.get("title", "") or "")
+            return len(abstract) + (len(title) if title else 0)
+
+        indexed = [(length_of(entry), idx, entry) for idx, entry in enumerate(batch)]
+        indexed.sort(key=lambda x: x[0])
+
+        # Process in sorted order to minimize padding, then restore original order
+        sorted_items = [t[2] for t in indexed]
+        optimized_results = self.score_batch_optimized(sorted_items, batch_size=base_batch_size)
+
+        # Map results back to original order
+        restored: List[Optional[Dict[str, Any]]] = [None] * len(batch)
+        for (_, original_idx, _), res in zip(indexed, optimized_results):
+            restored[original_idx] = res
+
+        # All should be filled; if any None, fill with a default
+        for i in range(len(restored)):
+            if restored[i] is None:
+                restored[i] = {
+                    "ensemble_score": 0.0,
+                    "ensemble_prediction": 0,
+                    "fold_scores": [],
+                    "statistics": {
+                        "mean_score": 0.0,
+                        "std_score": 0.0,
+                        "min_score": 0.0,
+                        "max_score": 0.0,
+                        "positive_folds": 0,
+                        "consensus_strength": 0.0,
+                    },
+                }
+
+        return restored
+
 # --- Data loading utilities ---
 def load_data(path: str) -> List[Dict[str, Any]]:
     """
