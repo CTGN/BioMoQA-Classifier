@@ -165,14 +165,6 @@ def render_sidebar():
             help="Group texts by similar length for better GPU utilization"
         )
         
-        max_workers = st.slider(
-            "Processing Mode",
-            min_value=1,
-            max_value=2,
-            value=1,
-            help="1 = Sequential (stable), 2 = Experimental parallel"
-        )
-        
         enable_compilation = st.checkbox(
             "Enable Model Compilation (Experimental)",
             value=False,
@@ -182,7 +174,6 @@ def render_sidebar():
     # Store advanced settings in session state
     st.session_state.use_ultra_optimization = use_ultra_optimization
     st.session_state.use_dynamic_batching = use_dynamic_batching
-    st.session_state.max_workers = max_workers
     st.session_state.enable_compilation = enable_compilation
     
     # Store batch size in session state
@@ -686,14 +677,12 @@ def process_batch_scoring_chunked(texts_data, processing_id):
                 # Get optimization settings
                 use_ultra = getattr(st.session_state, 'use_ultra_optimization', True)
                 use_dynamic = getattr(st.session_state, 'use_dynamic_batching', True)
-                max_workers = getattr(st.session_state, 'max_workers', 5)
                 
                 if use_ultra:
                     # Use ultra-optimized method with parallel processing
                     batch_results = st.session_state.predictor.score_batch_ultra_optimized(
                         predictor_data, 
                         base_batch_size=len(predictor_data),
-                        max_workers=max_workers,
                         use_dynamic_batching=use_dynamic
                     )
                 else:

@@ -195,14 +195,12 @@ class BioMoQAEnsemblePredictor:
         self,
         batch: List[Dict[str, Union[str, None]]],
         base_batch_size: int = 8,
-        max_workers: int = 1,
         use_dynamic_batching: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Ultra-optimized path:
         - Optionally groups inputs by approximate length to reduce padding (dynamic batching)
         - Uses the same GPU-batched execution per fold under the hood
-        - max_workers is accepted for API compatibility; computation runs sequentially per fold for stability
         """
         if not batch:
             return []
