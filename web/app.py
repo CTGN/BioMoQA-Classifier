@@ -12,6 +12,7 @@ import numpy as np
 import uuid
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import tempfile
+import hashlib
 
 # Add project root to sys.path for imports
 project_root = Path(__file__).resolve().parent.parent
@@ -322,13 +323,30 @@ def render_batch_upload():
     
     if uploaded_file:
         try:
-            # Write upload to temp file and load using API
-            suffix = os.path.splitext(uploaded_file.name)[-1]
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
-                tmp_file.write(uploaded_file.read())
-                tmp_path = tmp_file.name
-            texts_data = load_data(tmp_path)
-            os.unlink(tmp_path)
+            # Avoid re-loading the same file on Streamlit reruns
+            file_bytes = uploaded_file.getvalue()
+            file_sig = (
+                uploaded_file.name,
+                len(file_bytes),
+                hashlib.md5(file_bytes).hexdigest(),
+            )
+
+            cached_sig = st.session_state.get('uploaded_signature')
+            cached_data = st.session_state.get('loaded_texts_data')
+
+            if cached_sig != file_sig or not cached_data:
+                # Write upload to temp file and load using API
+                suffix = os.path.splitext(uploaded_file.name)[-1]
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+                    tmp_file.write(file_bytes)
+                    tmp_path = tmp_file.name
+                texts_data = load_data(tmp_path)
+                os.unlink(tmp_path)
+                # Cache for subsequent reruns
+                st.session_state.uploaded_signature = file_sig
+                st.session_state.loaded_texts_data = texts_data
+            else:
+                texts_data = cached_data
 
             if not texts_data:
                 st.error("No valid abstracts found in the uploaded file.")
@@ -384,7 +402,7 @@ def render_batch_upload():
                 st.session_state.cancel_processing = False
                 st.session_state.batch_processing = True
                 st.session_state.processing_id = processing_id
-                st.session_state.current_batch_data = texts_data
+                st.session_state.current_batch_data = st.session_state.get('loaded_texts_data', texts_data)
                 st.session_state.batch_progress = 0
                 st.session_state.batch_results = []
                 st.session_state.batch_total = 0
