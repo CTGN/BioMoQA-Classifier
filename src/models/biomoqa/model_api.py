@@ -256,6 +256,7 @@ def load_data(path: str) -> List[Dict[str, Any]]:
     ext = os.path.splitext(path)[-1].lower()
     loaded, valid = 0, 0
     records = []
+    skipped = 0
     if ext == ".csv":
         df = pd.read_csv(path)
         # Drop auto-saved index columns (e.g., when CSV was saved with index=True)
@@ -288,7 +289,9 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                 records.append(rec)
                 valid += 1
             else:
-                logger.warning(f"Skipping row {i} (missing/empty abstract): {row}")
+                logger.warning(f"Skipping row {i} (missing/empty abstract)")
+                skipped+=1
+                logger.warning(f"Number of skipped rows so far: {skipped}")
     elif ext == ".json":
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
