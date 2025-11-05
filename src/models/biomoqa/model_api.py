@@ -63,15 +63,43 @@ class BioMoQAEnsemblePredictor:
             self.fold_models[fold] = model
         logger.info(f"Loaded all {self.num_folds} fold models.")
 
+    def _as_str_or_none(self, value: Any) -> Optional[str]:
+        """Return a cleaned string or None for invalid inputs (e.g., NaN/None)."""
+        if value is None:
+            return None
+        # Handle pandas/NumPy NaNs which are floats
+        if isinstance(value, float) and np.isnan(value):
+            return None
+        # Convert other non-strings to string conservatively
+        text = value if isinstance(value, str) else str(value)
+        text = text.strip()
+        return text if text else None
+
     def score_text(self, abstract: str, title: Optional[str]=None) -> Dict[str, Any]:
         fold_scores = []
         for fold in range(1, self.num_folds + 1):
             tokenizer = self.fold_tokenizers[fold]
             model = self.fold_models[fold]
-            if title:
-                tokens = tokenizer(title, abstract, truncation=True, max_length=512, padding=True, return_tensors="pt")
+            # Sanitize inputs for tokenizer: ensure strings, avoid NaN/None
+            clean_abstract = self._as_str_or_none(abstract) or ""
+            clean_title = self._as_str_or_none(title)
+            if clean_title is not None:
+                tokens = tokenizer(
+                    clean_title,
+                    clean_abstract,
+                    truncation=True,
+                    max_length=512,
+                    padding=True,
+                    return_tensors="pt",
+                )
             else:
-                tokens = tokenizer(abstract, truncation=True, max_length=512, padding=True, return_tensors="pt")
+                tokens = tokenizer(
+                    clean_abstract,
+                    truncation=True,
+                    max_length=512,
+                    padding=True,
+                    return_tensors="pt",
+                )
             tokens = {k: v.to(self.device) for k, v in tokens.items()}
             with torch.no_grad():
                 if self.use_fp16 and self.device == "cuda":
@@ -127,8 +155,8 @@ class BioMoQAEnsemblePredictor:
                 model = self.fold_models[fold]
 
                 # Prepare tokenized inputs with optional title as pair
-                abstracts = [str(entry.get("abstract", "") or "") for entry in minibatch]
-                titles = [entry.get("title") for entry in minibatch]
+                abstracts = [self._as_str_or_none(entry.get("abstract", "")) or "" for entry in minibatch]
+                titles = [self._as_str_or_none(entry.get("title")) or "" for entry in minibatch]
 
                 if any(titles):
                     tokens = tokenizer(
@@ -278,20 +306,48 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                 logger.warning(f"No column named 'abstract'; using closest column '{abs_col}'.")
             else:
                 raise ValueError(f"CSV must have an 'abstract' column. Available columns: {', '.join(df.columns)}")
+
+        # Try to find a title column (optional) to allow skipping empty titles when present
+        title_col = None
+        for col in df.columns:
+            if col.lower().strip() == "title":
+                title_col = col
+                break
+        if not title_col:
+            title_alts = [c for c in df.columns if "title" in c.lower()]
+            if title_alts:
+                title_col = title_alts[0]
+                logger.warning(f"No column named 'title'; using closest column '{title_col}'.")
+
+        def _clean_str_or_none(v: Any) -> Optional[str]:
+            if v is None:
+                return None
+            if isinstance(v, float) and np.isnan(v):
+                return None
+            s = v if isinstance(v, str) else str(v)
+            s = s.strip()
+            return s if s else None
+
         for i, row in df.iterrows():
             loaded += 1
-            abst = row.get(abs_col, None)
-            if isinstance(abst, float) and np.isnan(abst):
-                abst = None
-            if abst is not None and isinstance(abst, str) and abst.strip():
-                rec = dict(row)
-                rec['abstract'] = str(abst)
-                records.append(rec)
-                valid += 1
-            else:
-                logger.warning(f"Skipping row {i} (missing/empty abstract) : {row['abstract'] if 'abstract' in row else ''}")
-                skipped+=1
+            abst = _clean_str_or_none(row.get(abs_col, None))
+            ttl = _clean_str_or_none(row.get(title_col, None)) if title_col else None
+            if abst is None:
+                logger.warning(f"Skipping row {i} (missing/empty abstract) : {row[abs_col] if abs_col in row else ''}")
+                skipped += 1
                 logger.warning(f"Number of skipped rows so far: {skipped}")
+                continue
+            if title_col and ttl is None:
+                logger.warning(f"Skipping row {i} (missing/empty title)")
+                skipped += 1
+                logger.warning(f"Number of skipped rows so far: {skipped}")
+                continue
+            rec = dict(row)
+            rec['abstract'] = abst
+            if title_col:
+                rec['title'] = ttl
+            records.append(rec)
+            valid += 1
     elif ext == ".json":
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -299,6 +355,7 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                 for i, item in enumerate(data):
                     loaded += 1
                     abst = None
+                    ttl = None
                     if isinstance(item, dict):
                         # Try both 'abstract' and possible alternative
                         for key in item:
@@ -310,11 +367,27 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                             if alt_keys:
                                 abst = item[alt_keys[0]]
                                 logger.warning(f"No key named 'abstract' in item {i}; using closest: '{alt_keys[0]}'")
+                        # Detect title if present (exact or fuzzy) and enforce non-empty when present
+                        for key in item:
+                            if key.lower().strip() == "title":
+                                ttl = item[key]
+                                break
+                        if ttl is None:
+                            title_alt_keys = [k for k in item if "title" in k.lower()]
+                            if title_alt_keys:
+                                ttl = item[title_alt_keys[0]]
+                                logger.warning(f"No key named 'title' in item {i}; using closest: '{title_alt_keys[0]}'")
                         if abst is not None and isinstance(abst, str) and abst.strip():
-                            rec = dict(item)
-                            rec['abstract'] = str(abst)
-                            records.append(rec)
-                            valid += 1
+                            # Enforce skipping empty title only if a title field exists
+                            if ttl is not None and not (isinstance(ttl, str) and ttl.strip()):
+                                logger.warning(f"Skipping JSON dict item {i} (missing/empty title): {item}")
+                            else:
+                                rec = dict(item)
+                                rec['abstract'] = str(abst).strip()
+                                if ttl is not None:
+                                    rec['title'] = str(ttl).strip()
+                                records.append(rec)
+                                valid += 1
                         else:
                             logger.warning(f"Skipping JSON dict item {i} (missing/empty abstract): {item}")
                     elif isinstance(item, str) and item.strip():
