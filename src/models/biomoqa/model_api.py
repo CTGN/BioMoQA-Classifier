@@ -276,10 +276,12 @@ class BioMoQAEnsemblePredictor:
 # --- Data loading utilities ---
 def load_data(path: str) -> List[Dict[str, Any]]:
     """
-    Loads data from a JSON or CSV file into a list of dicts suitable for batch scoring.
-    Accepts formats with fields 'abstract', optional 'title', and any others.
-    Skips rows with missing or None/empty abstracts and logs a warning with a sample.
-    Attempts to normalize CSV columns when possible.
+    Loads data from a JSON or CSV file into a list of dicts while PRESERVING
+    the original number/order of instances. Adds a boolean flag
+    '_valid_for_scoring' on each record indicating whether the item should be
+    scored. Valid means: non-empty 'abstract' and, if a title column/key exists
+    for that row, a non-empty 'title'. Attempts to normalize CSV columns when
+    possible.
     """
     ext = os.path.splitext(path)[-1].lower()
     loaded, valid = 0, 0
@@ -332,22 +334,17 @@ def load_data(path: str) -> List[Dict[str, Any]]:
             loaded += 1
             abst = _clean_str_or_none(row.get(abs_col, None))
             ttl = _clean_str_or_none(row.get(title_col, None)) if title_col else None
-            if abst is None:
-                logger.warning(f"Skipping row {i} (missing/empty abstract) : {row[abs_col] if abs_col in row else ''}")
-                skipped += 1
-                logger.warning(f"Number of skipped rows so far: {skipped}")
-                continue
-            if title_col and ttl is None:
-                logger.warning(f"Skipping row {i} (missing/empty title)")
-                skipped += 1
-                logger.warning(f"Number of skipped rows so far: {skipped}")
-                continue
             rec = dict(row)
-            rec['abstract'] = abst
+            rec['abstract'] = abst if abst is not None else rec.get(abs_col, None)
             if title_col:
-                rec['title'] = ttl
+                rec['title'] = ttl if ttl is not None else rec.get(title_col, None)
+            is_valid = (abst is not None) and (not title_col or ttl is not None)
+            rec['_valid_for_scoring'] = bool(is_valid)
+            if is_valid:
+                valid += 1
+            else:
+                skipped += 1
             records.append(rec)
-            valid += 1
     elif ext == ".json":
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -377,24 +374,27 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                             if title_alt_keys:
                                 ttl = item[title_alt_keys[0]]
                                 logger.warning(f"No key named 'title' in item {i}; using closest: '{title_alt_keys[0]}'")
-                        if abst is not None and isinstance(abst, str) and abst.strip():
-                            # Enforce skipping empty title only if a title field exists
-                            if ttl is not None and not (isinstance(ttl, str) and ttl.strip()):
-                                logger.warning(f"Skipping JSON dict item {i} (missing/empty title): {item}")
-                            else:
-                                rec = dict(item)
-                                rec['abstract'] = str(abst).strip()
-                                if ttl is not None:
-                                    rec['title'] = str(ttl).strip()
-                                records.append(rec)
-                                valid += 1
+                        rec = dict(item)
+                        # Normalize abstract/title values (keep originals if present)
+                        if abst is not None and isinstance(abst, str):
+                            rec['abstract'] = str(abst).strip()
+                        if ttl is not None and isinstance(ttl, str):
+                            rec['title'] = str(ttl).strip()
+                        is_valid = (abst is not None and isinstance(abst, str) and abst.strip()) and (
+                            ttl is None or (isinstance(ttl, str) and ttl.strip())
+                        )
+                        rec['_valid_for_scoring'] = bool(is_valid)
+                        if is_valid:
+                            valid += 1
                         else:
-                            logger.warning(f"Skipping JSON dict item {i} (missing/empty abstract): {item}")
+                            skipped += 1
+                        records.append(rec)
                     elif isinstance(item, str) and item.strip():
-                        records.append({'abstract': item})
+                        records.append({'abstract': item, '_valid_for_scoring': True})
                         valid += 1
                     else:
-                        logger.warning(f"Skipping JSON item {i} (unsupported type or empty string): {item}")
+                        records.append({'_valid_for_scoring': False})
+                        skipped += 1
             else:
                 raise ValueError("JSON root must be an array of dicts or strings.")
     else:
@@ -433,22 +433,51 @@ def cli():
     )
 
     if args.input_file:
-        batch = load_data(args.input_file)
-        if not batch:
-            print("No valid abstracts loaded from file.", file=sys.stderr)
+        records = load_data(args.input_file)
+        if not records:
+            print("No items loaded from file.", file=sys.stderr)
             sys.exit(1)
-        results = predictor.score_batch(batch, batch_size=args.batch_size)
+
+        # Build list of only valid items for scoring
+        valid_indices: List[int] = [i for i, r in enumerate(records) if r.get('_valid_for_scoring', False)]
+        valid_batch: List[Dict[str, Union[str, None]]] = [
+            {"abstract": r.get("abstract", ""), "title": r.get("title")}
+            for r in (records[i] for i in valid_indices)
+        ]
+
+        # Score valid items
+        scored: List[Dict[str, Any]] = predictor.score_batch_optimized(valid_batch, batch_size=args.batch_size)
+
+        # Merge back into full list, preserving order; fill invalid with "None"
+        merged_results: List[Dict[str, Any]] = []
+        score_cols_default = {
+            "ensemble_score": "None",
+            "ensemble_prediction": "None",
+            "fold_scores": "None",
+            "statistics": "None",
+        }
+        scored_iter = iter(scored)
+        for idx, rec in enumerate(records):
+            out = dict(rec)
+            out.pop('_valid_for_scoring', None)
+            if idx in valid_indices:
+                res = next(scored_iter)
+                out.update(res)
+            else:
+                out.update(score_cols_default)
+            merged_results.append(out)
+
         if args.output_file:
             ext = args.output_file.lower().split('.')[-1]
             if ext == "json":
                 with open(args.output_file, "w", encoding="utf-8") as f:
-                    json.dump(results, f, indent=2, ensure_ascii=False)
+                    json.dump(merged_results, f, indent=2, ensure_ascii=False)
             else:
                 import pandas as pd
-                pd.DataFrame(results).to_csv(args.output_file, index=False)
+                pd.DataFrame(merged_results).to_csv(args.output_file, index=False)
             print(f"Results written to {args.output_file}")
         else:
-            print(json.dumps(results, indent=2, ensure_ascii=False))
+            print(json.dumps(merged_results, indent=2, ensure_ascii=False))
     elif args.abstract:
         result = predictor.score_text(args.abstract, args.title)
         if args.output_file:
