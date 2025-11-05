@@ -313,7 +313,7 @@ def render_batch_upload():
         st.success(f"⚡ **ULTRA-OPTIMIZATION ENABLED**: Dynamic batching + FP16{comp_text} = ~2-4x faster!")
     else:
         st.success("⚡ **GPU Optimizations**: FP16 mixed precision + dynamic batching for maximum speed!")
-    
+
     # File upload
     uploaded_file = st.file_uploader(
         "Choose a file",

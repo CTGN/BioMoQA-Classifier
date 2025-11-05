@@ -1,8 +1,4 @@
 [server]
 
-maxUploadSize = 600
-
-
-[client]
-
-client_max_body_size = 600
+maxUploadSize = 600        # in MB
+maxMessageSize = 600       # in MB, affects websocket/message frames

@@ -9250,3 +9250,16 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 2025-11-05 07:52:02,473 - INFO - Loaded 15859 valid / 15893 total items from: /tmp/tmpkrj4g5x2.csv
 2025-11-05 07:55:01.035 "client.client_max_body_size" is not a valid config option. If you previously had this config option set, it may have been removed.
   Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-05 08:40:30,277 - INFO - Loaded all 5 fold models.

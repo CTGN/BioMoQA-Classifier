@@ -289,7 +289,7 @@ def load_data(path: str) -> List[Dict[str, Any]]:
                 records.append(rec)
                 valid += 1
             else:
-                logger.warning(f"Skipping row {i} (missing/empty abstract)")
+                logger.warning(f"Skipping row {i} (missing/empty abstract) : {row['abstract'] if 'abstract' in row else ''}")
                 skipped+=1
                 logger.warning(f"Number of skipped rows so far: {skipped}")
     elif ext == ".json":
