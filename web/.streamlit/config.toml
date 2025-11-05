@@ -1,0 +1,8 @@
+[server]
+
+maxUploadSize = 600
+
+
+[client]
+
+client_max_body_size = 600

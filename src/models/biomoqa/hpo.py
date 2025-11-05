@@ -57,8 +57,8 @@ def set_reproducibility(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
-    set_random_seeds(get_config().get('environment', {}).get('seed', 42))
-    set_seed(get_config().get('environment', {}).get('seed', 42))
+    set_random_seeds(get_config().get('environment', default={}).get('seed', 42))
+    set_seed(get_config().get('environment', default={}).get('seed', 42))
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run HPO for our BERT classifier")

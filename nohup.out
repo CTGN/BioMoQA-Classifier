@@ -9079,3 +9079,174 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 2025-11-04 07:14:47,322 - INFO - 🔍 Running diagnostic test...
 2025-11-04 07:14:47,341 - INFO - ✅ Diagnostic test passed! Test score: 0.0055
   Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-04 13:31:25,564 - INFO - Loaded all 5 fold models.
+2025-11-04 15:55:09,536 - INFO - Loaded all 5 fold models.
+2025-11-04 16:59:17,176 - INFO - Loaded all 5 fold models.
+2025-11-04 17:31:18,754 - INFO - Loaded all 5 fold models.
+2025-11-04 21:03:59,352 - INFO - Loaded all 5 fold models.
+2025-11-04 21:12:28,994 - INFO - Loaded all 5 fold models.
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-04 21:14:12,075 - INFO - Loaded all 5 fold models.
+2025-11-04 21:14:31,390 - INFO - Loaded all 5 fold models.
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-04 21:14:58,865 - INFO - Loaded all 5 fold models.
+  Stopping...
+2025-11-04 21:17:20.137 "server.maxUpdloadSize" is not a valid config option. If you previously had this config option set, it may have been removed.
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-04 21:17:41,452 - INFO - Loaded all 5 fold models.
+2025-11-04 21:18:19.004 An update to the [server] config option section was detected. To have these changes be reflected, please restart streamlit.
+2025-11-04 21:18:24.483 304 GET / (172.30.0.3) 0.73ms
+2025-11-04 21:18:24.570 304 GET /_stcore/health (172.30.0.3) 0.68ms
+2025-11-04 21:18:24.580 304 GET /_stcore/host-config (172.30.0.3) 0.38ms
+2025-11-04 21:18:24.703 200 GET /static/media/SourceSansVF-Upright.ttf.BsWL4Kly.woff2 (172.30.0.3) 1.06ms
+2025-11-04 21:18:25.551 200 GET /favicon.png (172.30.0.3) 0.65ms
+2025-11-04 21:18:25.629 304 GET /_stcore/health (172.30.0.3) 0.80ms
+2025-11-04 21:18:25.629 304 GET /_stcore/host-config (172.30.0.3) 0.71ms
+2025-11-04 21:18:25.853 101 GET /_stcore/stream (172.30.0.3) 0.55ms
+2025-11-04 21:18:27,464 - INFO - Loaded all 5 fold models.
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-04 21:20:51,444 - INFO - Loaded all 5 fold models.
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://172.30.120.56:8501
+  External URL: http://194.38.180.210:8501
+
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-05 07:49:59,242 - INFO - Loaded all 5 fold models.
+2025-11-05 07:51:59,802 - WARNING - Skipping row 211 (missing/empty abstract)
+2025-11-05 07:51:59,803 - WARNING - Number of skipped rows so far: 1
+2025-11-05 07:51:59,827 - WARNING - Skipping row 356 (missing/empty abstract)
+2025-11-05 07:51:59,827 - WARNING - Number of skipped rows so far: 2
+2025-11-05 07:51:59,896 - WARNING - Skipping row 775 (missing/empty abstract)
+2025-11-05 07:51:59,896 - WARNING - Number of skipped rows so far: 3
+2025-11-05 07:51:59,950 - WARNING - Skipping row 1102 (missing/empty abstract)
+2025-11-05 07:51:59,950 - WARNING - Number of skipped rows so far: 4
+2025-11-05 07:51:59,990 - WARNING - Skipping row 1331 (missing/empty abstract)
+2025-11-05 07:51:59,990 - WARNING - Number of skipped rows so far: 5
+2025-11-05 07:52:00,072 - WARNING - Skipping row 1814 (missing/empty abstract)
+2025-11-05 07:52:00,072 - WARNING - Number of skipped rows so far: 6
+2025-11-05 07:52:00,189 - WARNING - Skipping row 2492 (missing/empty abstract)
+2025-11-05 07:52:00,189 - WARNING - Number of skipped rows so far: 7
+2025-11-05 07:52:00,315 - WARNING - Skipping row 3228 (missing/empty abstract)
+2025-11-05 07:52:00,316 - WARNING - Number of skipped rows so far: 8
+2025-11-05 07:52:00,321 - WARNING - Skipping row 3257 (missing/empty abstract)
+2025-11-05 07:52:00,321 - WARNING - Number of skipped rows so far: 9
+2025-11-05 07:52:00,407 - WARNING - Skipping row 3769 (missing/empty abstract)
+2025-11-05 07:52:00,407 - WARNING - Number of skipped rows so far: 10
+2025-11-05 07:52:00,408 - WARNING - Skipping row 3773 (missing/empty abstract)
+2025-11-05 07:52:00,408 - WARNING - Number of skipped rows so far: 11
+2025-11-05 07:52:00,480 - WARNING - Skipping row 4201 (missing/empty abstract)
+2025-11-05 07:52:00,480 - WARNING - Number of skipped rows so far: 12
+2025-11-05 07:52:00,500 - WARNING - Skipping row 4322 (missing/empty abstract)
+2025-11-05 07:52:00,501 - WARNING - Number of skipped rows so far: 13
+2025-11-05 07:52:00,549 - WARNING - Skipping row 4608 (missing/empty abstract)
+2025-11-05 07:52:00,549 - WARNING - Number of skipped rows so far: 14
+2025-11-05 07:52:00,724 - WARNING - Skipping row 5651 (missing/empty abstract)
+2025-11-05 07:52:00,724 - WARNING - Number of skipped rows so far: 15
+2025-11-05 07:52:00,841 - WARNING - Skipping row 6362 (missing/empty abstract)
+2025-11-05 07:52:00,841 - WARNING - Number of skipped rows so far: 16
+2025-11-05 07:52:00,892 - WARNING - Skipping row 6680 (missing/empty abstract)
+2025-11-05 07:52:00,892 - WARNING - Number of skipped rows so far: 17
+2025-11-05 07:52:00,977 - WARNING - Skipping row 7194 (missing/empty abstract)
+2025-11-05 07:52:00,977 - WARNING - Number of skipped rows so far: 18
+2025-11-05 07:52:01,150 - WARNING - Skipping row 8214 (missing/empty abstract)
+2025-11-05 07:52:01,150 - WARNING - Number of skipped rows so far: 19
+2025-11-05 07:52:01,260 - WARNING - Skipping row 8835 (missing/empty abstract)
+2025-11-05 07:52:01,261 - WARNING - Number of skipped rows so far: 20
+2025-11-05 07:52:01,430 - WARNING - Skipping row 9832 (missing/empty abstract)
+2025-11-05 07:52:01,430 - WARNING - Number of skipped rows so far: 21
+2025-11-05 07:52:01,550 - WARNING - Skipping row 10520 (missing/empty abstract)
+2025-11-05 07:52:01,550 - WARNING - Number of skipped rows so far: 22
+2025-11-05 07:52:01,578 - WARNING - Skipping row 10688 (missing/empty abstract)
+2025-11-05 07:52:01,578 - WARNING - Number of skipped rows so far: 23
+2025-11-05 07:52:01,932 - WARNING - Skipping row 12760 (missing/empty abstract)
+2025-11-05 07:52:01,932 - WARNING - Number of skipped rows so far: 24
+2025-11-05 07:52:02,036 - WARNING - Skipping row 13364 (missing/empty abstract)
+2025-11-05 07:52:02,036 - WARNING - Number of skipped rows so far: 25
+2025-11-05 07:52:02,094 - WARNING - Skipping row 13699 (missing/empty abstract)
+2025-11-05 07:52:02,094 - WARNING - Number of skipped rows so far: 26
+2025-11-05 07:52:02,104 - WARNING - Skipping row 13752 (missing/empty abstract)
+2025-11-05 07:52:02,104 - WARNING - Number of skipped rows so far: 27
+2025-11-05 07:52:02,135 - WARNING - Skipping row 13935 (missing/empty abstract)
+2025-11-05 07:52:02,135 - WARNING - Number of skipped rows so far: 28
+2025-11-05 07:52:02,263 - WARNING - Skipping row 14666 (missing/empty abstract)
+2025-11-05 07:52:02,263 - WARNING - Number of skipped rows so far: 29
+2025-11-05 07:52:02,319 - WARNING - Skipping row 14990 (missing/empty abstract)
+2025-11-05 07:52:02,319 - WARNING - Number of skipped rows so far: 30
+2025-11-05 07:52:02,346 - WARNING - Skipping row 15145 (missing/empty abstract)
+2025-11-05 07:52:02,346 - WARNING - Number of skipped rows so far: 31
+2025-11-05 07:52:02,360 - WARNING - Skipping row 15226 (missing/empty abstract)
+2025-11-05 07:52:02,360 - WARNING - Number of skipped rows so far: 32
+2025-11-05 07:52:02,432 - WARNING - Skipping row 15652 (missing/empty abstract)
+2025-11-05 07:52:02,432 - WARNING - Number of skipped rows so far: 33
+2025-11-05 07:52:02,472 - WARNING - Skipping row 15891 (missing/empty abstract)
+2025-11-05 07:52:02,472 - WARNING - Number of skipped rows so far: 34
+2025-11-05 07:52:02,473 - INFO - Loaded 15859 valid / 15893 total items from: /tmp/tmpkrj4g5x2.csv
+2025-11-05 07:55:01.035 "client.client_max_body_size" is not a valid config option. If you previously had this config option set, it may have been removed.
+  Stopping...
