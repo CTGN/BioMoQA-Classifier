@@ -20,6 +20,7 @@ results/models
 results/ray_results
 results/ray_results_dir
 results/final_model
+results/predictions.csv
 
 plots/
 
