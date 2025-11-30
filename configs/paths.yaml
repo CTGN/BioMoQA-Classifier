@@ -32,7 +32,7 @@ plots:
 
 # Model configuration
 models:
-  checkpoint_pattern: "best_model_cross_val_{loss}_{model}_fold-{fold}"
+  checkpoint_pattern: "best_model_cross_val_{loss}_{model}_fold-{fold}_opt_negs-{nb_opt_negs}"
   
 # Environment settings
 environment:

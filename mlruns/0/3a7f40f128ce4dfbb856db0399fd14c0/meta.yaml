@@ -1,0 +1,14 @@
+artifact_uri: file:///home/leandre/Projects/BioMoQA_Playground/mlruns/0/3a7f40f128ce4dfbb856db0399fd14c0/artifacts
+end_time: 1764430706063
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 3a7f40f128ce4dfbb856db0399fd14c0
+run_name: intelligent-eel-228
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764430692336
+status: 3
+tags: []
+user_id: leandre

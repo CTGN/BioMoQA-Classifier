@@ -1,0 +1,14 @@
+# Web UI Requirements
+streamlit==1.31.0
+plotly==5.18.0
+
+# Celery and Redis (for task queue communication)
+celery==5.3.6
+redis==5.0.1
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Shared model API dependencies (for load_data utility)
+# Note: UI doesn't load models directly, but needs some utilities

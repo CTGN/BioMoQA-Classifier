@@ -18,6 +18,13 @@ if str(project_root) not in sys.path:
 
 from src.data_pipeline.biomoqa.create_raw import *
 from src.config import get_config
+from src.utils.plot_style import (
+    FIGURE_SIZES, PRIMARY_COLORS,
+    create_figure, save_figure, setup_plotting_style
+)
+
+# Apply unified style
+setup_plotting_style()
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +87,7 @@ def pmids_to_text(train_df, test_df):
 def balance_dataset(df, balance_coeff):
     """
     - Performs undersampling on the negatives
-    - Renames the abstract column -> we should not hqve to do that 
+    - Renames the abstract column -> we should not hqve to do that
     """
 
     def is_label(batch,label):
@@ -92,6 +99,9 @@ def balance_dataset(df, balance_coeff):
                 batch_bools.append(False)
         return batch_bools
 
+    config = get_config()
+    seed = config.get('environment', {}).get('seed', 42)
+
     # Assuming your dataset has a 'label' column (adjust if needed)
     pos = df[df['labels'] == 1]
     neg = df[df['labels'] == 0]
@@ -102,12 +112,12 @@ def balance_dataset(df, balance_coeff):
     # Ensure there are more negatives than positives before subsampling
     if len(neg) > num_pos:
         #TODO : Change the proportion value here for les or more imbalance -> compare different values, plot ? try less
-        neg_subset_train = neg.sample(n=balance_coeff*num_pos, random_state=CONFIG["seed"])
+        neg_subset_train = neg.sample(n=balance_coeff*num_pos, random_state=seed)
     else:
         neg_subset_train = neg  # Fallback (unlikely in your case)
 
     balanced_df = pd.concat([pos, neg_subset_train], ignore_index=True)
-    balanced_df = balanced_df.sample(frac=1, random_state=CONFIG["seed"]).reset_index(drop=True)  # Final shuffle
+    balanced_df = balanced_df.sample(frac=1, random_state=seed).reset_index(drop=True)  # Final shuffle
 
     logger.info(f"Balanced columns: {balanced_df.columns}")
     logger.info(f"Balanced dataset size: {len(balanced_df)}")
@@ -131,7 +141,10 @@ def biomoqa_data_pipeline(
     optional_negatives_df = optional_negatives_df[['title', 'text', 'MESH_terms', 'doi', 'labels']]
     optional_negatives_df.rename(columns={'MESH_terms': 'Keywords', 'text': 'abstract'}, inplace=True)
 
-    optional_negatives_df = optional_negatives_df.sample(n=nb_optional_negs, random_state=CONFIG['seed'])
+    config = get_config()
+    seed = config.get('environment', {}).get('seed', 42)
+
+    optional_negatives_df = optional_negatives_df.sample(n=nb_optional_negs, random_state=seed)
     all_df = pd.concat([og_df, optional_negatives_df], ignore_index=True)
     logger.info(f"Combined dataset size: {len(all_df)}")
 
@@ -154,21 +167,21 @@ def biomoqa_data_pipeline(
 
     labels = ['Original Positives', 'Original Negatives', 'Added Negatives']
     sizes = [n_positives, n_original_negatives, n_optional_negatives]
+    colors = [PRIMARY_COLORS['blue'], PRIMARY_COLORS['orange'], PRIMARY_COLORS['green']]
 
-    plt.figure(figsize=(6, 6))
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    plt.axis('equal')
-    plt.tight_layout()
-    # Add the title lower, below the pie chart
-    plt.gcf().text(0.5, 0.8, 'Dataset Distribution', ha='center', fontsize=14)
+    fig, ax = create_figure(figsize='square')
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
+    ax.axis('equal')
+    ax.set_title('Dataset Distribution', fontsize=14, fontweight='bold', pad=20)
+
     config = get_config()
     plots_dir = Path(config.get("plots_dir"))
     data_plots_dir = plots_dir / "data"
     data_plots_dir.mkdir(parents=True, exist_ok=True)
-    plt.savefig(data_plots_dir / "dataset_distribution.png")
+    save_figure(fig, data_plots_dir / "dataset_distribution.png")
     plt.show()
 
-    rng = np.random.RandomState(CONFIG["seed"])
+    rng = np.random.RandomState(seed)
     derived_seeds = rng.randint(0, 1000000, size=n_runs)
     folds_per_run = []
 
@@ -263,7 +276,10 @@ def main():
 
 
     args = parser.parse_args()
-    set_reproducibility(CONFIG["seed"])
+
+    config = get_config()
+    seed = config.get('environment', {}).get('seed', 42)
+    set_reproducibility(seed)
 
     logger.info(args)
 

@@ -39,6 +39,7 @@ import yaml
 
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
@@ -48,6 +49,9 @@ from src.config import *
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Initialize config instance
+config = get_config()
 
 logger.info(f"Project root: {project_root}")
 
@@ -96,14 +100,20 @@ def parse_args():
     parser.add_argument(
         "-t",
         "--with_title",
-        action="store_true",
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        nargs='?',
+        const=True,
+        default=None,
+        type=lambda x: x.lower() == 'true' if isinstance(x, str) else bool(x),
+        help="Include title in input (overrides config)"
     )
     parser.add_argument(
         "-k",
         "--with_keywords",
-        action="store_true",
-        help="Number of HPO trials (overrides config.hpo.num_trials)"
+        nargs='?',
+        const=True,
+        default=None,
+        type=lambda x: x.lower() == 'true' if isinstance(x, str) else bool(x),
+        help="Include keywords in input (overrides config)"
     )
     
     return parser.parse_args()
@@ -130,7 +140,7 @@ def ensemble_pred(cfg):
     avg_models_scores = np.mean(scores_by_model, axis=0)  # Average scores across models
     logger.info(f"\nfold number {cfg['fold'] + 1} | run no. {cfg['run']}")
 
-    test_split = load_dataset("csv", data_files=config.get_fold_path(cfg['fold'], cfg['run']),split="train")
+    test_split = load_dataset("csv", data_files=str(config.get_fold_path("test", cfg['fold'], cfg['run'])),split="train")
 
     # Ensure avg_models_scores and test_split["labels"] have matching shapes
     if avg_models_scores.shape[0] != len(test_split["labels"]):
@@ -139,10 +149,15 @@ def ensemble_pred(cfg):
     preds = (avg_models_scores > 0.5).astype(int)
     result = detailed_metrics(preds, test_split["labels"],scores=avg_models_scores)
 
-    result_metrics_path=config.get_path('results', 'binary_metrics.csv')
+    result_metrics_path=config.get_path('results', 'metrics_dir') / 'binary_metrics.csv'
 
     if os.path.isfile(result_metrics_path):
         result_metrics=pd.read_csv(result_metrics_path)
+        # Convert metric columns to numeric, coercing errors to NaN
+        numeric_cols = ["f1", "recall", "precision", "accuracy", "roc_auc", "AP", "MCC", "NDCG", "kappa", "TN", "FP", "FN", "TP"]
+        for col in numeric_cols:
+            if col in result_metrics.columns:
+                result_metrics[col] = pd.to_numeric(result_metrics[col], errors='coerce')
     else:
         result_metrics=pd.DataFrame(columns=["model_name", "loss_type","fold", "run", "with_title", "with_keywords","nb_added_negs"])
 

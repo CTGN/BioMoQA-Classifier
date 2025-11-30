@@ -147,14 +147,14 @@ class ConfigManager:
             return folds_dir / f"{split}{fold}_run-{run}.csv"
         return self.get_data_path(f"biomoqa/folds/{split}{fold}_run-{run}.csv")
     
-    def get_model_checkpoint_path(self, loss_type: str, model_name: str, fold: int) -> Path:
+    def get_model_checkpoint_path(self, loss_type: str, model_name: str, fold: int, nb_opt_negs: int = 0) -> Path:
         """Get path for model checkpoint"""
         from .utils.utils import map_name
         final_model_dir = self.get_path("results", "final_model_dir")
         if final_model_dir:
-            checkpoint_name = f"best_model_cross_val_{loss_type}_{map_name(model_name)}_fold-{fold}"
+            checkpoint_name = f"best_model_cross_val_{loss_type}_{map_name(model_name)}_fold-{fold}_opt_negs-{nb_opt_negs}"
             return final_model_dir / checkpoint_name
-        return self.get_results_path(f"final_model/best_model_cross_val_{loss_type}_{map_name(model_name)}_fold-{fold}")
+        return self.get_results_path(f"final_model/best_model_cross_val_{loss_type}_{map_name(model_name)}_fold-{fold}_opt_negs-{nb_opt_negs}")
 
 
 # Global configuration instance

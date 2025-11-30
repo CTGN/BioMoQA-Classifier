@@ -1,0 +1,203 @@
+/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/hyperopt/atpe.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-25 14:40:32,579 - INFO - 
+================================================================================
+2025-11-25 14:40:32,579 - INFO - STEP 1: LOADING SCREENING FILE
+2025-11-25 14:40:32,579 - INFO - ================================================================================
+2025-11-25 14:40:32,617 - INFO - Loaded 1047 instances
+2025-11-25 14:40:32,656 - INFO - Prepared 1029 valid records for scoring
+2025-11-25 14:40:32,656 - INFO - 
+================================================================================
+2025-11-25 14:40:32,656 - INFO - STEP 2: LOADING MODEL AND SCORING
+2025-11-25 14:40:32,656 - INFO - ================================================================================
+2025-11-25 14:40:32,656 - INFO - Loading BioMoQA ensemble predictor...
+2025-11-25 14:40:32,656 - INFO - Using device: cpu (GPUs busy)
+2025-11-25 14:40:35,250 - INFO - Loaded all 5 fold models.
+2025-11-25 14:40:35,250 - INFO - Scoring batch (this may take a few minutes)...
+2025-11-25 14:55:05,959 - INFO - ✓ Scored 1029 records
+2025-11-25 14:55:05,960 - INFO - 
+================================================================================
+2025-11-25 14:55:05,960 - INFO - STEP 3: MERGING RESULTS
+2025-11-25 14:55:05,960 - INFO - ================================================================================
+2025-11-25 14:55:06,201 - INFO - ✓ Saved scored results to: results/screening_file_scored.csv
+2025-11-25 14:55:06,201 - INFO - 
+Scoring statistics:
+2025-11-25 14:55:06,201 - INFO -   - Total records: 1047
+2025-11-25 14:55:06,201 - INFO -   - Scored records: 1029
+2025-11-25 14:55:06,202 - INFO -   - Score range: 0.0025 - 0.9968
+2025-11-25 14:55:06,202 - INFO -   - Mean score: 0.8345
+2025-11-25 14:55:06,202 - INFO -   - Median score: 0.9941
+2025-11-25 14:55:06,202 - INFO - 
+================================================================================
+2025-11-25 14:55:06,202 - INFO - STEP 4: ANALYZING PREDICTIONS VS HUMAN EXPERT LABELS
+2025-11-25 14:55:06,202 - INFO - ================================================================================
+2025-11-25 14:55:06,202 - INFO - 
+--- ANALYZING POSITIVES (Included by experts) ---
+================================================================================
+LOADING DATA
+================================================================================
+Loaded 986 instances from results/screening_labels/screening_positives.csv
+Columns: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'rated unclear', 'Comment: Island (Population); ', 'Unnamed: 39', 'Comment: Terrestrial Biodiversity (Population); ', 'Unnamed: 41', 'Comment: Monitoring&nbsp; (Outcome); ', 'Unnamed: 43']
+No label column found - assuming all instances have same label
+Loaded 1047 predictions from results/screening_file_scored.csv
+Columns: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'rated unclear', 'Comment: Island (Population); ', 'Unnamed: 39', 'Comment: Terrestrial Biodiversity (Population); ', 'Unnamed: 41', 'Comment: Monitoring&nbsp; (Outcome); ', 'Unnamed: 43', 'ensemble_score', 'ensemble_prediction', 'std_score', 'consensus_strength', 'positive_folds', 'Score_Rank']
+Auto-detected score column: 'ensemble_score'
+Auto-detected rank column: 'Score_Rank'
+Assigned label 'positive' to all instances
+
+Matching on:
+  Labeled file: 'DOI'
+  Predictions file: 'DOI'
+
+================================================================================
+MATCHING INSTANCES
+================================================================================
+
+Matched 986/986 instances (100.0%)
+
+================================================================================
+RANKING PERFORMANCE ANALYSIS
+================================================================================
+
+Total instances matched: 986
+
+================================================================================
+CLASS: POSITIVE
+================================================================================
+Count: 986
+
+Score statistics:
+  - Range: 0.0025 - 0.9968
+  - Mean: 0.8710
+  - Median: 0.9954
+  - Std: 0.2678
+
+Score distribution:
+  - High (≥ 0.9): 756/986 (76.7%)
+  - Medium (0.5-0.9): 110/986 (11.2%)
+  - Low (< 0.5): 111/986 (11.3%)
+
+Rank statistics:
+  - Range: 1 - 1029
+  - Mean: 422.3
+  - Median: 399
+
+Percentage in top ranks (out of 1029 total):
+  - Top    10:  159/ 986 ( 16.1%)
+  - Top    50:  194/ 986 ( 19.7%)
+  - Top   100:  237/ 986 ( 24.0%)
+  - Top   500:  571/ 986 ( 57.9%)
+  - Top  1000:  957/ 986 ( 97.1%)
+
+Best ranked (top 5):
+  Rank     1, Score 0.9968: SLAM Project - Long Term Ecological Study of the Impacts of ...
+  Rank     2, Score 0.9968: Wildlife inventory from camera-trapping surveys in the Azore...
+  Rank     3, Score 0.9968: Progress in the eradication of the feral cat (Felis catus) a...
+  Rank     4, Score 0.9968: A working list of breeding bird species of the New Zealand r...
+  Rank     5, Score 0.9968: The avifauna of Makira (San Cristobal), Solomon Islands
+
+
+Worst ranked (bottom 5):
+  Rank  1029, Score 0.0025: A bright future for wave reserves?
+
+  Rank  1027, Score 0.0030: Seasonal Occurrence and Distribution of Fungi Associated wit...
+  Rank  1026, Score 0.0031: Biology and Conservation of the Laysan Duck (Anas laysanensi...
+  Rank  1025, Score 0.0034: Alternative Management and Mitigation for Potential Impacts ...
+  Rank  1024, Score 0.0035: Population dynamic and Species diversity of wintering waterb...
+
+✓ Saved 986 matched instances to results/screening_positives_performance.csv
+
+================================================================================
+ANALYSIS COMPLETE
+================================================================================
+2025-11-25 14:55:08,279 - INFO - 
+--- ANALYZING NEGATIVES (Excluded by experts) ---
+================================================================================
+LOADING DATA
+================================================================================
+Loaded 61 instances from results/screening_labels/screening_negatives.csv
+Columns: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'rated unclear', 'Comment: Island (Population); ', 'Unnamed: 39', 'Comment: Terrestrial Biodiversity (Population); ', 'Unnamed: 41', 'Comment: Monitoring&nbsp; (Outcome); ', 'Unnamed: 43']
+No label column found - assuming all instances have same label
+Loaded 1047 predictions from results/screening_file_scored.csv
+Columns: ['Article ID', 'Title', 'Author', 'Secondary authors', 'Keywords', 'title of unpublished reference', 'primary date', 'publication year', 'notes', 'reprint status', 'start page number', 'ending page number', 'periodical full name', 'periodical standard abbreviation', 'periodical in which article was published', 'periodical name - user abbreviation 1', 'periodical name - user abbreviation 2', 'volume number', 'issue number', 'title secondary', 'city of publication', 'publisher', 'user definable 1', 'user definable 5', 'title series', 'Abstract', 'ISSN/ISBN', 'availability', 'Misc. 1', 'Misc. 2', 'address', 'Web/URL', 'link to PDF', 'link to full-text', 'related records', 'images', 'DOI', 'rated unclear', 'Comment: Island (Population); ', 'Unnamed: 39', 'Comment: Terrestrial Biodiversity (Population); ', 'Unnamed: 41', 'Comment: Monitoring&nbsp; (Outcome); ', 'Unnamed: 43', 'ensemble_score', 'ensemble_prediction', 'std_score', 'consensus_strength', 'positive_folds', 'Score_Rank']
+Auto-detected score column: 'ensemble_score'
+Auto-detected rank column: 'Score_Rank'
+Assigned label 'negative' to all instances
+
+Matching on:
+  Labeled file: 'DOI'
+  Predictions file: 'DOI'
+
+================================================================================
+MATCHING INSTANCES
+================================================================================
+
+Matched 61/61 instances (100.0%)
+
+================================================================================
+RANKING PERFORMANCE ANALYSIS
+================================================================================
+
+Total instances matched: 61
+
+================================================================================
+CLASS: NEGATIVE
+================================================================================
+Count: 61
+
+Score statistics:
+  - Range: 0.0028 - 0.9967
+  - Mean: 0.7405
+  - Median: 0.9782
+  - Std: 0.3620
+
+Score distribution:
+  - High (≥ 0.9): 37/61 (60.7%)
+  - Medium (0.5-0.9): 9/61 (14.8%)
+  - Low (< 0.5): 14/61 (23.0%)
+
+Rank statistics:
+  - Range: 9 - 1028
+  - Mean: 532.7
+  - Median: 665
+
+Percentage in top ranks (out of 1028 total):
+  - Top    10:   11/  61 ( 18.0%)
+  - Top    50:   13/  61 ( 21.3%)
+  - Top   100:   15/  61 ( 24.6%)
+  - Top   500:   27/  61 ( 44.3%)
+  - Top  1000:   55/  61 ( 90.2%)
+
+Best ranked (top 5):
+  Rank     9, Score 0.9967: Antarctic diptera: ecology, physiology and distribution
+
+  Rank     9, Score 0.9967: Pathogenic micro-organism threats to the terrestrial vertebr...
+  Rank     9, Score 0.9967: Butterfly diversity and a preliminary comparison with bird a...
+  Rank     9, Score 0.9967: The impact of brodifacoum on non-target wildlife: gaps in kn...
+  Rank     9, Score 0.9967: Mamíferos terrestres não voadores da Ilha de Santa Catarina,...
+
+Worst ranked (bottom 5):
+  Rank  1028, Score 0.0028: DISTURBANCE‐MEDIATED COMPETITION AND THE SPREAD OF PHRAGMITE...
+  Rank  1018, Score 0.0044: Species Richness and Dispersal of Vascular Plants to Islands...
+  Rank  1015, Score 0.0046: Tropical forest community ecology
+
+  Rank  1013, Score 0.0053: Ecological Insights from Long‐term Research Plots in Tropica...
+  Rank  1003, Score 0.0069: Establishing IUCN Red List Criteria for Threatened Ecosystem...
+
+✓ Saved 61 matched instances to results/screening_negatives_performance.csv
+
+================================================================================
+ANALYSIS COMPLETE
+================================================================================
+================================================================================
+SCORE SCREENING FILE AND EVALUATE MODEL PERFORMANCE
+================================================================================
+
+================================================================================
+EVALUATION COMPLETE!
+================================================================================
+
+Results saved to:
+  - Scored data: results/screening_file_scored.csv
+  - Positives performance: results/screening_positives_performance.csv
+  - Negatives performance: results/screening_negatives_performance.csv

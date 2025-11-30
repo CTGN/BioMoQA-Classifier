@@ -1,0 +1,372 @@
+[2025-11-06 17:53:33,985: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 17:53:34,012: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 17:53:34,013: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 17:53:34,015: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 17:53:35,022: INFO/MainProcess] mingle: all alone
+[2025-11-06 17:53:35,032: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 17:54:18,817: INFO/MainProcess] Task api.tasks.score_batch_from_file[fdc84ef0-142f-445c-b59c-5e8d16b29f53] received
+[2025-11-06 17:54:18,819: INFO/MainProcess] Loading data from file: /tmp/tmpg0_lfhv9.csv
+[2025-11-06 17:54:18,834: INFO/MainProcess] Dropped index/unnamed columns from CSV: Unnamed: 0
+[2025-11-06 17:54:18,845: INFO/MainProcess] Loaded 230 valid / 230 total items from: /tmp/tmpg0_lfhv9.csv
+[2025-11-06 17:54:18,845: INFO/MainProcess] Deleted temporary file: /tmp/tmpg0_lfhv9.csv
+[2025-11-06 17:54:18,845: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-06 17:54:20,737: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-06 17:54:20,737: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_None
+[2025-11-06 17:55:42,317: INFO/MainProcess] Task api.tasks.score_batch_from_file[fdc84ef0-142f-445c-b59c-5e8d16b29f53] succeeded in 83.4999288379986s: {'status': 'success', 'results': [{'title': 'Palaeoecological information concerning members of the frog genus<i>Leiopelma</i>: Leiopelmatidae in New Zealand', 'abstract': 'Abstract The endemic New Zealand frog framily Leiopelmatidae has three living species, all with very restricted distributions, and three extinct species, whose former natural history is unknown. The subfossil distributions of the extant Leiopelma hochstetteri Fitzinger 1861, and L. hamiltoni McCulloch 1919, show that until the late Holocene these species ranged from Punakaiki, on the west coast of the South Island, to Waitomo in the North Island. The morphological characters of the frogs, and the characteristics of the subfossil sites, suggest that the presumably extinct L. waitomoensis Worthy 1987 was a strongly hopping, stream or streamside frog, whereas L. markhami Worthy 1987, a slightly smaller extinct species, was primarily a walking, terrestrial frog. The formerly widespread species of Leiopelma, (L. markhami, L. waitomoensis, L....', ...}]}
+[2025-11-06 18:16:01,927: WARNING/MainProcess] Got shutdown from remote
+[2025-11-06 18:18:35,691: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:18:35,693: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 18:18:35,694: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:18:35,695: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 18:18:36,701: INFO/MainProcess] mingle: all alone
+[2025-11-06 18:18:36,709: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 18:23:11,947: INFO/MainProcess] Task api.tasks.score_batch_from_file[afeaa5c7-a2ed-42e9-b752-5cc1aff01337] received
+[2025-11-06 18:23:11,949: INFO/MainProcess] Loading data from file: /tmp/tmp8sejgq25.csv
+[2025-11-06 18:23:15,346: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp8sejgq25.csv
+[2025-11-06 18:23:15,359: INFO/MainProcess] Deleted temporary file: /tmp/tmp8sejgq25.csv
+[2025-11-06 18:23:15,359: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-06 18:23:16,838: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-06 18:23:16,839: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_None
+[2025-11-06 18:30:49,078: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:30:49,085: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 18:30:49,086: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:30:49,090: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 18:30:50,103: INFO/MainProcess] mingle: all alone
+[2025-11-06 18:30:50,112: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 18:31:52,410: WARNING/MainProcess] Got shutdown from remote
+[2025-11-06 18:32:08,021: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:32:08,028: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 18:32:08,029: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:32:08,030: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 18:32:09,043: INFO/MainProcess] mingle: all alone
+[2025-11-06 18:32:09,058: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 18:39:34,072: WARNING/MainProcess] Got shutdown from remote
+[2025-11-06 18:43:59,815: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:43:59,819: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 18:43:59,820: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:43:59,822: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 18:44:00,830: INFO/MainProcess] mingle: all alone
+[2025-11-06 18:44:00,846: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 18:47:34,984: WARNING/MainProcess] Got shutdown from remote
+[2025-11-06 18:48:00,169: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:48:00,176: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-06 18:48:00,177: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-06 18:48:00,181: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-06 18:48:01,201: INFO/MainProcess] mingle: all alone
+[2025-11-06 18:48:01,209: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-06 19:24:30,554: INFO/MainProcess] Task api.tasks.score_batch_from_file[afeaa5c7-a2ed-42e9-b752-5cc1aff01337] received
+[2025-11-06 19:24:30,558: INFO/MainProcess] Loading data from file: /tmp/tmp8sejgq25.csv
+[2025-11-06 19:24:30,560: ERROR/MainProcess] Error scoring batch from file: [Errno 2] No such file or directory: '/tmp/tmp8sejgq25.csv'
+Traceback (most recent call last):
+  File "/home/leandre/Projects/BioMoQA_Playground/api/tasks.py", line 245, in score_batch_from_file
+    records = load_data(file_path)
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/src/models/biomoqa/model_api.py", line 291, in load_data
+    df = pd.read_csv(path)
+         ^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+                   ^^^^^^^^^^^
+  File "/home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+             ^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp8sejgq25.csv'
+[2025-11-06 19:24:30,568: INFO/MainProcess] Task api.tasks.score_batch_from_file[afeaa5c7-a2ed-42e9-b752-5cc1aff01337] succeeded in 0.012870001999544911s: {'status': 'error', 'error': '[Errno 2] No such file or directory: \'/tmp/tmp8sejgq25.csv\'', 'error_type': 'FileNotFoundError'}
+[2025-11-06 19:24:42,596: INFO/MainProcess] Task api.tasks.score_batch_from_file[afeaa5c7-a2ed-42e9-b752-5cc1aff01337] succeeded in 3690.648456387993s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-06 19:24:42,656: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 09:47:48,563: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 09:47:48,566: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 09:47:48,567: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 09:47:48,569: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 09:47:49,576: INFO/MainProcess] mingle: all alone
+[2025-11-07 09:47:49,583: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 09:47:49,585: INFO/MainProcess] Task api.tasks.score_batch_from_file[55d93ac5-4bf1-48f0-a1bc-bf789f930d8a] received
+[2025-11-07 09:47:49,595: INFO/MainProcess] Loading data from file: /tmp/tmpou8dj78q.csv
+[2025-11-07 09:47:49,663: INFO/MainProcess] Dropped index/unnamed columns from CSV: Unnamed: 0
+[2025-11-07 09:47:49,674: INFO/MainProcess] Loaded 230 valid / 230 total items from: /tmp/tmpou8dj78q.csv
+[2025-11-07 09:47:49,674: INFO/MainProcess] Deleted temporary file: /tmp/tmpou8dj78q.csv
+[2025-11-07 09:47:49,674: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-07 09:47:58,840: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-07 09:47:58,840: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_None
+[2025-11-07 09:48:02,119: INFO/MainProcess] Task api.tasks.score_batch_from_file[55d93ac5-4bf1-48f0-a1bc-bf789f930d8a] succeeded in 12.525669413000003s: {'status': 'success', 'results': [{'title': 'Palaeoecological information concerning members of the frog genus<i>Leiopelma</i>: Leiopelmatidae in New Zealand', 'abstract': 'Abstract The endemic New Zealand frog framily Leiopelmatidae has three living species, all with very restricted distributions, and three extinct species, whose former natural history is unknown. The subfossil distributions of the extant Leiopelma hochstetteri Fitzinger 1861, and L. hamiltoni McCulloch 1919, show that until the late Holocene these species ranged from Punakaiki, on the west coast of the South Island, to Waitomo in the North Island. The morphological characters of the frogs, and the characteristics of the subfossil sites, suggest that the presumably extinct L. waitomoensis Worthy 1987 was a strongly hopping, stream or streamside frog, whereas L. markhami Worthy 1987, a slightly smaller extinct species, was primarily a walking, terrestrial frog. The formerly widespread species of Leiopelma, (L. markhami, L. waitomoensis, L....', ...}]}
+[2025-11-07 09:48:30,253: INFO/MainProcess] Task api.tasks.score_batch_from_file[c495b259-230a-47f2-8ed7-9c6cd816cc5e] received
+[2025-11-07 09:48:30,254: INFO/MainProcess] Loading data from file: /tmp/tmpnhdwwhyh.csv
+[2025-11-07 09:48:33,587: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpnhdwwhyh.csv
+[2025-11-07 09:48:33,598: INFO/MainProcess] Deleted temporary file: /tmp/tmpnhdwwhyh.csv
+[2025-11-07 09:50:02,162: INFO/MainProcess] Task api.tasks.score_batch_from_file[c495b259-230a-47f2-8ed7-9c6cd816cc5e] succeeded in 91.90898867199999s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 10:11:49,578: INFO/MainProcess] Task api.tasks.score_batch_from_file[747b6af5-015a-4e77-bbde-e6c439f9e225] received
+[2025-11-07 10:11:49,579: INFO/MainProcess] Loading data from file: /tmp/tmpntdvne5q.csv
+[2025-11-07 10:11:52,841: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpntdvne5q.csv
+[2025-11-07 10:11:52,857: INFO/MainProcess] Deleted temporary file: /tmp/tmpntdvne5q.csv
+[2025-11-07 10:13:20,740: INFO/MainProcess] Task api.tasks.score_batch_from_file[747b6af5-015a-4e77-bbde-e6c439f9e225] succeeded in 91.1614681980002s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 10:13:32,848: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 10:13:32,851: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 10:13:32,852: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 10:13:32,853: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 10:13:33,859: INFO/MainProcess] mingle: all alone
+[2025-11-07 10:13:33,867: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 10:13:47,510: INFO/MainProcess] Task api.tasks.score_batch_from_file[f5bd65ca-1b27-4891-a0a0-9753b785a90e] received
+[2025-11-07 10:13:47,511: INFO/MainProcess] Loading data from file: /tmp/tmp_ea7620c.csv
+[2025-11-07 10:13:50,715: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp_ea7620c.csv
+[2025-11-07 10:13:50,731: INFO/MainProcess] Deleted temporary file: /tmp/tmp_ea7620c.csv
+[2025-11-07 10:15:19,677: INFO/MainProcess] Task api.tasks.score_batch_from_file[f5bd65ca-1b27-4891-a0a0-9753b785a90e] succeeded in 92.16709428400009s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 10:17:54,009: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 10:17:54,009: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 10:18:32,676: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 10:18:32,679: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 10:18:32,680: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 10:18:32,681: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 10:18:33,686: INFO/MainProcess] mingle: all alone
+[2025-11-07 10:18:33,694: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 10:18:59,086: INFO/MainProcess] Task api.tasks.score_batch_from_file[ab993844-d62e-4143-aef3-ef011e3462b9] received
+[2025-11-07 10:18:59,087: INFO/MainProcess] Loading data from file: /tmp/tmpkgcwjjd1.csv
+[2025-11-07 10:19:02,637: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpkgcwjjd1.csv
+[2025-11-07 10:19:02,652: INFO/MainProcess] Deleted temporary file: /tmp/tmpkgcwjjd1.csv
+[2025-11-07 10:19:02,652: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-07 10:19:04,696: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-07 10:19:04,696: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_None
+[2025-11-07 10:20:32,285: INFO/MainProcess] Task api.tasks.score_batch_from_file[ab993844-d62e-4143-aef3-ef011e3462b9] succeeded in 93.1984740119999s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 10:33:45,244: INFO/MainProcess] Task api.tasks.score_batch_from_file[f226a24a-b006-4e5d-9500-377922349376] received
+[2025-11-07 10:33:45,246: INFO/MainProcess] Loading data from file: /tmp/tmpkd96nj07.csv
+[2025-11-07 10:33:48,547: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpkd96nj07.csv
+[2025-11-07 10:33:48,561: INFO/MainProcess] Deleted temporary file: /tmp/tmpkd96nj07.csv
+[2025-11-07 10:35:08,052: INFO/MainProcess] Task api.tasks.score_batch_from_file[f226a24a-b006-4e5d-9500-377922349376] succeeded in 82.8065567409999s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 10:49:57,663: INFO/MainProcess] Task api.tasks.score_batch_from_file[2ef3dc83-a94a-45c4-b7c0-64f5d41507d6] received
+[2025-11-07 10:49:57,665: INFO/MainProcess] Loading data from file: /tmp/tmp43d_d22_.csv
+[2025-11-07 10:50:00,947: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp43d_d22_.csv
+[2025-11-07 10:50:00,963: INFO/MainProcess] Deleted temporary file: /tmp/tmp43d_d22_.csv
+[2025-11-07 10:51:28,873: INFO/MainProcess] Task api.tasks.score_batch_from_file[2ef3dc83-a94a-45c4-b7c0-64f5d41507d6] succeeded in 91.20871708099958s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:16:48,142: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 11:17:02,783: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:17:02,786: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 11:17:02,786: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:17:02,787: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 11:17:03,793: INFO/MainProcess] mingle: all alone
+[2025-11-07 11:17:03,801: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 11:17:21,149: INFO/MainProcess] Task api.tasks.score_batch_from_file[45da093b-ec31-4050-9f2e-3266521e4e03] received
+[2025-11-07 11:17:21,150: INFO/MainProcess] Loading data from file: /tmp/tmp3v_bex49.csv
+[2025-11-07 11:17:24,409: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp3v_bex49.csv
+[2025-11-07 11:17:24,424: INFO/MainProcess] Deleted temporary file: /tmp/tmp3v_bex49.csv
+[2025-11-07 11:17:24,424: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-07 11:17:26,316: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-07 11:17:26,316: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_None
+[2025-11-07 11:18:55,760: INFO/MainProcess] Task api.tasks.score_batch_from_file[45da093b-ec31-4050-9f2e-3266521e4e03] succeeded in 94.6109544280007s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:22:34,614: INFO/MainProcess] Task api.tasks.score_batch_from_file[136a0a1b-6610-4ab9-acfc-604c22c1c6c1] received
+[2025-11-07 11:22:34,615: INFO/MainProcess] Loading data from file: /tmp/tmpjmiohd9x.csv
+[2025-11-07 11:22:37,822: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpjmiohd9x.csv
+[2025-11-07 11:22:37,836: INFO/MainProcess] Deleted temporary file: /tmp/tmpjmiohd9x.csv
+[2025-11-07 11:24:07,490: INFO/MainProcess] Task api.tasks.score_batch_from_file[136a0a1b-6610-4ab9-acfc-604c22c1c6c1] succeeded in 92.87546782100071s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:31:48,081: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 11:32:06,514: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:32:06,516: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 11:32:06,517: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:32:06,518: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 11:32:07,524: INFO/MainProcess] mingle: all alone
+[2025-11-07 11:32:07,534: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 11:32:29,236: INFO/MainProcess] Task api.tasks.score_batch_from_file[c6125b17-6dfc-4979-b4b9-10cdae0ddb2f] received
+[2025-11-07 11:32:29,238: INFO/MainProcess] Loading data from file: /tmp/tmpvidiwont.csv
+[2025-11-07 11:32:32,632: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmpvidiwont.csv
+[2025-11-07 11:32:32,647: INFO/MainProcess] Deleted temporary file: /tmp/tmpvidiwont.csv
+[2025-11-07 11:32:32,647: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-07 11:32:34,560: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-07 11:32:34,560: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_
+[2025-11-07 11:34:03,456: INFO/MainProcess] Task api.tasks.score_batch_from_file[c6125b17-6dfc-4979-b4b9-10cdae0ddb2f] succeeded in 94.2199126860005s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:35:53,414: INFO/MainProcess] Task api.tasks.score_batch_from_file[48c5a5e7-e1c3-4f10-9198-94940931fa96] received
+[2025-11-07 11:35:53,415: INFO/MainProcess] Loading data from file: /tmp/tmp7wqhbp8b.csv
+[2025-11-07 11:35:56,704: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp7wqhbp8b.csv
+[2025-11-07 11:35:56,718: INFO/MainProcess] Deleted temporary file: /tmp/tmp7wqhbp8b.csv
+[2025-11-07 11:37:17,711: INFO/MainProcess] Task api.tasks.score_batch_from_file[48c5a5e7-e1c3-4f10-9198-94940931fa96] succeeded in 84.29672698900049s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:48:11,269: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 11:48:25,507: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:48:25,510: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 11:48:25,511: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:48:25,513: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 11:48:26,519: INFO/MainProcess] mingle: all alone
+[2025-11-07 11:48:26,526: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 11:48:38,296: INFO/MainProcess] Task api.tasks.score_batch_from_file[4b3cf31b-b10f-4ade-b478-233d94fb16d9] received
+[2025-11-07 11:48:38,297: INFO/MainProcess] Loading data from file: /tmp/tmp765_exl2.csv
+[2025-11-07 11:48:41,638: INFO/MainProcess] Loaded 15859 valid / 15893 total items from: /tmp/tmp765_exl2.csv
+[2025-11-07 11:48:41,653: INFO/MainProcess] Deleted temporary file: /tmp/tmp765_exl2.csv
+[2025-11-07 11:48:41,654: INFO/MainProcess] Loading model: roberta-base with loss BCE
+[2025-11-07 11:48:43,534: INFO/MainProcess] Loaded all 5 fold models.
+[2025-11-07 11:48:43,534: INFO/MainProcess] Model loaded successfully: roberta-base_BCE_results/final_model_0.5_
+[2025-11-07 11:50:11,513: INFO/MainProcess] Task api.tasks.score_batch_from_file[4b3cf31b-b10f-4ade-b478-233d94fb16d9] succeeded in 93.21673371299948s: {'status': 'success', 'results': [{'Key': 'YU5Y65NP', 'Item Type': 'journalArticle', 'Publication Year': 1982, 'Author': 'Piper, S.R.; Maclean, S.F.; Christensen, B.', 'title': 'Enchytraeidae ( Oligochaeta) from taiga and tundra habitats of northeastern USSR.', 'Publication Title': 'Canadian Journal of Zoology', 'ISBN': nan, 'ISSN': '00084301 (ISSN)', 'doi': '10.1139/z82-334', 'Url': 'https://www.scopus.com/inward/record.uri?eid=2-s2.0-0020342608&doi=10.1139%2fz82-334&partnerID=40&md5=d18cc99b33c7677c1e033d0716218734', 'abstract': 'Terrestrial Enchytraeidae were studied in taiga (Magadan) and in tundra (Chaun Bay). Some 22 taxa are reported, 13 at Magadan and 17 at Chaun Bay. Mesenchytraeus primaeuus Eisen, 1878 is designated as type species for the genus. Five new species of Mesenchytraeus are described: M. diverticulatus from Magadan and M. chaunus, M. tundrus, M. kontrimavichusi, and M. svetae from Chaun Bay. Henlea diverticulata, known previously only from the New Siberian Islands, occurred at Chaun Bay....', ...}]}
+[2025-11-07 11:58:47,496: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 11:59:11,496: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:59:11,499: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 11:59:11,500: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 11:59:11,501: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 11:59:12,508: INFO/MainProcess] mingle: all alone
+[2025-11-07 11:59:12,516: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-07 12:00:45,173: WARNING/MainProcess] Got shutdown from remote
+[2025-11-07 17:58:08,726: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 17:58:08,729: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-07 17:58:08,729: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-07 17:58:08,731: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-07 17:58:09,737: INFO/MainProcess] mingle: all alone
+[2025-11-07 17:58:09,745: INFO/MainProcess] celery@lcatogni ready.
+[2025-11-09 00:54:17,906: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-09 00:54:17,912: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-09 00:54:17,913: WARNING/MainProcess] /home/leandre/Projects/BioMoQA_Playground/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-11-09 00:54:17,914: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-09 00:54:18,921: INFO/MainProcess] mingle: all alone
+[2025-11-09 00:54:18,930: INFO/MainProcess] celery@lcatogni ready.

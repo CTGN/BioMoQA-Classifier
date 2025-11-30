@@ -1,0 +1,14 @@
+artifact_uri: file:///home/leandre/Projects/BioMoQA_Playground/mlruns/0/6ba140ff40fe4618844ff87579ca9391/artifacts
+end_time: 1764416006521
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6ba140ff40fe4618844ff87579ca9391
+run_name: capable-auk-759
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764416003338
+status: 3
+tags: []
+user_id: leandre

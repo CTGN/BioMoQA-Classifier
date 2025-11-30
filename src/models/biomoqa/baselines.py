@@ -100,10 +100,12 @@ def parse_args():
 
 def compute_naive_metrics(num_folds,num_runs,metrics_fn=detailed_metrics):
     naive_metrics = pd.DataFrame()
+    config = get_config()
     for fold_idx in range(num_folds):
 
         for run_idx in range(num_runs):
-            test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+            test_path = str(config.get_fold_path("test", fold_idx, run_idx))
+            test_split = load_dataset("csv", data_files=test_path,split="train")
 
             logger.info(f"test split size : {len(test_split)}")
 
@@ -161,10 +163,13 @@ def random_forest(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                 for fold_idx in range(num_folds):
                     logger.info(f"\nfold number {fold_idx+1} / {num_folds}")
 
-
-                    train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
-                    dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
-                    test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+                    config = get_config()
+                    train_path = str(config.get_fold_path("train", fold_idx, run_idx))
+                    dev_path = str(config.get_fold_path("dev", fold_idx, run_idx))
+                    test_path = str(config.get_fold_path("test", fold_idx, run_idx))
+                    train_split = load_dataset("csv", data_files=train_path,split="train")
+                    dev_split = load_dataset("csv", data_files=dev_path,split="train")
+                    test_split = load_dataset("csv", data_files=test_path,split="train")
 
                     logger.info(f"train split size : {len(train_split)}")
                     logger.info(f"dev split size : {len(dev_split)}")
@@ -207,8 +212,8 @@ def random_forest(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                     preds = fitted_model.predict(x_test_vec)
                     results=detailed_metrics(preds, np.asarray(test_split["labels"]))
 
-
-                    result_metrics_path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics/random_forest_metrics.csv"
+                    config = get_config()
+                    result_metrics_path = str(config.get_path("results", "metrics_dir") / "random_forest_metrics.csv")
 
                     if os.path.isfile(result_metrics_path):
                         random_forest_metrics=pd.read_csv(result_metrics_path)
@@ -233,7 +238,9 @@ def random_forest(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                     
                     save_dataframe(random_forest_metrics,file_name="random_forest_metrics.csv")
                     fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
-                    test_preds_path=os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/rf",f"fold-{fold_idx}_rf_{criterion}{'_with_title' if with_title else ''}{'_with_keywords' if with_keywords else ''}_{num_trees}_run-{run_idx}_opt_neg-{nb_optional_negs}.csv")
+                    test_preds_dir = config.get_path("results", "test_preds_dir") / "rf"
+                    test_preds_dir.mkdir(parents=True, exist_ok=True)
+                    test_preds_path = str(test_preds_dir / f"fold-{fold_idx}_rf_{criterion}{'_with_title' if with_title else ''}{'_with_keywords' if with_keywords else ''}_{num_trees}_run-{run_idx}_opt_neg-{nb_optional_negs}.csv")
                     
                     fold_preds_df.to_csv(test_preds_path,index=False)
 
@@ -248,10 +255,13 @@ def svm(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
             for fold_idx in range(num_folds):
                 logger.info(f"\nfold number {fold_idx+1} / {num_folds}")
 
-
-                train_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/train{fold_idx}_run-{run_idx}.csv",split="train")
-                dev_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/dev{fold_idx}_run-{run_idx}.csv",split="train")
-                test_split = load_dataset("csv", data_files=f"/home/leandre/Projects/BioMoQA_Playground/data/biomoqa/folds/test{fold_idx}_run-{run_idx}.csv",split="train")
+                config = get_config()
+                train_path = str(config.get_fold_path("train", fold_idx, run_idx))
+                dev_path = str(config.get_fold_path("dev", fold_idx, run_idx))
+                test_path = str(config.get_fold_path("test", fold_idx, run_idx))
+                train_split = load_dataset("csv", data_files=train_path,split="train")
+                dev_split = load_dataset("csv", data_files=dev_path,split="train")
+                test_split = load_dataset("csv", data_files=test_path,split="train")
 
                 logger.info(f"train split size : {len(train_split)}")
                 logger.info(f"dev split size : {len(dev_split)}")
@@ -294,7 +304,8 @@ def svm(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                 preds = fitted_model.predict(x_test_vec)
                 results = detailed_metrics(preds, np.asarray(test_split["labels"]))
 
-                result_metrics_path="/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/metrics/svm_metrics.csv"
+                config = get_config()
+                result_metrics_path = str(config.get_path("results", "metrics_dir") / "svm_metrics.csv")
 
                 if os.path.isfile(result_metrics_path):
                     svm_metrics=pd.read_csv(result_metrics_path)
@@ -320,7 +331,9 @@ def svm(num_folds,num_runs,with_title,with_keywords,nb_optional_negs):
                 save_dataframe(svm_metrics, file_name="svm_metrics.csv")
 
                 fold_preds_df=pd.DataFrame(data={"label":test_split["labels"],"score":preds,"fold":[fold_idx for _ in range(len(preds))]})
-                test_preds_path=os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm", f"svm_{kernel}{'_with_title' if with_title else ''}{'_with_keywords' if with_keywords else ''}_run-{run_idx}_opt_neg-{nb_optional_negs}.csv")
+                test_preds_dir = config.get_path("results", "test_preds_dir") / "svm"
+                test_preds_dir.mkdir(parents=True, exist_ok=True)
+                test_preds_path = str(test_preds_dir / f"svm_{kernel}{'_with_title' if with_title else ''}{'_with_keywords' if with_keywords else ''}_run-{run_idx}_opt_neg-{nb_optional_negs}.csv")
                 fold_preds_df.to_csv(test_preds_path,index=False)
 
         
@@ -409,10 +422,10 @@ def svm_bert(self, model_name):
                 preds_df_list.append(fold_preds_df)
 
             save_dataframe(self.svm_metrics, file_name=f"svm_bert_{model_name.replace('/', '_')}_metrics.csv")
-            pd.concat(preds_df_list).to_csv(os.path.join(
-                "/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds/svm_bert",
-                f"svm_bert_{model_name.replace('/', '_')}_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"
-            ))
+            config = get_config()
+            test_preds_dir = config.get_path("results", "test_preds_dir") / "svm_bert"
+            test_preds_dir.mkdir(parents=True, exist_ok=True)
+            pd.concat(preds_df_list).to_csv(str(test_preds_dir / f"svm_bert_{model_name.replace('/', '_')}_{kernel}{'_with_title' if self.with_title else ''}{'_with_keywords' if self.with_keywords else ''}_run-{self.run_idx}_opt_neg-{self.nb_optional_negs}.csv"))
 
 def find_best(self,metrics_df,metric):
     metrics_df[metrics_df[metric]==metrics_df[metric].max()]
@@ -466,7 +479,9 @@ def zero_shot(self):
             logger.info(f"Detailed metrics for fold {fold_idx+1}: {detailed_metrics}")
 
             # Save predictions
-            preds_df.to_csv(os.path.join("/home/leandre/Projects/BioMoQA_Playground/results/biomoqa/test preds", f"zero_shot_{model_name.replace('/', '_')}_fold-{fold_idx}_opt_neg-{self.nb_optional_negs}.csv"), index=False)
+            config = get_config()
+            test_preds_dir = config.get_path("results", "test_preds_dir")
+            preds_df.to_csv(str(test_preds_dir / f"zero_shot_{model_name.replace('/', '_')}_fold-{fold_idx}_opt_neg-{self.nb_optional_negs}.csv"), index=False)
             scores_by_model.append(preds_df)
     logger.info(f"Zero-shot ensemble classification : {self.ensemble_pred(scores_by_model=scores_by_model, zero_shot=True)}")
 

@@ -1,0 +1,10 @@
+Screening_Phase,Criterion,Kappa,Kappa_Interpretation,Agreements,Total_Papers,Agreement_Percentage
+Abstract,Island (Population),0.755,Substantial,45,49,91.83673469387756
+Abstract,Terrestrial Biodiversity (Population),0.7786144578313253,Substantial,46,49,93.87755102040816
+Abstract,Monitoring (Outcome),0.8126195028680688,Almost Perfect,47,49,95.91836734693877
+Fulltext,Island (Population),1.0,Almost Perfect,19,19,100.0
+Fulltext,Terrestrial Biodiversity (Population),1.0,Almost Perfect,19,19,100.0
+Fulltext,Monitoring (Outcome),1.0,Almost Perfect,19,19,100.0
+Fulltext,Specified location,0.6415094339622641,Substantial,18,19,94.73684210526315
+Fulltext,Not a review,0.4411764705882353,Moderate,17,19,89.47368421052632
+Fulltext,Not a book,1.0,Almost Perfect,19,19,100.0

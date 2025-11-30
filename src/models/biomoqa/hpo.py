@@ -42,6 +42,7 @@ import pandas as pd
 # Add project root to sys.path for imports
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
@@ -141,16 +142,12 @@ def parse_args():
 
 @staticmethod
 def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_dev,data_collator,tokenizer):
-    
+
     clear_cuda_cache()
-    
-    #ray.tune.utils.wait_for_gpu(target_util=0.15)
+
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=get_config().get('environment', {}).get('num_labels', 1))
 
-    gpu_id = os.environ.get("CUDA_VISIBLE_DEVICES")
-    batch_size = 100
-    
-    logger.info(f"Trial on GPU {gpu_id} using batch size {batch_size}")
+    batch_size = 42
     
     # Set up training arguments
     training_args = CustomTrainingArguments(
@@ -186,7 +183,6 @@ def trainable(config,model_name,loss_type,hpo_metric,tokenized_train,tokenized_d
         tokenizer=tokenizer,
     )
 
-
     os.makedirs(training_args.output_dir, exist_ok=True)
 
     trainer.train()
@@ -215,8 +211,21 @@ def train_hpo(cfg,fold_idx,run_idx):
     """
     
     ray.init(runtime_env={
-        'excludes': os.listdir(os.path.join(project_root,'.git/objects'))
-        ,"env_vars": {"VIRTUAL_ENV": os.path.join(project_root,".venv")}
+        'excludes': [
+            '.git',
+            '.venv',
+            'results',
+            'logs',
+            'plots',
+            'nohup.out',
+            '*.csv',
+            '*.png',
+            '*.jpg',
+            '*.jpeg',
+            '__pycache__',
+            '*.pyc',
+        ],
+        "env_vars": {"VIRTUAL_ENV": os.path.join(project_root,".venv")}
     })
 
     #? When should we tokenize ? 

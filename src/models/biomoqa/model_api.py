@@ -22,6 +22,7 @@ class BioMoQAEnsemblePredictor:
         loss_type: str,
         base_path: str = "results/final_model",
         threshold: float = 0.5,
+        nb_opt_negs: int = 0,
         device: Optional[str] = None,
         use_fp16: Optional[bool] = None,
         use_compile: Optional[bool] = None,
@@ -30,6 +31,7 @@ class BioMoQAEnsemblePredictor:
         self.loss_type = loss_type
         self.base_path = base_path
         self.threshold = threshold
+        self.nb_opt_negs = nb_opt_negs
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.use_fp16 = use_fp16 if use_fp16 is not None else (self.device == "cuda")
         self.use_compile = use_compile if use_compile is not None else False
@@ -43,7 +45,7 @@ class BioMoQAEnsemblePredictor:
         Load all 5 fold models for the specified model type and loss type (required). Fails if any missing.
         """
         for fold in range(1, self.num_folds + 1):
-            fold_path = os.path.join(self.base_path, f"best_model_cross_val_{self.loss_type}_{self.model_type}_fold-{fold}")
+            fold_path = os.path.join(self.base_path, f"best_model_cross_val_{self.loss_type}_{self.model_type}_fold-{fold}_opt_negs-{self.nb_opt_negs}")
             if not os.path.exists(fold_path):
                 raise FileNotFoundError(f"Fold model not found: {fold_path}")
             tokenizer = AutoTokenizer.from_pretrained(fold_path)
@@ -403,9 +405,9 @@ def load_data(path: str) -> List[Dict[str, Any]]:
     return records
 
 # --- Unified API entrypoint ---
-def instantiate_predictor(model_type: str, loss_type: str="BCE", base_path: str="results/final_model", threshold: float=0.5, device: Optional[str]=None) -> BioMoQAEnsemblePredictor:
+def instantiate_predictor(model_type: str, loss_type: str="BCE", base_path: str="results/final_model", threshold: float=0.5, nb_opt_negs: int=0, device: Optional[str]=None) -> BioMoQAEnsemblePredictor:
     """Returns an ensemble predictor ready for batch or single scoring."""
-    return BioMoQAEnsemblePredictor(model_type, loss_type, base_path, threshold, device)
+    return BioMoQAEnsemblePredictor(model_type, loss_type, base_path, threshold, nb_opt_negs, device)
 
 def cli():
     parser = argparse.ArgumentParser(
@@ -416,6 +418,7 @@ def cli():
     parser.add_argument('--loss_type', type=str, default='BCE', help='Loss type (BCE or focal)')
     parser.add_argument('--base_path', type=str, default='results/final_model', help='Directory with fold model checkpoints')
     parser.add_argument('--threshold', type=float, default=0.5, help='Threshold for ensemble prediction')
+    parser.add_argument('--nb_opt_negs', type=int, default=0, help='Number of optional negatives used during training')
     parser.add_argument('--device', type=str, default=None, help='Inference device (cpu, cuda, or auto)')
     parser.add_argument('--input_file', type=str, help='Batch input file (CSV/JSON)')
     parser.add_argument('--abstract', type=str, help='Abstract for single prediction')
@@ -429,6 +432,7 @@ def cli():
         loss_type=args.loss_type,
         base_path=args.base_path,
         threshold=args.threshold,
+        nb_opt_negs=args.nb_opt_negs,
         device=args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     )
 

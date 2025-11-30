@@ -33,7 +33,9 @@ def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float
     #TODO : print the size of logits to be sure that we compute the metrics in the right way
     logits, labels = eval_pred
     scores = 1 / (1 + np.exp(-logits.squeeze()))
-    optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=CONFIG["plot_dir"], data_type="val",metric="f1")
+    config = get_config()
+    plot_dir = str(config.get("plots_dir", "plots"))
+    optimal_threshold = plot_roc_curve(labels, scores, logger=logger, plot_dir=plot_dir, data_type="val",metric="f1")
     predictions = (scores > optimal_threshold).astype(int)
     f1 = evaluate.load("f1").compute(predictions=predictions, references=labels) or {}
     recall = evaluate.load("recall").compute(predictions=predictions, references=labels) or {}
@@ -77,9 +79,11 @@ class LossPlottingCallback(TrainerCallback):
         plt.title("Training vs Validation Loss")
         plt.legend()
         plt.xticks(range(len(self.train_losses)))
-        plt.savefig(os.path.join(CONFIG["plot_dir"], "loss_curve.png"))
+        config = get_config()
+        plot_dir = str(config.get("plots_dir", "plots"))
+        plt.savefig(os.path.join(plot_dir, "loss_curve.png"))
         plt.close()
-        logger.info(f"Loss plot saved to {CONFIG['plot_dir']}/loss_curve.png")
+        logger.info(f"Loss plot saved to {plot_dir}/loss_curve.png")
 
 
 class CustomTrainingArguments(TrainingArguments):

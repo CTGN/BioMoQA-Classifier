@@ -42,11 +42,16 @@ import pandas as pd
 # Add project root to sys.path for imports
 from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.models.biomoqa.HPO_callbacks import CleanupCallback
 from src.utils import *
 from src.models.biomoqa.model_init import *
 from src.config import get_config
+from src.utils.plot_style import (
+    FIGURE_SIZES, PRIMARY_COLORS, PLOT_PARAMS,
+    create_figure, format_axis, save_figure
+)
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +62,10 @@ def set_reproducibility(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     logger.info(f"Randomness sources seeded with {seed} for reproducibility.")
 
-    set_random_seeds(CONFIG["seed"])
-    set_seed(CONFIG["seed"])
+    config = get_config()
+    seed_value = config.get('environment', {}).get('seed', 42)
+    set_random_seeds(seed_value)
+    set_seed(seed_value)
 
 #TODO : Add some variables to the config file and lnk them to here from the config (ex: Early Stopping patience)
 #TODO : Make the paths reproducible
@@ -94,7 +101,7 @@ def parse_args():
         "-g",
         "--gpu",
         type=str,
-        default=[0,1,2],
+        default="0,1,2",
         help="CUDA_VISIBLE_DEVICES string (e.g. '0,1')"
     )
     parser.add_argument(
@@ -156,17 +163,20 @@ def train(cfg,hp_cfg):
     #TODO : Check Julien's article about how to implement that (ask him about the threholding optimization)
     logger.info(f"Final training...")
     start_time=perf_counter()
-    model=AutoModelForSequenceClassification.from_pretrained(cfg['model_name'], num_labels=CONFIG["num_labels"])
+    num_labels = config.get('environment', {}).get('num_labels', 1)
+    model=AutoModelForSequenceClassification.from_pretrained(cfg['model_name'], num_labels=num_labels)
     #model.gradient_checkpointing_enable()
 
-    batch_size=100
+    batch_size=42
 
     # Set up training arguments
+    seed_value = config.get('environment', {}).get('seed', 42)
+    default_training_args = config.get('training', {}).get('default_args', {})
     training_args = CustomTrainingArguments(
             output_dir=str(config.get_path("results", "models_dir")),
-            seed=CONFIG["seed"],
-            data_seed=CONFIG["seed"],
-            **CONFIG["default_training_args"],
+            seed=seed_value,
+            data_seed=seed_value,
+            **default_training_args,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
             loss_type=cfg['loss_type'],
@@ -225,20 +235,28 @@ def train(cfg,hp_cfg):
         eval_epochs = [log['epoch'] for log in eval_logs]
         eval_loss = [log['eval_loss'] for log in eval_logs]
 
-        plt.figure(figsize=(12, 6))
-        plt.plot(train_epochs, train_loss, 'o-', label='Training Loss')
-        plt.plot(eval_epochs, eval_loss, 'o-', label='Validation Loss')
-        plt.title(f"Loss Evolution\nModel: {map_name(cfg['model_name'])}, Loss: {cfg['loss_type']}, Fold: {cfg['fold']}, Run: {cfg['run']}")
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.legend()
-        plt.grid(True)
-        
+        fig, ax = create_figure(figsize='wide')
+        ax.plot(train_epochs, train_loss, 'o-', label='Training Loss',
+                color=PRIMARY_COLORS['blue'], linewidth=PLOT_PARAMS['linewidth'],
+                markersize=PLOT_PARAMS['markersize'])
+        ax.plot(eval_epochs, eval_loss, 'o-', label='Validation Loss',
+                color=PRIMARY_COLORS['orange'], linewidth=PLOT_PARAMS['linewidth'],
+                markersize=PLOT_PARAMS['markersize'])
+
+        format_axis(ax,
+                    xlabel="Epoch",
+                    ylabel="Loss",
+                    title=f"Loss Evolution\nModel: {map_name(cfg['model_name'])}, Loss: {cfg['loss_type']}, Fold: {cfg['fold']}, Run: {cfg['run']}",
+                    grid=True,
+                    grid_axis='both',
+                    legend=True)
+
         plot_filename = f"loss_evolution_{map_name(cfg['model_name'])}_loss-{cfg['loss_type']}_fold-{cfg['fold']}_run-{cfg['run']}.png"
-        plot_path = os.path.join(CONFIG["plot_dir"], "Loss Evolutions",plot_filename)
-        plt.savefig(plot_path)
+        plot_dir = str(config.get("plots_dir", "plots"))
+        plot_path = os.path.join(plot_dir, "Loss Evolutions",plot_filename)
+        save_figure(fig, plot_path)
         logger.info(f"Loss evolution plot saved at {plot_path}")
-        plt.close()
+        plt.close(fig)
 
     end_time_train=perf_counter()
     logger.info(f"Training time : {end_time_train-start_time}")
@@ -257,8 +275,8 @@ def train(cfg,hp_cfg):
     logger.info(f"Avg time / step: {avg_step_time:.3f}s")
     
 
-    final_model_path = config.get_model_checkpoint_path(cfg['loss_type'], cfg['model_name'], cfg['fold']+1)
-    
+    final_model_path = config.get_model_checkpoint_path(cfg['loss_type'], cfg['model_name'], cfg['fold']+1, cfg['nb_optional_negs'])
+
     trainer.save_model(final_model_path)
     logger.info(f"Best model saved to {final_model_path}")
 
@@ -283,15 +301,16 @@ def train(cfg,hp_cfg):
     logger.info(f"Unique values in labels: {np.unique(test_split['labels'])}")
     logger.info(f"Confusion matrix:\n{confusion_matrix(test_split['labels'], preds)}")
 
-    plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
-    plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
+    plot_dir = str(config.get("plots_dir", "plots"))
+    plot_roc_curve(test_split["labels"],scores,logger=logger,plot_dir=plot_dir,data_type="test")
+    plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=plot_dir,data_type="test")
 
     #! The following seems weird. we are talking about decision here. View it like a ranking problem. take a perspective for usage
     threshold = eval_results_dev["eval_optim_threshold"]
     logger.info(f"\nOn test Set (New optimal threshold of {threshold} according to the dev set): ")
     preds = (scores > threshold).astype(int)
     res2=detailed_metrics(preds, test_split["labels"],scores=scores)
-    plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=CONFIG["plot_dir"],data_type="test")
+    plot_precision_recall_curve(test_split["labels"],preds,logger=logger,plot_dir=plot_dir,data_type="test")
 
     logger.info(f"Results for fold {cfg['fold']+1} with optim_threshold learned from dev set : {res2}")
 
@@ -333,7 +352,9 @@ def train(cfg,hp_cfg):
 
 def main():
     args = parse_args()
-    set_reproducibility(CONFIG["seed"])
+    config = get_config()
+    seed_value = config.get('environment', {}).get('seed', 42)
+    set_reproducibility(seed_value)
 
     logger.info(args)
 

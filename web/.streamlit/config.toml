@@ -1,4 +1,0 @@
-[server]
-
-maxUploadSize = 600        # in MB
-maxMessageSize = 600       # in MB, affects websocket/message frames

@@ -111,11 +111,21 @@ def render_sidebar():
     )
     
     loss_type = st.sidebar.selectbox(
-        "Loss Type", 
+        "Loss Type",
         loss_types,
         help="Select the loss function used during training"
     )
-    
+
+    # Number of optional negatives
+    nb_opt_negs = st.sidebar.number_input(
+        "Number of Optional Negatives",
+        min_value=0,
+        max_value=10000,
+        value=0,
+        step=100,
+        help="Number of optional negatives used during training"
+    )
+
     # Base path for models
     base_path = st.sidebar.text_input(
         "Models Base Path",
@@ -215,14 +225,14 @@ def render_sidebar():
     
     # Load model button
     if st.sidebar.button("🚀 Load Ensemble Models", type="primary", use_container_width=True):
-        load_ensemble_models(model_type, loss_type, base_path, threshold, device, enable_compilation)
+        load_ensemble_models(model_type, loss_type, base_path, threshold, nb_opt_negs, device, enable_compilation)
     
     # Example paths
     st.sidebar.subheader("💡 Example Model Configurations")
     st.sidebar.code("Model: BiomedBERT-abs\nLoss: BCE")
     st.sidebar.code("Model: bert-base\nLoss: focal")
 
-def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, device: str, enable_compilation: bool = False):
+def load_ensemble_models(model_type: str, loss_type: str, base_path: str, threshold: float, nb_opt_negs: int, device: str, enable_compilation: bool = False):
     """Load the ensemble of fold models with GPU optimizations"""
     with st.spinner("Loading ensemble models with GPU optimizations..."):
         try:
@@ -236,6 +246,7 @@ def load_ensemble_models(model_type: str, loss_type: str, base_path: str, thresh
                 loss_type=loss_type,
                 base_path=base_path,
                 threshold=threshold,
+                nb_opt_negs=nb_opt_negs,
                 device=device,
                 use_fp16=True,
                 use_compile=enable_compilation

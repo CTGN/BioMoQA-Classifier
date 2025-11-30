@@ -12,7 +12,7 @@ MODELS=(
 )
 
 # Optional negatives to try
-NUM_OPT_NEGS=(500)
+NUM_OPT_NEGS=(0)
 
 # Number of HPO/train runs and folds
 NUM_RUNS=1
@@ -30,9 +30,9 @@ for opt_negs in "${NUM_OPT_NEGS[@]}"; do
     echo "--> Run #${run}"
     # try both losses
     # each fold
-    for (( fold=0; fold<NUM_FOLDS; fold++ )); do
+    for (( fold=1; fold<NUM_FOLDS; fold++ )); do
     echo "------> Fold: ${fold}"
-      for loss in focal; do
+      for loss in BCE; do
         echo "----> Loss function: ${loss}"
         # each model
         for model in "${MODELS[@]}"; do

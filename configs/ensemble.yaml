@@ -9,4 +9,4 @@ run: 0
 loss_type: "BCE"
 with_title: True
 with_keywords: False
-nb_optional_negs: 100
+nb_optional_negs: 0
